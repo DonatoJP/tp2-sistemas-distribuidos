@@ -16,7 +16,7 @@ services:
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=column_drop.column_drop
+      - OPERATOR_MODULE=operators.column_drop.column_drop
       - OPERATOR_FUNC=drop_columns
       - OPERATOR_PARAMS={"keep_positions":[1,2]}
       - INPUT_QUEUE_NAME=test
