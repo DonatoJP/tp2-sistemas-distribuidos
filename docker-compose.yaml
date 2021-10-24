@@ -34,6 +34,21 @@ services:
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"column_position":0,"to_compare":10,"op":">"}
       - INPUT_QUEUE_NAME=drop-output
+      - OUTPUT_QUEUE_NAME=filter-output
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+  
+  sentiment-analyser:
+    container_name: sentiment-analyser
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.sentiment_analysis
+      - OPERATOR_PARAMS={}
+      - INPUT_QUEUE_NAME=filter-output
       - OUTPUT_QUEUE_NAME=final-output
     depends_on:
       - "rabbitmq-tp2"

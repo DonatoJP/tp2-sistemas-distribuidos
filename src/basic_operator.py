@@ -1,5 +1,4 @@
 import importlib, sys, os, signal, json
-import operator
 from rabbit_builders.consumers import basic_consumer
 from rabbit_builders.producers import basic_producer
 
