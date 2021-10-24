@@ -1,32 +1,41 @@
 import importlib, sys, os, signal, json
 from rabbit_builders.consumers import basic_consumer
+from rabbit_builders.producers import basic_producer
 
 def main():
     module = os.environ['OPERATOR_MODULE']
     module_func = os.environ['OPERATOR_FUNC']
     func_params = json.loads(os.environ['OPERATOR_PARAMS'])
-    queue_name = os.environ['INPUT_QUEUE_NAME']
+    input_queue_name = os.environ['INPUT_QUEUE_NAME']
+    output_queue_name = os.environ['OUTPUT_QUEUE_NAME']
 
     operation_module = importlib.import_module(module)
     func = getattr(operation_module, module_func)
 
-    def callback_consuming_queue(ch, method, properties, body):
-        result = func(str(body), **func_params)
-        print(result)
+    output_connection, output_channel = basic_producer.build_basic_producer(output_queue_name)
 
-    connection, channel = basic_consumer.build_basic_consumer(queue_name, callback_consuming_queue)
+
+    def callback_consuming_queue(ch, method, properties, body):
+        result = func(body.decode('UTF-8'), **func_params)
+        print(result)
+        output_channel.basic_publish(exchange='',
+                                     routing_key=output_queue_name,
+                                     body=result)
+
+    input_connection, input_channel = basic_consumer.build_basic_consumer(input_queue_name, callback_consuming_queue)
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
         print("Closing server side socket")
-        connection.close()
+        input_connection.close()
+        output_connection.close()
         sys.exit()
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
 
     print('Starting to consume...')
-    channel.start_consuming()
+    input_channel.start_consuming()
 
 if __name__ == '__main__':
     try:

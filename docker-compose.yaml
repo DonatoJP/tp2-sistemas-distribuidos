@@ -18,8 +18,9 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop.column_drop
       - OPERATOR_FUNC=drop_columns
-      - OPERATOR_PARAMS={"keep_positions":[1,2]}
+      - OPERATOR_PARAMS={"keep_positions":[0,1]}
       - INPUT_QUEUE_NAME=test
+      - OUTPUT_QUEUE_NAME=test-output
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
