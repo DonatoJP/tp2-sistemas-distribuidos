@@ -17,7 +17,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"keep_positions":[0,1]}
+      - OPERATOR_PARAMS={"keep_positions":[5,6]}
       - INPUT_QUEUE_NAME=input-queue
       - OUTPUT_QUEUE_NAME=drop-output
     depends_on:
@@ -32,7 +32,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"column_position":0,"to_compare":10,"op":">"}
+      - OPERATOR_PARAMS={"keep_columns":[1],"column_position":0,"to_compare":10,"op":">"}
       - INPUT_QUEUE_NAME=drop-output
       - OUTPUT_QUEUE_NAME=filter-output
     depends_on:

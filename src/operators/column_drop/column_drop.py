@@ -12,5 +12,8 @@ class DropColumnOperator(AbstractOperator):
 
         return ','.join(result)
 
+    def drop_columns(self, line, keep_positions):
+        return self._drop_columns(line, keep_positions)
+
     def exec_operation(self, data, **kwargs) -> list:
         return [ self._drop_columns(data, **kwargs) ]
