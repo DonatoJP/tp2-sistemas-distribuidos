@@ -17,8 +17,8 @@ def main():
 
     def callback_consuming_queue(ch, method, properties, body):
         result = func(body.decode('UTF-8'), **func_params)
-        print(result)
-        output_channel.basic_publish(exchange='',
+        if result:
+            output_channel.basic_publish(exchange='',
                                      routing_key=output_queue_name,
                                      body=result)
 

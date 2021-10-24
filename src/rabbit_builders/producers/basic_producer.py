@@ -7,8 +7,4 @@ def build_basic_producer(queue_name, host='rabbitmq-tp2', port='5672'):
 
     channel.queue_declare(queue=queue_name)
 
-    # channel.basic_publish(exchange='',
-    #                     routing_key='hello',
-    #                     body='Hello World!')
-
     return connection, channel

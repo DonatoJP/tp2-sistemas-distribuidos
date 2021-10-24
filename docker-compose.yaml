@@ -18,9 +18,25 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop.column_drop
       - OPERATOR_FUNC=drop_columns
-      - OPERATOR_PARAMS={"keep_positions":[0,1]}
-      - INPUT_QUEUE_NAME=test
-      - OUTPUT_QUEUE_NAME=test-output
+      - OPERATOR_PARAMS={"keep_positions":[0,3]}
+      - INPUT_QUEUE_NAME=input-queue
+      - OUTPUT_QUEUE_NAME=drop-output
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+  filter-column:
+    container_name: filter-column
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.filter.filter
+      - OPERATOR_FUNC=filter_by_column
+      - OPERATOR_PARAMS={"column_position":0,"to_compare":10,"op":">"}
+      - INPUT_QUEUE_NAME=drop-output
+      - OUTPUT_QUEUE_NAME=final-output
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
