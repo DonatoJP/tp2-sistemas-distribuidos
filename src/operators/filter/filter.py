@@ -1,10 +1,27 @@
 import operator
-ops = {">": operator.gt, "<": operator.lt, ">=": operator.ge, "<=": operator.le}
-def filter_by_column(row: str, column_position = 0, to_compare = 10, op = '>'):
-    op = ops[op]
-    to_filter = float(row.split(',')[column_position])
+from ..operator import AbstractOperator
 
-    if operator.gt(to_filter, to_compare):
-        return row
+class FilterOperator(AbstractOperator):
+    def __init__(self) -> None:
+        self.ops = {">": operator.gt, "<": operator.lt, ">=": operator.ge, "<=": operator.le}
+        super().__init__()
     
-    return None
+    def _filter_by_column(self, row: str, column_position = 0, to_compare = 10, op = '>'):
+        op = self.ops[op]
+        to_filter = float(row.split(',')[column_position])
+
+        if operator.gt(to_filter, to_compare):
+            return True
+        
+        return False
+    
+    def exec_operation(self, data, **kwargs) -> list:
+        returnables = []
+        result = self._filter_by_column(data, **kwargs)
+        if result:
+            returnables.append(data)
+        
+        return returnables
+
+
+

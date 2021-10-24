@@ -1,26 +1,27 @@
 import importlib, sys, os, signal, json
+import operator
 from rabbit_builders.consumers import basic_consumer
 from rabbit_builders.producers import basic_producer
 
 def main():
     module = os.environ['OPERATOR_MODULE']
-    module_func = os.environ['OPERATOR_FUNC']
     func_params = json.loads(os.environ['OPERATOR_PARAMS'])
     input_queue_name = os.environ['INPUT_QUEUE_NAME']
     output_queue_name = os.environ['OUTPUT_QUEUE_NAME']
 
     operation_module = importlib.import_module(module)
-    func = getattr(operation_module, module_func)
+    ImportedOperator = getattr(operation_module, 'ImportedOperator')
+    operator_to_use = ImportedOperator()
 
     output_connection, output_channel = basic_producer.build_basic_producer(output_queue_name)
 
 
     def callback_consuming_queue(ch, method, properties, body):
-        result = func(body.decode('UTF-8'), **func_params)
-        if result:
+        returnables = operator_to_use.exec_operation(body.decode('UTF-8'), **func_params)
+        for returnable in returnables:
             output_channel.basic_publish(exchange='',
                                      routing_key=output_queue_name,
-                                     body=result)
+                                     body=returnable)
 
     input_connection, input_channel = basic_consumer.build_basic_consumer(input_queue_name, callback_consuming_queue)
     

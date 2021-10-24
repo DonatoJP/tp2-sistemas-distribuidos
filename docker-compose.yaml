@@ -16,9 +16,8 @@ services:
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.column_drop.column_drop
-      - OPERATOR_FUNC=drop_columns
-      - OPERATOR_PARAMS={"keep_positions":[0,3]}
+      - OPERATOR_MODULE=operators.column_drop
+      - OPERATOR_PARAMS={"keep_positions":[0,1]}
       - INPUT_QUEUE_NAME=input-queue
       - OUTPUT_QUEUE_NAME=drop-output
     depends_on:
@@ -32,8 +31,7 @@ services:
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.filter.filter
-      - OPERATOR_FUNC=filter_by_column
+      - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"column_position":0,"to_compare":10,"op":">"}
       - INPUT_QUEUE_NAME=drop-output
       - OUTPUT_QUEUE_NAME=final-output

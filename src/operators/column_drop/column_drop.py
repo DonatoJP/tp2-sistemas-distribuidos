@@ -1,7 +1,16 @@
-def drop_columns(line: str, keep_positions: list):
-    line_splitted = line.split(',')
-    result = []
-    for position in keep_positions:
-        result.append(line_splitted[position])
+from ..operator import AbstractOperator
 
-    return ','.join(result)
+class DropColumnOperator(AbstractOperator):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def _drop_columns(self, line: str, keep_positions: list):
+        line_splitted = line.split(',')
+        result = []
+        for position in keep_positions:
+            result.append(line_splitted[position])
+
+        return ','.join(result)
+
+    def exec_operation(self, data, **kwargs) -> list:
+        return [ self._drop_columns(data, **kwargs) ]
