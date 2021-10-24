@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  rabbitmq-tp2:
+    container_name: "rabbitmq-tp2"
+    image: rabbitmq:3.9.7-management-alpine
+    ports:
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - tp2-network
+  
+  drop-input-column:
+    container_name: drop-input-column
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=column_drop.column_drop
+      - OPERATOR_FUNC=drop_columns
+      - OPERATOR_PARAMS={"keep_positions":[1,2]}
+      - INPUT_QUEUE_NAME=test
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+networks:
+  tp2-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.201.0/24
