@@ -17,12 +17,17 @@ def main():
 
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')
-        returnables = operator_to_use.exec_operation(decoded, **func_params)
-        print(returnables)
-        for returnable in returnables:
+        if decoded == 'END':
             output_channel.basic_publish(exchange='',
                                      routing_key=output_queue_name,
-                                     body=returnable)
+                                     body='END')
+        else:
+            returnables = operator_to_use.exec_operation(decoded, **func_params)
+            print(returnables)
+            for returnable in returnables:
+                output_channel.basic_publish(exchange='',
+                                        routing_key=output_queue_name,
+                                        body=returnable)
 
     input_connection, input_channel = basic_consumer.build_basic_consumer(input_queue_name, callback_consuming_queue)
     
