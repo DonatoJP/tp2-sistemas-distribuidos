@@ -17,7 +17,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"keep_positions":[5,6]}
+      - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"]}
       - INPUT_QUEUE_NAME=input-queue
       - OUTPUT_QUEUE_NAME=drop-output
     depends_on:
@@ -32,7 +32,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":[1],"column_position":0,"to_compare":10,"op":">"}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
       - INPUT_QUEUE_NAME=drop-output
       - OUTPUT_QUEUE_NAME=filter-output
     depends_on:
@@ -47,7 +47,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.sentiment_analysis
-      - OPERATOR_PARAMS={}
+      - OPERATOR_PARAMS={"column":"Body"}
       - INPUT_QUEUE_NAME=filter-output
       - OUTPUT_QUEUE_NAME=final-output
     depends_on:
