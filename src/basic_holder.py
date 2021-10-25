@@ -6,23 +6,18 @@ def main():
     module = os.environ['OPERATOR_MODULE']
     func_params = json.loads(os.environ['OPERATOR_PARAMS'])
     input_queue_name = os.environ['INPUT_QUEUE_NAME']
-    output_queue_name = os.environ['OUTPUT_QUEUE_NAME']
 
     operation_module = importlib.import_module(module)
-    ImportedOperator = getattr(operation_module, 'ImportedOperator')
-    operator_to_use = ImportedOperator()
-
-    output_connection, output_channel = basic_producer.build_basic_producer(output_queue_name)
-
+    ImportedHolder = getattr(operation_module, 'ImportedHolder')
+    holder_to_use = ImportedHolder()
 
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')
-        returnables = operator_to_use.exec_operation(decoded, **func_params)
-        print(returnables)
-        for returnable in returnables:
-            output_channel.basic_publish(exchange='',
-                                     routing_key=output_queue_name,
-                                     body=returnable)
+        if decoded == 'END':
+            result = holder_to_use.end()
+            print(result)
+        else:
+            holder_to_use.exec_operation(decoded, **func_params)
 
     input_connection, input_channel = basic_consumer.build_basic_consumer(input_queue_name, callback_consuming_queue)
     
@@ -30,7 +25,6 @@ def main():
         print("Received SIGTERM signal. Starting graceful exit...")
         print("Closing server side socket")
         input_connection.close()
-        output_connection.close()
         sys.exit()
 
     signal.signal(signal.SIGTERM, __exit_gracefully)

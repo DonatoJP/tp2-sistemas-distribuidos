@@ -49,10 +49,25 @@ services:
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body"}
       - INPUT_QUEUE_NAME=filter-output
-      - OUTPUT_QUEUE_NAME=final-output
+      - OUTPUT_QUEUE_NAME=sa-output
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+  
+  avg-holder:
+    container_name: avg-holder
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=holders.avg_holder
+      - OPERATOR_PARAMS={"column":"result"}
+      - INPUT_QUEUE_NAME=sa-output
+      - OUTPUT_QUEUE_NAME=final-output
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
     networks:
       - tp2-network
 
