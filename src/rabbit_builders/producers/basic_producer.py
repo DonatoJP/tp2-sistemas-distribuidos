@@ -1,10 +1,23 @@
 import pika
+from ..abstract_builder import AbstractQueueHandler
 
-def build_basic_producer(queue_name, host='rabbitmq-tp2', port='5672'):
-    credentials = pika.PlainCredentials('guest', 'guest')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
-    channel = connection.channel()
+class QueueProducer(AbstractQueueHandler):
+    def __init__(self) -> None:
+        super().__init__()
 
-    channel.queue_declare(queue=queue_name)
-
-    return connection, channel
+    def init_queue_pattern(self, pattern, queue_name='', auto_ack=False):
+        self.queue_name = queue_name
+        self.channel.queue_declare(queue=queue_name, durable=True)
+    
+    def send_end_centinel(self):
+        self.channel.basic_publish(exchange='', 
+            routing_key=self.queue_name,
+            body='END')
+    
+    def send(self, message):
+        self.channel.basic_publish(exchange='',
+            routing_key=self.queue_name,
+            body=message)
+    
+    def close(self):
+        super().close()

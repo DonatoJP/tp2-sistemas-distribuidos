@@ -1,11 +1,17 @@
 import pika
+from ..abstract_builder import AbstractQueueHandler
 
-def build_basic_consumer(queue_name, callback_func, host='rabbitmq-tp2', port='5672', auto_ack=True):
-    credentials = pika.PlainCredentials('guest', 'guest')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
-    channel = connection.channel()
-
-    channel.queue_declare(queue=queue_name)
-    channel.basic_consume(queue=queue_name, on_message_callback=callback_func, auto_ack=auto_ack)
-
-    return connection, channel
+class QueueConsumer(AbstractQueueHandler):
+    def __init__(self) -> None:
+        super().__init__()
+    
+    def init_queue_pattern(self, pattern, callback, queue_name='', auto_ack=False):
+        self.queue_name = queue_name
+        self.queue = self.channel.queue_declare(queue=queue_name, durable=True)
+        self.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=auto_ack)
+    
+    def start_consuming(self):
+        self.channel.start_consuming()
+    
+    def close(self):
+        super().close()

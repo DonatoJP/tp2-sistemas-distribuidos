@@ -1,6 +1,5 @@
 import importlib, sys, os, signal, json
-from rabbit_builders.consumers import basic_consumer
-from rabbit_builders.producers import basic_producer
+from rabbit_builders.consumers import QueueConsumer
 
 def main():
     module = os.environ['OPERATOR_MODULE']
@@ -19,19 +18,22 @@ def main():
         else:
             holder_to_use.exec_operation(decoded, **func_params)
 
-    input_connection, input_channel = basic_consumer.build_basic_consumer(input_queue_name, callback_consuming_queue)
+    queue_consumer = QueueConsumer()
+    queue_consumer.init_queue_pattern('work',
+        callback_consuming_queue,
+        queue_name=input_queue_name)
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
         print("Closing server side socket")
-        input_connection.close()
+        queue_consumer.close()
         sys.exit()
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
 
     print('Starting to consume...')
-    input_channel.start_consuming()
+    queue_consumer.start_consuming()
 
 if __name__ == '__main__':
     try:
