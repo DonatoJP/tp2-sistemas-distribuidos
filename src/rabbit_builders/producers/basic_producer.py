@@ -7,7 +7,7 @@ class QueueProducer(AbstractQueueHandler):
 
     def init_queue_pattern(self, pattern, queue_name='', auto_ack=False):
         self.queue_name = queue_name
-        self.channel.queue_declare(queue=queue_name, durable=True)
+        self.channel.queue_declare(queue=queue_name, durable=False)
     
     def send_end_centinel(self):
         self.channel.basic_publish(exchange='', 
