@@ -1,4 +1,5 @@
 import json
+from io import StringIO
 from ..operator import AbstractOperator
 
 class DropColumnOperator(AbstractOperator):
@@ -16,6 +17,6 @@ class DropColumnOperator(AbstractOperator):
         return self._drop_columns(data, columns_to_keep)
 
     def exec_operation(self, data, **kwargs) -> list:
-        data_dict = json.loads(data)
-        result = self._drop_columns(data_dict, **kwargs)
-        return [ json.dumps(result) ]
+        io_string = StringIO(data)
+        result = map(lambda line: self._drop_columns(json.loads(line), **kwargs), io_string)
+        return list(map(lambda x: json.dumps(x), result))
