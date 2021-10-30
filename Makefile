@@ -5,6 +5,7 @@ default: build
 
 build:
 	docker build -f ./src/building_blocks.dockerfile -t "building-block:latest" .
+	docker build -f "input_node/input_node.dockerfile" -t "input_node:latest" .
 .PHONY: build
 
 docker-compose-up:
@@ -21,5 +22,5 @@ docker-compose-ps:
 .PHONY: docker-compose-ps
 
 docker-compose-logs:
-	docker-compose --project-name "tp2-middleware" logs -f
+	docker-compose --project-name "tp2-middleware" logs -f $(service)
 .PHONY: docker-compose-logs
