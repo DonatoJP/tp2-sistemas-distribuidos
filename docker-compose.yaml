@@ -15,6 +15,7 @@ services:
     container_name: drop-input-column
     image: building-block:latest
     environment: 
+      - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
       - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"]}
@@ -26,10 +27,27 @@ services:
     networks:
       - tp2-network
 
-  filter-column:
-    container_name: filter-column
+  filter-column1:
+    container_name: filter-column1
     image: building-block:latest
     environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.filter
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
+      - INPUT_QUEUE_NAME=drop-output
+      - OUTPUT_QUEUE_NAME=filter-output
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+  filter-column2:
+    container_name: filter-column2
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=2
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
@@ -41,11 +59,28 @@ services:
     networks:
       - tp2-network
   
-  sentiment-analyser:
-    container_name: sentiment-analyser
+  sentiment-analyser1:
+    container_name: sentiment-analyser1
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=operators.sentiment_analysis
+      - OPERATOR_PARAMS={"column":"Body"}
+      - INPUT_QUEUE_NAME=filter-output
+      - OUTPUT_QUEUE_NAME=sa-output
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+  sentiment-analyser2:
+    container_name: sentiment-analyser2
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=2
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body"}
       - INPUT_QUEUE_NAME=filter-output
@@ -61,6 +96,7 @@ services:
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
       - OPERATOR_PARAMS={"column":"result"}
       - INPUT_QUEUE_NAME=sa-output
