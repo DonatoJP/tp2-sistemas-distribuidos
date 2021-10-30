@@ -1,33 +1,42 @@
 import importlib, sys, os, signal, json
 from rabbit_builders.consumers import QueueConsumer
+from rabbit_builders.centinels_manager import CentinelsManager
+from utils import parse_parameters, ParseParametersError, exit
 
 def main():
-    module = os.environ['OPERATOR_MODULE']
-    func_params = json.loads(os.environ['OPERATOR_PARAMS'])
-    input_queue_name = os.environ['INPUT_QUEUE_NAME']
+    try:
+        params = parse_parameters()
+    except ParseParametersError as e:
+        print(e.message)
+        exit()
 
-    operation_module = importlib.import_module(module)
+    operation_module = importlib.import_module(params["module"])
     ImportedHolder = getattr(operation_module, 'ImportedHolder')
     holder_to_use = ImportedHolder()
 
+    queue_consumer = QueueConsumer()
+
+    centinels_manager = CentinelsManager(params["previous_step_count"])
+    func_params = params["func_params"]
+
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')
-        if decoded == 'END':
-            result = holder_to_use.end()
-            print(result)
+        if centinels_manager.is_centinel(decoded):
+            centinels_manager.count_centinel()
+            if centinels_manager.are_all_received():
+                result = holder_to_use.end()
+                print(result)
+                exit([queue_consumer])
         else:
             holder_to_use.exec_operation(decoded, **func_params)
 
-    queue_consumer = QueueConsumer()
     queue_consumer.init_queue_pattern('work',
         callback_consuming_queue,
-        queue_name=input_queue_name)
+        queue_name=params["input_queue_name"])
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
-        print("Closing server side socket")
-        queue_consumer.close()
-        sys.exit()
+        exit([queue_consumer])
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
