@@ -6,9 +6,11 @@ class QueueProducer(AbstractQueueHandler):
         self.next_step_count = next_step_count
         super().__init__()
 
-    def init_queue_pattern(self, pattern, queue_name='', auto_ack=False):
-        self.queue_name = queue_name
-        self.channel.queue_declare(queue=queue_name)
+    def _build_work_queue_pattern(self, queue_name):
+        super()._build_work_queue_pattern(queue_name)
+
+    def init_queue_pattern(self, pattern, **kwargs):
+        super().init_queue_pattern(pattern, **kwargs)
     
     def send_end_centinels(self, centinel):
         for _ in range(0, self.next_step_count):

@@ -11,22 +11,22 @@ services:
     networks:
       - tp2-network
   
-  input_node:
-    container_name: input_node
-    image: input_node:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/red_answers.csv
-      - CHUNK_SIZE=3
-      - OUTPUT_QUEUE_NAME=input-queue
-      - NEXT_STEP_COUNT=1
-    depends_on:
-      - "rabbitmq-tp2"
-    volumes:
-      - "./data:/app/data"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
-    networks:
-      - tp2-network
+  # input_node:
+  #   container_name: input_node
+  #   image: input_node:latest
+  #   environment: 
+  #     - PYTHONUNBUFFERED=1
+  #     - FILE_TO_PROCESS=data/red_answers.csv
+  #     - CHUNK_SIZE=3
+  #     - OUTPUT_QUEUE_NAME=input-queue
+  #     - NEXT_STEP_COUNT=1
+  #   depends_on:
+  #     - "rabbitmq-tp2"
+  #   volumes:
+  #     - "./data:/app/data"
+  #   command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+  #   networks:
+  #     - tp2-network
   
   drop-input-column:
     container_name: drop-input-column
@@ -36,8 +36,8 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
       - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"]}
-      - INPUT_QUEUE_NAME=input-queue
-      - OUTPUT_QUEUE_NAME=drop-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - PREVIOUS_STEP_COUNT=1
       - NEXT_STEP_COUNT=2
     depends_on:
@@ -54,8 +54,8 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
-      - INPUT_QUEUE_NAME=drop-output
-      - OUTPUT_QUEUE_NAME=filter-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - PREVIOUS_STEP_COUNT=1
       - NEXT_STEP_COUNT=2
     depends_on:
@@ -72,8 +72,8 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
-      - INPUT_QUEUE_NAME=drop-output
-      - OUTPUT_QUEUE_NAME=filter-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - PREVIOUS_STEP_COUNT=1
       - NEXT_STEP_COUNT=2
     depends_on:
@@ -90,8 +90,8 @@ services:
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body"}
-      - INPUT_QUEUE_NAME=filter-output
-      - OUTPUT_QUEUE_NAME=sa-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - PREVIOUS_STEP_COUNT=2
       - NEXT_STEP_COUNT=1
     depends_on:
@@ -108,8 +108,8 @@ services:
       - BLOCK_ID=2
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body"}
-      - INPUT_QUEUE_NAME=filter-output
-      - OUTPUT_QUEUE_NAME=sa-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - PREVIOUS_STEP_COUNT=2
       - NEXT_STEP_COUNT=1
     depends_on:
@@ -126,8 +126,8 @@ services:
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
       - OPERATOR_PARAMS={"column":"result"}
-      - INPUT_QUEUE_NAME=sa-output
-      - OUTPUT_QUEUE_NAME=final-output
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
       - PREVIOUS_STEP_COUNT=2
       - NEXT_STEP_COUNT=0
     depends_on:

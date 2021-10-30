@@ -2,6 +2,19 @@ from abc import ABC, abstractmethod
 import pika
 
 class AbstractQueueHandler:
+    def _build_work_queue_pattern(self, queue_name):
+        self.queue_name = queue_name
+        self.queue = self.channel.queue_declare(queue=queue_name)
+    
+    def _build_direct_pattern(self, exchange_name, callback, routing_key, auto_ack=False):
+        pass
+
+    def init_queue_pattern(self, pattern, **kwargs):
+        if pattern not in self.patterns.keys():
+            raise Exception(f'Pattern {pattern} not implemented')
+        
+        self.patterns[pattern](**kwargs)
+
     def __init__(self) -> None:
         host = 'rabbitmq-tp2'
         port = '5672'
@@ -11,11 +24,8 @@ class AbstractQueueHandler:
         self.queue = None
         self.queue_name = None
 
+        self.patterns = { "work_queue": self._build_work_queue_pattern, "direct": self._build_direct_pattern }
         super().__init__()
-    
-    @abstractmethod
-    def init_queue_pattern(self, pattern, queue_name='', auto_ack=False):
-        pass
 
     def close(self):
         self.channel.close()

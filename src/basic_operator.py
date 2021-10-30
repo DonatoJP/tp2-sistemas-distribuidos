@@ -18,7 +18,7 @@ def main():
     queue_producer = QueueProducer(params["next_step_count"])
     queue_consumer = QueueConsumer()
 
-    queue_producer.init_queue_pattern('work', params["output_queue_name"])
+    queue_producer.init_queue_pattern(**params["output_queue_params"])
     
     centinels_manager = CentinelsManager(params["previous_step_count"])
     block_id = params["block_id"]
@@ -40,9 +40,8 @@ def main():
             for returnable in returnables:
                 queue_producer.send(returnable)
     
-    queue_consumer.init_queue_pattern('work', 
-        callback_consuming_queue, 
-        queue_name=params["input_queue_name"])
+    params["input_queue_params"]["callback"] = callback_consuming_queue
+    queue_consumer.init_queue_pattern(**params["input_queue_params"])
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")

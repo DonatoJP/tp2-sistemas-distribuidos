@@ -30,9 +30,8 @@ def main():
         else:
             holder_to_use.exec_operation(decoded, **func_params)
 
-    queue_consumer.init_queue_pattern('work',
-        callback_consuming_queue,
-        queue_name=params["input_queue_name"])
+    params["input_queue_params"]["callback"] = callback_consuming_queue
+    queue_consumer.init_queue_pattern(**params["input_queue_params"])
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")

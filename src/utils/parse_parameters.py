@@ -10,13 +10,23 @@ def parse_parameters():
     try:
         params["module"] = os.environ['OPERATOR_MODULE']
         params["func_params"] = json.loads(os.environ['OPERATOR_PARAMS'])
-        params["input_queue_name"] = os.environ['INPUT_QUEUE_NAME']
-        params["output_queue_name"] = os.environ['OUTPUT_QUEUE_NAME']
+        params["input_queue_params"] = os.environ['INPUT_QUEUE_PARAMS']
+        params["output_queue_params"] = os.environ['OUTPUT_QUEUE_PARAMS']
         params["block_id"] = os.environ['BLOCK_ID']
         params["previous_step_count"] = int(os.environ['PREVIOUS_STEP_COUNT'])
         params["next_step_count"] = int(os.environ['NEXT_STEP_COUNT'])
     except KeyError as e:
         raise ParseParametersError(f"The following parameter is mandatory: {e}")
+
+    try:
+        params["output_queue_params"] = json.loads(params["output_queue_params"])
+    except:
+        raise ParseParametersError(f"output_queue_params must be json")
+
+    try:
+        params["input_queue_params"] = json.loads(params["input_queue_params"])
+    except:
+        raise ParseParametersError(f"input_queue_params must be json")
     
     try:
         params["previous_step_count"] = int(params["previous_step_count"])
