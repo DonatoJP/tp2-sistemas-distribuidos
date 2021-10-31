@@ -2,6 +2,7 @@
 {"Id":2, "CreationDate":"2021-10-31T00:45:00Z", "Score":10, "Tags":"Python,Rust"}
 {"CreationDate":"2021-10-30T00:45:00Z", "ParentId":4, "Score":10}
 {"CreationDate":"2021-10-31T00:45:00Z", "ParentId":4, "Score":15}
+{"CreationDate":"2021-11-01T00:45:00Z", "ParentId":4, "Score":-5}
 {"Id":4, "CreationDate":"2021-10-31T00:45:00Z", "Score":10, "Tags":"Node"}
 {"Id":6, "CreationDate":"2021-10-31T00:45:00Z", "Score":10, "Tags":"Node"}
 {"CreationDate":"2021-10-31T00:45:00Z", "ParentId":6, "Score":15}

@@ -44,6 +44,4 @@ class Joiner(AbstractOperator):
         else:
             result = self.process_question(dict_data)
         
-        print(self.__dict__)
-        print(result)
         return [(json.dumps(x), self.get_affinity(dict_data)) for x in result]

@@ -14,6 +14,7 @@ class AbstractQueueHandler:
         if pattern not in self.patterns.keys():
             raise Exception(f'Pattern {pattern} not implemented')
         
+        self.pattern = pattern
         self.patterns[pattern](**kwargs)
 
     def __init__(self) -> None:
@@ -25,6 +26,7 @@ class AbstractQueueHandler:
         self.queue = None
         self.exchange_name = ''
         self.queue_name = ''
+        self.pattern = ''
 
         self.patterns = { "work_queue": self._build_work_queue_pattern, "direct": self._build_direct_pattern }
         super().__init__()

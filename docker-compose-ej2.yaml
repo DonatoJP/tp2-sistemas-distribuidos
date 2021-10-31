@@ -57,8 +57,26 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"joiner-output"}
-      - PREVIOUS_STEP_COUNT=1
-      - NEXT_STEP_COUNT=2
+      - PREVIOUS_STEP_COUNT=2
+      - NEXT_STEP_COUNT=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej2-network
+  
+  joiner2:
+    container_name: joiner2
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.joiner
+      - OPERATOR_PARAMS={"perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange","routing_key":"1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"joiner-output"}
+      - PREVIOUS_STEP_COUNT=2
+      - NEXT_STEP_COUNT=1
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]

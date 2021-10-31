@@ -13,6 +13,9 @@ class AbstractOperator:
     def get_affinity(self, msg_to_send: dict):
         return '' if (not self.perform_affinity) else self._get_affinity(msg_to_send)
     
+    def get_affinity_posible_values(self) -> list:
+        return [] if (not self.perform_affinity) else [str(x) for x in range(0, self.affinity_divider)]
+    
     @abstractmethod
     def exec_operation(self, data, **kwargs) -> list:
         pass

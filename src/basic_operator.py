@@ -30,7 +30,7 @@ def main():
             centinels_manager.count_centinel()
             if centinels_manager.are_all_received():
                 print(f"{block_id} - Received all centinels. Stopping...")
-                queue_producer.send_end_centinels(centinels_manager.centinel)
+                queue_producer.send_end_centinels(centinels_manager.centinel, operator_to_use.get_affinity_posible_values())
                 exit([queue_consumer, queue_producer])
 
         else:
