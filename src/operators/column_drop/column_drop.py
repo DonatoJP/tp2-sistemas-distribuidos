@@ -20,4 +20,4 @@ class DropColumnOperator(AbstractOperator):
     def exec_operation(self, data) -> list:
         io_string = StringIO(data)
         result = map(lambda line: self._drop_columns(json.loads(line)), io_string)
-        return list(map(lambda x: json.dumps(x), result))
+        return list(map(lambda x: (json.dumps(x), self.get_affinity(x)), result))

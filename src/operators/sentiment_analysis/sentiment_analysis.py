@@ -19,5 +19,5 @@ class SentimentAnalysisOperator(AbstractOperator):
         result = {}
         data_dict = json.loads(data)
         result["result"] = self._calc_sentiment(data_dict)
-        return [ json.dumps(result) ]
+        return [ (json.dumps(result), self.get_affinity(result)) ]
     

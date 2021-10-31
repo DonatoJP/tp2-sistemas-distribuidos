@@ -28,9 +28,9 @@ class FilterOperator(AbstractOperator):
         if meets_condition:
             if len(self.keep_columns) > 0:
                 processed_data = self.column_drop_operator.drop_columns(data_dict)
-                returnables.append(json.dumps(processed_data))
+                returnables.append((json.dumps(processed_data), self.get_affinity(processed_data)))
             else:
-                returnables.append(json.dumps(data))
+                returnables.append((json.dumps(data), self.get_affinity(data)))
         
         return returnables
 
