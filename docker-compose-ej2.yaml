@@ -54,11 +54,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":false}
+      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange","routing_key":"0"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"joiner-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output"}
       - PREVIOUS_STEP_COUNT=2
-      - NEXT_STEP_COUNT=1
+      - NEXT_STEP_COUNT=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -72,26 +72,44 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":false}
+      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange","routing_key":"1"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"joiner-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output"}
       - PREVIOUS_STEP_COUNT=2
-      - NEXT_STEP_COUNT=1
+      - NEXT_STEP_COUNT=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
     networks:
       - ej2-network
 
-  group_by_holder:
-    container_name: group_by_holder
+  group_by_holder1:
+    container_name: group_by_holder1
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.top_n_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"joiner-output"}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
+      - PREVIOUS_STEP_COUNT=2
+      - NEXT_STEP_COUNT=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    networks:
+      - ej2-network
+  
+  group_by_holder2:
+    container_name: group_by_holder2
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=holders.top_n_holder
+      - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
       - PREVIOUS_STEP_COUNT=2
       - NEXT_STEP_COUNT=0

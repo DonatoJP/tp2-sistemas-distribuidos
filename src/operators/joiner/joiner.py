@@ -43,5 +43,5 @@ class Joiner(AbstractOperator):
             result = self.process_answer(dict_data)
         else:
             result = self.process_question(dict_data)
-        
-        return [(json.dumps(x), self.get_affinity(dict_data)) for x in result]
+
+        return [(json.dumps(x), self.get_affinity(x)) for x in result]
