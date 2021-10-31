@@ -12,12 +12,11 @@ def main():
 
     operation_module = importlib.import_module(params["module"])
     ImportedHolder = getattr(operation_module, 'ImportedHolder')
-    holder_to_use = ImportedHolder()
+    holder_to_use = ImportedHolder(**params["operator_params"])
 
     queue_consumer = QueueConsumer()
 
     centinels_manager = CentinelsManager(params["previous_step_count"])
-    func_params = params["func_params"]
 
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')
@@ -28,7 +27,7 @@ def main():
                 print(result)
                 exit([queue_consumer])
         else:
-            holder_to_use.exec_operation(decoded, **func_params)
+            holder_to_use.exec_operation(decoded)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])

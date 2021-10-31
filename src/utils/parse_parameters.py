@@ -9,7 +9,7 @@ def parse_parameters():
     params = {}
     try:
         params["module"] = os.environ['OPERATOR_MODULE']
-        params["func_params"] = json.loads(os.environ['OPERATOR_PARAMS'])
+        params["operator_params"] = json.loads(os.environ['OPERATOR_PARAMS'])
         params["input_queue_params"] = os.environ['INPUT_QUEUE_PARAMS']
         params["output_queue_params"] = os.environ['OUTPUT_QUEUE_PARAMS']
         params["block_id"] = os.environ['BLOCK_ID']

@@ -35,7 +35,7 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"]}
+      - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"], "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - PREVIOUS_STEP_COUNT=1
@@ -53,7 +53,7 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - PREVIOUS_STEP_COUNT=1
@@ -71,7 +71,7 @@ services:
       - BLOCK_ID=2
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">"}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - PREVIOUS_STEP_COUNT=1
@@ -89,7 +89,7 @@ services:
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.sentiment_analysis
-      - OPERATOR_PARAMS={"column":"Body"}
+      - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - PREVIOUS_STEP_COUNT=2
@@ -107,7 +107,7 @@ services:
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=2
       - OPERATOR_MODULE=operators.sentiment_analysis
-      - OPERATOR_PARAMS={"column":"Body"}
+      - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - PREVIOUS_STEP_COUNT=2
@@ -125,7 +125,7 @@ services:
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
-      - OPERATOR_PARAMS={"column":"result"}
+      - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
       - PREVIOUS_STEP_COUNT=2

@@ -8,7 +8,8 @@ class QueueConsumer(AbstractQueueHandler):
         self.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=auto_ack)
 
     def _build_direct_pattern(self, exchange_name, callback, routing_key, auto_ack=False):
-        self.channel.exchange_declare(exchange=exchange_name, exchange_type='direct')
+        super()._build_direct_pattern(exchange_name)
+
         result = self.channel.queue_declare(queue='')
         self.queue_name = result.method.queue
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
@@ -17,11 +18,9 @@ class QueueConsumer(AbstractQueueHandler):
     def __init__(self) -> None:
         super().__init__()
     
-    
     def init_queue_pattern(self, pattern, **kwargs):
         super().init_queue_pattern(pattern, **kwargs)
 
-    
     def start_consuming(self):
         self.channel.start_consuming()
     

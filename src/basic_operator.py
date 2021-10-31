@@ -13,7 +13,7 @@ def main():
     
     operation_module = importlib.import_module(params["module"])
     ImportedOperator = getattr(operation_module, 'ImportedOperator')
-    operator_to_use = ImportedOperator()
+    operator_to_use = ImportedOperator(**params['operator_params'])
 
     queue_producer = QueueProducer(params["next_step_count"])
     queue_consumer = QueueConsumer()
@@ -22,7 +22,6 @@ def main():
     
     centinels_manager = CentinelsManager(params["previous_step_count"])
     block_id = params["block_id"]
-    func_params = params["func_params"]
 
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')
@@ -35,7 +34,7 @@ def main():
                 exit([queue_consumer, queue_producer])
 
         else:
-            returnables = operator_to_use.exec_operation(decoded, **func_params)
+            returnables = operator_to_use.exec_operation(decoded)
             print(f"{block_id} - {returnables}")
             for returnable in returnables:
                 queue_producer.send(returnable)

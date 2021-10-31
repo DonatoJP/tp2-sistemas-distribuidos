@@ -8,6 +8,9 @@ class QueueProducer(AbstractQueueHandler):
 
     def _build_work_queue_pattern(self, queue_name):
         super()._build_work_queue_pattern(queue_name)
+    
+    def _build_direct_pattern(self, exchange_name):
+        super()._build_direct_pattern(exchange_name)
 
     def init_queue_pattern(self, pattern, **kwargs):
         super().init_queue_pattern(pattern, **kwargs)
@@ -16,10 +19,16 @@ class QueueProducer(AbstractQueueHandler):
         for _ in range(0, self.next_step_count):
             self.send(centinel)
     
-    def send(self, message):
-        self.channel.basic_publish(exchange='',
-            routing_key=self.queue_name,
-            body=message)
+    def send(self, message, routing_key=''):
+        if routing_key == '':
+            self.channel.basic_publish(exchange=self.exchange_name,
+                routing_key=self.queue_name,
+                body=message)
+        else:
+            self.channel.basic_publish(exchange=self.exchange_name,
+                routing_key=routing_key,
+                body=message)
+
     
     def close(self):
         super().close()
