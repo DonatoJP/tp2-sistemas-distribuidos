@@ -26,7 +26,7 @@ class QueueProducer(AbstractQueueHandler):
                 body=message)
         else:
             self.channel.basic_publish(exchange=self.exchange_name,
-                routing_key=routing_key,
+                routing_key=str(routing_key),
                 body=message)
 
     

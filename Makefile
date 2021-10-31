@@ -24,3 +24,21 @@ docker-compose-ps:
 docker-compose-logs:
 	docker-compose --project-name "tp2-middleware" logs -f $(service)
 .PHONY: docker-compose-logs
+
+
+docker-compose-up-2:
+	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" up -d
+.PHONY: docker-compose-up-2
+
+docker-compose-down-2:
+	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" stop -t 1
+	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" down
+.PHONY: docker-compose-down-2
+
+docker-compose-ps-2:
+	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" ps
+.PHONY: docker-compose-ps-2
+
+docker-compose-logs-2:
+	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" logs -f $(service)
+.PHONY: docker-compose-logs-2

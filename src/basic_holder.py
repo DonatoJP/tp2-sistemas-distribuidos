@@ -28,6 +28,8 @@ def main():
                 exit([queue_consumer])
         else:
             holder_to_use.exec_operation(decoded)
+        
+        ch.basic_ack(method.delivery_tag)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])

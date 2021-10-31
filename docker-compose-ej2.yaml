@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  rabbitmq-tp2:
+    container_name: "rabbitmq-tp2"
+    image: rabbitmq:3.9.7-management-alpine
+    ports:
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - ej2-network
+
+  drop-input-column:
+    container_name: drop-input-column
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop
+      - OPERATOR_PARAMS={"columns_to_keep":["ParentId","CreationDate", "Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":2}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange"}
+      - PREVIOUS_STEP_COUNT=1
+      - NEXT_STEP_COUNT=2
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej2-network
+
+networks:
+  ej2-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.202.0/24

@@ -38,6 +38,8 @@ def main():
             print(f"{block_id} - {returnables}")
             for returnable in returnables:
                 queue_producer.send(returnable[0], returnable[1])
+        
+        ch.basic_ack(method.delivery_tag)
     
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])
