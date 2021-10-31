@@ -9,6 +9,7 @@ class TopNHolder(AbstractHolder):
     
     def exec_operation(self, data, **kwargs) -> list:
         dict_data = json.loads(data)
+        print(dict_data)
         if dict_data["Year"] not in self.group_by_year.keys():
             self.group_by_year[dict_data["Year"]] = {}
         
