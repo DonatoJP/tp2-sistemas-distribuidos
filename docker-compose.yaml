@@ -11,22 +11,22 @@ services:
     networks:
       - tp2-network
   
-  # input_node:
-  #   container_name: input_node
-  #   image: input_node:latest
-  #   environment: 
-  #     - PYTHONUNBUFFERED=1
-  #     - FILE_TO_PROCESS=data/red_answers.csv
-  #     - CHUNK_SIZE=3
-  #     - OUTPUT_QUEUE_NAME=input-queue
-  #     - NEXT_STEP_COUNT=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   volumes:
-  #     - "./data:/app/data"
-  #   command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
-  #   networks:
-  #     - tp2-network
+  input_node:
+    container_name: input_node
+    image: input_node:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - FILE_TO_PROCESS=data/red_answers.csv
+      - CHUNK_SIZE=100
+      - OUTPUT_QUEUE_NAME=input-queue
+      - NEXT_STEP_COUNT=1
+    depends_on:
+      - "rabbitmq-tp2"
+    volumes:
+      - "./data:/app/data"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+    networks:
+      - tp2-network
   
   drop-input-column:
     container_name: drop-input-column
@@ -36,7 +36,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
       - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"], "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-output"}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - PREVIOUS_STEP_COUNT=1
       - NEXT_STEP_COUNT=2
