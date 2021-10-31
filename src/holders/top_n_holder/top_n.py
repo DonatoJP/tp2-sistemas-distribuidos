@@ -5,7 +5,7 @@ class TopNHolder(AbstractHolder):
     def __init__(self, top_n, **kwargs) -> None:
         self.group_by_year = {}
         self.top_n = top_n
-        super().__init__()
+        super().__init__(**kwargs)
     
     def exec_operation(self, data, **kwargs) -> list:
         dict_data = json.loads(data)
@@ -28,4 +28,7 @@ class TopNHolder(AbstractHolder):
         return tags_tuple_list[0:self.top_n]
 
     def end(self):
-        return [(year, self._make_top_n(year)) for year in self.group_by_year.keys()]
+        result = {}
+        for year in self.group_by_year.keys():
+            result[year] = self._make_top_n(year)
+        return [ (json.dumps(result), self.get_affinity(result)) ]

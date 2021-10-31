@@ -11,16 +11,16 @@ services:
     networks:
       - ej3-network
   
-  drop-input-column-answers1:
-    container_name: drop-input-column-answers1
+  drop-input-column-questions1:
+    container_name: drop-input-column-questions1
     image: building-block:latest
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Score"],"perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"input-exchange","routing_key":"0"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"output"}
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions"}
       - CENTINELS_TO_RECEIVE=1
       - CENTINELS_TO_SEND=1
     depends_on:
@@ -29,35 +29,17 @@ services:
     networks:
       - ej3-network
   
-  drop-input-column-answers2:
-    container_name: drop-input-column-answers2
+  drop-input-column-answers1:
+    container_name: drop-input-column-answers1
     image: building-block:latest
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Body"],"perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"input-exchange","routing_key":"1"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"output"}
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=1
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - ej3-network
-
-  drop-input-column-answers3:
-    container_name: drop-input-column-answers3
-    image: building-block:latest
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Id"],"perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"input-exchange","routing_key":"*"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"output"}
-      - CENTINELS_TO_RECEIVE=2
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"

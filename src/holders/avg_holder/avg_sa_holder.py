@@ -6,7 +6,7 @@ class AvgSAHolder(AbstractHolder):
         self.total_count = 0
         self.positive_sa_count = 0
         self.column = column
-        super().__init__()
+        super().__init__(**kwargs)
     
     def _count_new_result(self, data: dict):
         self.total_count += 1
@@ -18,4 +18,9 @@ class AvgSAHolder(AbstractHolder):
         self._count_new_result(data_dict)
     
     def end(self):
-        return {"result": self.positive_sa_count / self.total_count}
+        if self.total_count == 0:
+            result = {"Result": "inf"}
+            return [(json.dumps(result), self.get_affinity(result))]
+        
+        result = {"Result": self.positive_sa_count / self.total_count}
+        return [(json.dumps(result), self.get_affinity(result))]

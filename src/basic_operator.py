@@ -24,6 +24,7 @@ def main():
     block_id = params["block_id"]
 
     def callback_consuming_queue(ch, method, properties, body):
+        finish = False
         decoded = body.decode('UTF-8')
         if centinels_manager.is_centinel(decoded):
             print("Received Centinel")
@@ -31,9 +32,9 @@ def main():
             if centinels_manager.are_all_received():
                 print(f"{block_id} - Received all centinels. Stopping...")
                 queue_producer.send_end_centinels(centinels_manager.centinel, operator_to_use.get_affinity_posible_values())
+                finish = True
                 # ch.basic_ack(method.delivery_tag)
-                exit([queue_consumer, queue_producer])
-
+                # exit([queue_consumer, queue_producer])
         else:
             returnables = operator_to_use.exec_operation(decoded)
             print(f"{block_id} - {returnables}")
@@ -41,6 +42,8 @@ def main():
                 queue_producer.send(returnable[0], returnable[1])
         
         ch.basic_ack(method.delivery_tag)
+        if finish:
+            exit([queue_consumer, queue_producer])
     
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])
