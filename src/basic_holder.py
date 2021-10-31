@@ -16,7 +16,7 @@ def main():
 
     queue_consumer = QueueConsumer()
 
-    centinels_manager = CentinelsManager(params["previous_step_count"])
+    centinels_manager = CentinelsManager(params["centinels_to_receive"])
 
     def callback_consuming_queue(ch, method, properties, body):
         decoded = body.decode('UTF-8')

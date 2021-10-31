@@ -19,7 +19,7 @@ services:
       - FILE_TO_PROCESS=data/red_answers.csv
       - CHUNK_SIZE=100
       - OUTPUT_QUEUE_NAME=input-queue
-      - NEXT_STEP_COUNT=1
+      - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
     volumes:
@@ -38,8 +38,8 @@ services:
       - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"], "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
-      - PREVIOUS_STEP_COUNT=1
-      - NEXT_STEP_COUNT=2
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -56,8 +56,8 @@ services:
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - PREVIOUS_STEP_COUNT=1
-      - NEXT_STEP_COUNT=2
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -74,8 +74,8 @@ services:
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - PREVIOUS_STEP_COUNT=1
-      - NEXT_STEP_COUNT=2
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -92,8 +92,8 @@ services:
       - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
-      - PREVIOUS_STEP_COUNT=2
-      - NEXT_STEP_COUNT=1
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -110,8 +110,8 @@ services:
       - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
-      - PREVIOUS_STEP_COUNT=2
-      - NEXT_STEP_COUNT=1
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -128,8 +128,8 @@ services:
       - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
-      - PREVIOUS_STEP_COUNT=2
-      - NEXT_STEP_COUNT=0
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]

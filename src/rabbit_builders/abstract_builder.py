@@ -10,6 +10,10 @@ class AbstractQueueHandler:
         self.channel.exchange_declare(exchange=exchange_name, exchange_type='direct')
         self.exchange_name = exchange_name
 
+    def _build_topic_pattern(self, exchange_name):
+        self.channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
+        self.exchange_name = exchange_name
+
     def init_queue_pattern(self, pattern, **kwargs):
         if pattern not in self.patterns.keys():
             raise Exception(f'Pattern {pattern} not implemented')
@@ -28,7 +32,11 @@ class AbstractQueueHandler:
         self.queue_name = ''
         self.pattern = ''
 
-        self.patterns = { "work_queue": self._build_work_queue_pattern, "direct": self._build_direct_pattern }
+        self.patterns = { 
+            "work_queue": self._build_work_queue_pattern, 
+            "direct": self._build_direct_pattern,
+            "topic": self._build_topic_pattern
+        }
         super().__init__()
 
     def close(self):

@@ -15,6 +15,14 @@ class QueueConsumer(AbstractQueueHandler):
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
         self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=auto_ack)
 
+    def _build_topic_pattern(self, exchange_name, callback, routing_key, auto_ack=False):
+        super()._build_topic_pattern(exchange_name)
+
+        result = self.channel.queue_declare(queue='')
+        self.queue_name = result.method.queue
+        self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
+        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=auto_ack)
+
     def __init__(self) -> None:
         super().__init__()
     

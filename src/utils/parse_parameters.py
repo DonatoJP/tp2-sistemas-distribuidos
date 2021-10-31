@@ -13,8 +13,8 @@ def parse_parameters():
         params["input_queue_params"] = os.environ['INPUT_QUEUE_PARAMS']
         params["output_queue_params"] = os.environ['OUTPUT_QUEUE_PARAMS']
         params["block_id"] = os.environ['BLOCK_ID']
-        params["previous_step_count"] = int(os.environ['PREVIOUS_STEP_COUNT'])
-        params["next_step_count"] = int(os.environ['NEXT_STEP_COUNT'])
+        params["centinels_to_receive"] = int(os.environ['CENTINELS_TO_RECEIVE'])
+        params["centinels_to_send"] = int(os.environ['CENTINELS_TO_SEND'])
     except KeyError as e:
         raise ParseParametersError(f"The following parameter is mandatory: {e}")
 
@@ -29,10 +29,10 @@ def parse_parameters():
         raise ParseParametersError(f"input_queue_params must be json")
     
     try:
-        params["previous_step_count"] = int(params["previous_step_count"])
-        params["next_step_count"] = int(params["next_step_count"])
+        params["centinels_to_receive"] = int(params["centinels_to_receive"])
+        params["centinels_to_send"] = int(params["centinels_to_send"])
     except ValueError as e:
-        raise ParseParametersError(f"'previous_step_count' and 'next_step_count' should be numbers")
+        raise ParseParametersError(f"'centinels_to_receive' and 'centinels_to_send' should be numbers")
 
     
     return params

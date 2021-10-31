@@ -26,6 +26,25 @@ docker-compose-logs:
 .PHONY: docker-compose-logs
 
 
+# Ejercicio 3
+docker-compose-up-3:
+	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" up -d
+.PHONY: docker-compose-up-3
+
+docker-compose-down-3:
+	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" stop -t 1
+	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" down -v
+.PHONY: docker-compose-down-3
+
+docker-compose-ps-3:
+	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" ps
+.PHONY: docker-compose-ps-3
+
+docker-compose-logs-3:
+	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" logs -f $(service)
+.PHONY: docker-compose-logs-3
+
+# Ejercicio 2
 docker-compose-up-2:
 	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" up -d
 .PHONY: docker-compose-up-2
@@ -42,3 +61,4 @@ docker-compose-ps-2:
 docker-compose-logs-2:
 	docker-compose -f docker-compose-ej2.yaml --project-name "tp2-middleware" logs -f $(service)
 .PHONY: docker-compose-logs-2
+

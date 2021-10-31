@@ -15,12 +15,12 @@ def main():
     ImportedOperator = getattr(operation_module, 'ImportedOperator')
     operator_to_use = ImportedOperator(**params['operator_params'])
 
-    queue_producer = QueueProducer(params["next_step_count"])
+    queue_producer = QueueProducer(params["centinels_to_send"])
     queue_consumer = QueueConsumer()
 
     queue_producer.init_queue_pattern(**params["output_queue_params"])
     
-    centinels_manager = CentinelsManager(params["previous_step_count"])
+    centinels_manager = CentinelsManager(params["centinels_to_receive"])
     block_id = params["block_id"]
 
     def callback_consuming_queue(ch, method, properties, body):
@@ -31,6 +31,7 @@ def main():
             if centinels_manager.are_all_received():
                 print(f"{block_id} - Received all centinels. Stopping...")
                 queue_producer.send_end_centinels(centinels_manager.centinel, operator_to_use.get_affinity_posible_values())
+                # ch.basic_ack(method.delivery_tag)
                 exit([queue_consumer, queue_producer])
 
         else:

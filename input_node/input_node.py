@@ -3,7 +3,7 @@ import csv, pika, json, os
 def main():
     file_to_read = os.environ["FILE_TO_PROCESS"] # 'data/red_answers.csv'
     chunk_size = int(os.environ["CHUNK_SIZE"])
-    centinels_to_send = int(os.environ["NEXT_STEP_COUNT"])
+    centinels_to_send = int(os.environ["CENTINELS_TO_SEND"])
 
     host = 'rabbitmq-tp2'
     port = '5672'
