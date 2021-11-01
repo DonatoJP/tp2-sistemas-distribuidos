@@ -25,5 +25,6 @@ class UserAvgHolder(AbstractHolder):
 
 
     def end(self):
-        return [self._build_output(x[0], x[1][0], x[1][1]) for x in self.user_counters.items()]
+        result = [self._build_output(x[0], x[1][0], x[1][1]) for x in self.user_counters.items()]
+        return [ (json.dumps(x), self.get_affinity(x)) for x in result ]
     
