@@ -119,6 +119,41 @@ services:
     networks:
       - ej3-network
 
+  user-answers-filter:
+    container_name: user-answers-filter
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.user_avg_filter
+      - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-answers-filter-input","routing_key":"0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final_output"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej3-network
+  
+  user-questions-filter:
+    container_name: user-questions-filter
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.user_avg_filter
+      - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-questions-filter-input","routing_key":"0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final_output"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej3-network
 networks:
   ej3-network:
     ipam:
