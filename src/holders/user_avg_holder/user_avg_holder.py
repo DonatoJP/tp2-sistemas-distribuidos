@@ -18,9 +18,10 @@ class UserAvgHolder(AbstractHolder):
 
     def _build_output(self, user_id, total_score, total_count):
         output = {}
-        output["OwnerIserId"] = user_id
+        output["OwnerUserId"] = user_id
         output["TotalScore"] = total_score
         output["Avg"] = total_score / total_count
+        output["User_Avg"] = True
         return output
 
 
