@@ -1,7 +1,7 @@
 from ..holder import AbstractHolder
 import json
 
-class TopNHolder(AbstractHolder):
+class TopNYearsHolder(AbstractHolder):
     def __init__(self, top_n, **kwargs) -> None:
         self.group_by_year = {}
         self.top_n = top_n

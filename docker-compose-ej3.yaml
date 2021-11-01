@@ -195,7 +195,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
-      - OPERATOR_MODULE=holders.top_n_holder
+      - OPERATOR_MODULE=holders.top_n_years_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
@@ -213,7 +213,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
-      - OPERATOR_MODULE=holders.top_n_holder
+      - OPERATOR_MODULE=holders.top_n_years_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
