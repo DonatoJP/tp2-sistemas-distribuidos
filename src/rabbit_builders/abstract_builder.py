@@ -25,7 +25,13 @@ class AbstractQueueHandler:
         host = 'rabbitmq-tp2'
         port = '5672'
         credentials = pika.PlainCredentials('guest', 'guest')
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=host,
+                port=port, 
+                credentials=credentials,
+                heartbeat=1800),
+        )
         self.channel = self.connection.channel()
         self.queue = None
         self.exchange_name = ''
