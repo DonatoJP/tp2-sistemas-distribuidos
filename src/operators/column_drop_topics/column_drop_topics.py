@@ -22,6 +22,16 @@ class ColumnDropTopicOperator(AbstractOperator):
         
         return result
 
+    def _group_chunks_by_rk(self, built_output):
+        result = {}
+        for chunk_line in built_output:
+            for topic_output in chunk_line:
+                if topic_output[1] not in result:
+                    result[topic_output[1]] = []
+                result[topic_output[1]].append(topic_output[0])
+        
+        return [('\n'.join(list_values), key) for key, list_values in result.items()]
+
     def get_all_routing_keys(self):
         topic_wo_aff = self.params_by_topic.keys()
         if not self.perform_affinity:
@@ -32,4 +42,4 @@ class ColumnDropTopicOperator(AbstractOperator):
     def exec_operation(self, data) -> list:
         io_string = StringIO(data)
         result = map(lambda line: self._build_output_by_topic(json.loads(line)), io_string)
-        return [i for x in result for i in x]
+        return self._group_chunks_by_rk(result)

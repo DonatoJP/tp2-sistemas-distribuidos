@@ -30,6 +30,7 @@ class QueueProducer(AbstractQueueHandler):
     def _send_centinel_by_routing_keys(self, centinel, routing_keys):
         for _ in range(0, self.centinels_to_send):
             for rk in routing_keys:
+                print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {str(rk)}")
                 self.send(centinel, str(rk))
 
     def send_end_centinels(self, centinel, routing_keys=[]):

@@ -1,3 +1,4 @@
+from io import StringIO
 import json, datetime
 from ..operator import AbstractOperator
 
@@ -10,7 +11,7 @@ class Joiner(AbstractOperator):
     def _parse_year(self, date):
         return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').year
     
-    def process_question(self, data: dict):
+    def process_question(self, data: dict) -> list:
         self.waiting_questions[data["Id"]] = data["Tags"] # Keep question tags for future answers
         data["Year"] = self._parse_year(data["CreationDate"])
         result = [ [ data ] ]
@@ -22,7 +23,7 @@ class Joiner(AbstractOperator):
         del data["CreationDate"]
         return [item for sublist in result for item in sublist]
     
-    def process_answer(self, data: dict):
+    def process_answer(self, data: dict) -> list:
         if data["ParentId"] in self.waiting_questions.keys(): # If we have the corresponding question
             question_tags = self.waiting_questions[data["ParentId"]]
             result = {}
@@ -36,12 +37,16 @@ class Joiner(AbstractOperator):
 
             self.waiting_answers[data["ParentId"]].append(data)
             return []
+    
+    def _process_line_of_chunk(self, line_data) -> list:
+        dict_data: dict = json.loads(line_data)
+        if len(dict_data.keys()) == 3:
+            return self.process_answer(dict_data)
+        else:
+            return self.process_question(dict_data)
 
     def exec_operation(self, data) -> list:
-        dict_data: dict = json.loads(data)
-        if len(dict_data.keys()) == 3:
-            result = self.process_answer(dict_data)
-        else:
-            result = self.process_question(dict_data)
+        io_string = StringIO(data)
+        res = [self._process_line_of_chunk(line) for line in io_string]
 
-        return [(json.dumps(x), self.get_affinity(x)) for x in result]
+        return [(json.dumps(x), self.get_affinity(x)) for i in res for x in i]
