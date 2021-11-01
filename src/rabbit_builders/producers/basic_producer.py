@@ -18,7 +18,7 @@ class QueueProducer(AbstractQueueHandler):
     def init_queue_pattern(self, pattern, **kwargs):
         super().init_queue_pattern(pattern, **kwargs)
     
-    def send_end_centinels(self, centinel, routing_keys=[]):
+    def send_end_centinels(self, centinel):
         for rk in range(0, self.centinels_to_send):
             if self.pattern == 'work_queue':
                 self.send(centinel)
