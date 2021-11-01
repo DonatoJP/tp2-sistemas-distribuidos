@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class AbstractOperator:
-    def __init__(self, perform_affinity, affinity_key='', affinity_divider=1) -> None:
+    def __init__(self, perform_affinity=False, affinity_key='', affinity_divider=1) -> None:
         self.perform_affinity = perform_affinity
         self.affinity_key = affinity_key
         self.affinity_divider = affinity_divider

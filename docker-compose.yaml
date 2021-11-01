@@ -11,14 +11,31 @@ services:
     networks:
       - tp2-network
   
-  input_node:
-    container_name: input_node
+  input_node-answers:
+    container_name: input_node-answers
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_answers.csv
       - CHUNK_SIZE=100
-      - OUTPUT_QUEUE_NAME=input-queue
+      - OUTPUT_QUEUE_NAME=input-answers
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    volumes:
+      - "./data:/app/data"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+    networks:
+      - tp2-network
+
+  input_node-questions:
+    container_name: input_node-questions
+    image: input_node:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - FILE_TO_PROCESS=data/red_answers.csv
+      - CHUNK_SIZE=100
+      - OUTPUT_QUEUE_NAME=input-questions
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -28,111 +45,39 @@ services:
     networks:
       - tp2-network
   
-  drop-input-column:
-    container_name: drop-input-column
+  drop-input-column-answers:
+    container_name: drop-input-column-answers
     image: building-block:latest
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Score","Body"], "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
+      - OPERATOR_MODULE=operators.column_drop_topics
+      - OPERATOR_PARAMS={"columns_to_keep_by_topic":{"answer.ej1":["Score","Body"],"answer.ej2":["OwnerUserId","Score"],"answer.ej3":["CreationDate","ParentId","Score"]}}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=2
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - tp2-network
-
-  filter-column1:
-    container_name: filter-column1
-    image: building-block:latest
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=2
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - tp2-network
-
-  filter-column2:
-    container_name: filter-column2
-    image: building-block:latest
-    environment: 
-      - BLOCK_ID=2
-      - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"drop-output"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=2
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - tp2-network
-  
-  sentiment-analyser1:
-    container_name: sentiment-analyser1
-    image: building-block:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
-      - OPERATOR_MODULE=operators.sentiment_analysis
-      - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
-      - CENTINELS_TO_RECEIVE=2
-      - CENTINELS_TO_SEND=1
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - tp2-network
-
-  sentiment-analyser2:
-    container_name: sentiment-analyser2
-    image: building-block:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=2
-      - OPERATOR_MODULE=operators.sentiment_analysis
-      - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"filter-output"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
-      - CENTINELS_TO_RECEIVE=2
-      - CENTINELS_TO_SEND=1
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - tp2-network
-  
-  avg-holder:
-    container_name: avg-holder
-    image: building-block:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
-      - OPERATOR_MODULE=holders.avg_holder
-      - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"sa-output"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
-      - CENTINELS_TO_RECEIVE=2
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+  drop-input-column-questions:
+    container_name: drop-input-column-questions
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop_topics
+      - OPERATOR_PARAMS={"columns_to_keep_by_topic":{"question.ej2":["OwnerUserId","Score"],"question.ej3":["Id","CreationDate","ParentId","Score"]}}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=0 
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
     networks:
       - tp2-network
 
