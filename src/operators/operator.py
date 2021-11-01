@@ -16,6 +16,9 @@ class AbstractOperator:
     def get_affinity(self, msg_to_send: dict):
         return '' if (not self.perform_affinity) else self._get_affinity(msg_to_send)
     
+    def get_all_routing_keys(self):
+        return []
+    
     @abstractmethod
     def exec_operation(self, data, **kwargs) -> list:
         pass

@@ -18,7 +18,7 @@ class QueueProducer(AbstractQueueHandler):
     def init_queue_pattern(self, pattern, **kwargs):
         super().init_queue_pattern(pattern, **kwargs)
     
-    def send_end_centinels(self, centinel):
+    def _send_centinel_by_pattern(self, centinel):
         for rk in range(0, self.centinels_to_send):
             if self.pattern == 'work_queue':
                 print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {self.queue_name}")
@@ -26,6 +26,17 @@ class QueueProducer(AbstractQueueHandler):
             else:
                 print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {str(rk)}")
                 self.send(centinel, str(rk))
+    
+    def _send_centinel_by_routing_keys(self, centinel, routing_keys):
+        for _ in range(0, self.centinels_to_send):
+            for rk in routing_keys:
+                self.send(centinel, str(rk))
+
+    def send_end_centinels(self, centinel, routing_keys=[]):
+        if len(routing_keys) > 0:
+            self._send_centinel_by_routing_keys(centinel, routing_keys)
+        else:
+            self._send_centinel_by_pattern(centinel)
     
     def send(self, message, routing_key=''):
         if routing_key == '':
