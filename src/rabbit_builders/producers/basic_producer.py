@@ -21,9 +21,10 @@ class QueueProducer(AbstractQueueHandler):
     def send_end_centinels(self, centinel):
         for rk in range(0, self.centinels_to_send):
             if self.pattern == 'work_queue':
+                print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {self.queue_name}")
                 self.send(centinel)
             else:
-                print(f"Sending centinel {centinel} to {rk}")
+                print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {str(rk)}")
                 self.send(centinel, str(rk))
     
     def send(self, message, routing_key=''):

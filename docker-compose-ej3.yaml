@@ -52,11 +52,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["ParentId","CreationDate", "Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":4}
+      - OPERATOR_PARAMS={"columns_to_keep":["ParentId","CreationDate", "Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue-answers"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=4
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -70,11 +70,11 @@ services:
       - BLOCK_ID=2
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["ParentId","CreationDate", "Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":4}
+      - OPERATOR_PARAMS={"columns_to_keep":["ParentId","CreationDate", "Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue-answers"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=4
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -88,11 +88,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Id","CreationDate","Score","Tags"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":4}
+      - OPERATOR_PARAMS={"columns_to_keep":["Id","CreationDate","Score","Tags"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue-questions"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=4
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -106,11 +106,11 @@ services:
       - BLOCK_ID=2
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["Id","CreationDate","Score","Tags"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":4}
+      - OPERATOR_PARAMS={"columns_to_keep":["Id","CreationDate","Score","Tags"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-queue-questions"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=4
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -170,24 +170,6 @@ services:
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
     networks:
       - ej2-network
-  
-  joiner4:
-    container_name: joiner4
-    image: building-block:latest
-    environment: 
-      - BLOCK_ID=4
-      - PYTHONUNBUFFERED=1
-      - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
-      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"drop-exchange","routing_key":"3"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output"}
-      - CENTINELS_TO_RECEIVE=4
-      - CENTINELS_TO_SEND=2
-    depends_on:
-      - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
-    networks:
-      - ej2-network
 
   group_by_holder1:
     container_name: group_by_holder1
@@ -199,7 +181,7 @@ services:
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
-      - CENTINELS_TO_RECEIVE=4
+      - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
@@ -217,7 +199,7 @@ services:
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"joiner-output","routing_key":"1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"group-output"}
-      - CENTINELS_TO_RECEIVE=4
+      - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"

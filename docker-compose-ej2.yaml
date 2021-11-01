@@ -17,9 +17,9 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_questions.csv
-      - CHUNK_SIZE=100
+      - CHUNK_SIZE=1000
       - OUTPUT_QUEUE_NAME=input-questions
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     volumes:
@@ -36,7 +36,7 @@ services:
       - FILE_TO_PROCESS=data/red_answers.csv
       - CHUNK_SIZE=100
       - OUTPUT_QUEUE_NAME=input-answers
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     volumes:
@@ -52,11 +52,29 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=3
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej3-network
+
+  drop-input-column-questions2:
+    container_name: drop-input-column-questions2
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=2
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -70,19 +88,37 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop
-      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers"}
       - CENTINELS_TO_RECEIVE=1
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=3
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
     networks:
       - ej3-network
   
-  user_avg_holder_questions:
-    container_name: user_avg_holder_questions
+  drop-input-column-answers2:
+    container_name: drop-input-column-answers2
+    image: building-block:latest
+    environment: 
+      - BLOCK_ID=2
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop
+      - OPERATOR_PARAMS={"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=3
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - ej3-network
+  
+  user_avg_holder_questions1:
+    container_name: user_avg_holder_questions1
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
@@ -91,7 +127,25 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-questions-filter-input"}
-      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    networks:
+      - ej3-network
+
+  user_avg_holder_questions2:
+    container_name: user_avg_holder_questions2
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=holders.user_avg_holder
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions","routing_key":"1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-questions-filter-input"}
+      - CENTINELS_TO_RECEIVE=2
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -99,8 +153,8 @@ services:
     networks:
       - ej3-network
   
-  user_avg_holder_answers:
-    container_name: user_avg_holder_answers
+  user_avg_holder_answers1:
+    container_name: user_avg_holder_answers1
     image: building-block:latest
     environment: 
       - PYTHONUNBUFFERED=1
@@ -109,7 +163,25 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-answers-filter-input"}
-      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    networks:
+      - ej3-network
+
+  user_avg_holder_answers2:
+    container_name: user_avg_holder_answers2
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=2
+      - OPERATOR_MODULE=holders.user_avg_holder
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers","routing_key":"1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-answers-filter-input"}
+      - CENTINELS_TO_RECEIVE=2
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -127,7 +199,7 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-answers","routing_key":"*"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-answers-filter-input"}
-      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_RECEIVE=6
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -145,7 +217,7 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"exchange-drop-questions","routing_key":"*"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-questions-filter-input"}
-      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_RECEIVE=6
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -163,7 +235,7 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-answers-filter-input","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"intersector-input"}
-      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
@@ -181,7 +253,7 @@ services:
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"user-questions-filter-input","routing_key":"0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"intersector-input"}
-      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
