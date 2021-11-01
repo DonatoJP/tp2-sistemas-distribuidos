@@ -10,7 +10,41 @@ services:
       - '15672:15672'
     networks:
       - ej3-network
+
+  input_node_questions:
+    container_name: input_node_questions
+    image: input_node:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - FILE_TO_PROCESS=data/red_questions.csv
+      - CHUNK_SIZE=100
+      - OUTPUT_QUEUE_NAME=input-questions
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    volumes:
+      - "./data:/app/data"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+    networks:
+      - ej3-network
   
+  input_node_answers:
+    container_name: input_node_answers
+    image: input_node:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - FILE_TO_PROCESS=data/red_answers.csv
+      - CHUNK_SIZE=100
+      - OUTPUT_QUEUE_NAME=input-answers
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    volumes:
+      - "./data:/app/data"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+    networks:
+      - ej3-network
+ 
   drop-input-column-questions1:
     container_name: drop-input-column-questions1
     image: building-block:latest

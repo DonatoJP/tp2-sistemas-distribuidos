@@ -10,7 +10,7 @@ class GeneralAvg(AbstractHolder):
     def exec_operation(self, data, **kwargs) -> list:
         dict_data = json.loads(data)
         self.total_count += 1
-        self.total_score += dict_data["Score"]
+        self.total_score += int(dict_data["Score"])
 
     def _build_output(self):
         output = {}

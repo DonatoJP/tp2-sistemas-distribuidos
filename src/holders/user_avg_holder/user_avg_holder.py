@@ -12,7 +12,7 @@ class UserAvgHolder(AbstractHolder):
             self.user_counters[dict_data["OwnerUserId"]] = (0, 0)
         
         # Tuple like (Sum(Score), Count(*))
-        to_sum = (dict_data["Score"], 1)
+        to_sum = (int(dict_data["Score"]), 1)
         actual = self.user_counters[dict_data["OwnerUserId"]]
         self.user_counters[dict_data["OwnerUserId"]] = tuple([sum(x) for x in zip(actual, to_sum)])
 

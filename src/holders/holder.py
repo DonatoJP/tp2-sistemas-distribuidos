@@ -8,7 +8,10 @@ class AbstractHolder:
         super().__init__()
     
     def _get_affinity(self, msg_to_send: dict):
-        return int(msg_to_send[self.affinity_key]) % self.affinity_divider
+        if not msg_to_send[self.affinity_key]:
+            return ''
+
+        return int(float(msg_to_send[self.affinity_key]) % self.affinity_divider)
 
     def get_affinity(self, msg_to_send: dict):
         return '' if (not self.perform_affinity) else self._get_affinity(msg_to_send)
