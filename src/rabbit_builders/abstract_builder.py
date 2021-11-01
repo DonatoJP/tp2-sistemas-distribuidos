@@ -30,7 +30,8 @@ class AbstractQueueHandler:
                 host=host,
                 port=port, 
                 credentials=credentials,
-                heartbeat=1800),
+                heartbeat=1800,
+                blocked_connection_timeout=600),
         )
         self.channel = self.connection.channel()
         self.queue = None
