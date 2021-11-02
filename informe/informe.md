@@ -1,6 +1,6 @@
 % 75.74 Sistemas Distribuidos I - Trabajo Práctico N°2
 % Donato, Juan Pablo. Padrón 100839
-% NoV 1st, 2021
+% Nov 2nd, 2021
 
 \begin{center} 
 \includegraphics[]{imagenes/logo.jpg}
@@ -173,3 +173,25 @@ De esta forma, estamos diciendole al nuevo bloque que:
 - Debe enviar 2 centinelas (a cada clave de afinidad entre 0 y *affinity_divider*) a la siguiente etapa para informar que ha finalizado.
 
 Notar en el campo `command` el comando `\wait-for` para esperar por la inicializacion de RabbitMQ para ejecutar nuestro bloque, y el llamado a `basic_operator.py` indicando que nuestro componente es un *operator*.
+
+# Diagrama C4
+## Level 1
+![](imagenes/c4-1.png)
+
+\newpage
+
+## Level 2
+![](imagenes/c4-2.png)
+
+## Level 3
+![](imagenes/c4-3.1.png)
+
+\newpage
+
+![](imagenes/c4-3.2.png)
+
+\newpage
+
+## Level 4
+![](imagenes/c4-4.1.png)
+![](imagenes/c4-4.2.png)
