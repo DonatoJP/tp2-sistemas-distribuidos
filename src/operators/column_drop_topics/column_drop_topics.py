@@ -8,9 +8,6 @@ class ColumnDropTopicOperator(AbstractOperator):
         self.params_by_topic: dict = params_by_topic
         self.perform_affinity = perform_affinity
         self.max_affinity = max_affinity
-
-    def drop_columns(self, data):
-        return self._drop_columns(data)
     
     def _build_output_by_topic(self, line: dict) -> list:
         result = []

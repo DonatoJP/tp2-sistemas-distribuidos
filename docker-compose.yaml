@@ -11,40 +11,6 @@ services:
     networks:
       - tp2-network
   
-  input_node-answers:
-    container_name: input_node-answers
-    image: input_node:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/answers.csv
-      - CHUNK_SIZE=1000
-      - OUTPUT_QUEUE_NAME=input-answers
-      - CENTINELS_TO_SEND=3
-    depends_on:
-      - "rabbitmq-tp2"
-    volumes:
-      - "./data:/app/data"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
-    networks:
-      - tp2-network
-
-  input_node-questions:
-    container_name: input_node-questions
-    image: input_node:latest
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/questions.csv
-      - CHUNK_SIZE=2000
-      - OUTPUT_QUEUE_NAME=input-questions
-      - CENTINELS_TO_SEND=2
-    depends_on:
-      - "rabbitmq-tp2"
-    volumes:
-      - "./data:/app/data"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
-    networks:
-      - tp2-network
-  
   drop-input-column-answers-1:
     container_name: drop-input-column-answers-1
     image: building-block:latest
