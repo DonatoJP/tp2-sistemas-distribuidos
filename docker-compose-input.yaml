@@ -1,35 +1,36 @@
 version: "3.8"
 services:
-  rabbitmq-tp2:
-    container_name: "rabbitmq-tp2"
-    image: rabbitmq:3.9.7-management-alpine
-    ports:
-      # AMQP protocol port
-      - '5672:5672'
-      # HTTP management UI
-      - '15672:15672'
-    networks:
-      - input_node-network
-  
-  input_node:
-    container_name: input_node
+  input_node-answers:
+    container_name: input_node-answers
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_answers.csv
-      - CHUNK_SIZE=3
-      - OUTPUT_QUEUE_NAME=example 
-    depends_on:
-      - "rabbitmq-tp2"
+      - CHUNK_SIZE=1000
+      - OUTPUT_QUEUE_NAME=input-answers
+      - CENTINELS_TO_SEND=3
     volumes:
       - "./data:/app/data"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
     networks:
-      - input_node-network
+      - tp2-network
+
+  input_node-questions:
+    container_name: input_node-questions
+    image: input_node:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - FILE_TO_PROCESS=data/red_questions.csv
+      - CHUNK_SIZE=2000
+      - OUTPUT_QUEUE_NAME=input-questions
+      - CENTINELS_TO_SEND=2
+    volumes:
+      - "./data:/app/data"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
+    networks:
+      - tp2-network
 
 networks:
-  input_node-network:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.202.0/24
+  tp2-network:
+    external: true
+    name: tp2-middleware_tp2-network
