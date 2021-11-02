@@ -40,11 +40,6 @@ follow-output:
 	time docker-compose --project-name "tp2-middleware" logs -f ej1-avg-holder-1 ej2-top-n-users ej3-group-by-holder-1
 .PHONY: follow-output
 
-service="ej1-avg-holder-1 ej2-top-n-users ej3-group-by-holder-1"
-system-control-output: system-logs
-.PHONY: system-control-output
-
-
 # Ejercicio 1
 docker-compose-up-1:
 	docker-compose -f docker-compose-ej1.yaml --project-name "tp2-middleware" up -d

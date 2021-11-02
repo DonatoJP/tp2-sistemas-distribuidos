@@ -33,12 +33,11 @@ def main():
                 print(f"{block_id} - Received all centinels. Stopping...")
                 queue_producer.send_end_centinels(centinels_manager.centinel, operator_to_use.get_all_routing_keys())
                 finish = True
-                # ch.basic_ack(method.delivery_tag)
-                # exit([queue_consumer, queue_producer])
+
         else:
             returnables = operator_to_use.exec_operation(decoded)
-            print(f"{block_id} - {returnables}")
             for returnable in returnables:
+                print(f"{block_id} - {returnable}")
                 queue_producer.send(returnable[0], returnable[1])
         
         ch.basic_ack(method.delivery_tag)
