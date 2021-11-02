@@ -16,7 +16,7 @@ services:
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/red_answers.csv
+      - FILE_TO_PROCESS=data/answers.csv
       - CHUNK_SIZE=1000
       - OUTPUT_QUEUE_NAME=input-answers
       - CENTINELS_TO_SEND=3
@@ -33,7 +33,7 @@ services:
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/red_questions.csv
+      - FILE_TO_PROCESS=data/questions.csv
       - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-questions
       - CENTINELS_TO_SEND=2
@@ -466,11 +466,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":1}
+      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner"}
       - CENTINELS_TO_RECEIVE=5
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -484,11 +484,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":1}
+      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner"}
       - CENTINELS_TO_RECEIVE=5
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -502,11 +502,11 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner
-      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":1}
+      - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.2"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner"}
       - CENTINELS_TO_RECEIVE=5
-      - CENTINELS_TO_SEND=1
+      - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
@@ -522,6 +522,24 @@ services:
       - OPERATOR_MODULE=holders.top_n_years_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner","routing_key":"0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej3-final-output"}
+      - CENTINELS_TO_RECEIVE=3
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    networks:
+      - tp2-network
+
+  ej3-group-by-holder-2:
+    container_name: ej3-group-by-holder-2
+    image: building-block:latest
+    environment: 
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=holders.top_n_years_holder
+      - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner","routing_key":"1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej3-final-output"}
       - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=0
