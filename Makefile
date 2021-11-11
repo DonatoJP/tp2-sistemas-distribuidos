@@ -70,7 +70,7 @@ docker-compose-up-3:
 
 docker-compose-down-3:
 	docker-compose --project-name "tp2-middleware" stop -t 1
-	docker-compose --project-name "tp2-middleware" down -v
+	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
 .PHONY: docker-compose-down-3
 
 docker-compose-ps-3:
@@ -90,7 +90,7 @@ docker-compose-up-2:
 
 docker-compose-down-2:
 	docker-compose --project-name "tp2-middleware" stop -t 1
-	docker-compose --project-name "tp2-middleware" down -v
+	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
 .PHONY: docker-compose-down-2
 
 docker-compose-ps-2:
