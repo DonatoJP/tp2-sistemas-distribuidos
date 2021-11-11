@@ -4,7 +4,7 @@ import pika
 class AbstractQueueHandler:
     def _build_work_queue_pattern(self, queue_name):
         self.queue_name = queue_name
-        self.queue = self.channel.queue_declare(queue=queue_name)
+        self.queue = self.channel.queue_declare(queue=queue_name, arguments={"x-max-priority": 2})
     
     def _build_direct_pattern(self, exchange_name):
         self.channel.exchange_declare(exchange=exchange_name, exchange_type='direct')

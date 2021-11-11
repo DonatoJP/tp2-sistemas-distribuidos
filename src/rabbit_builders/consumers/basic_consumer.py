@@ -10,7 +10,7 @@ class QueueConsumer(AbstractQueueHandler):
     def _build_direct_pattern(self, exchange_name, callback, routing_key):
         super()._build_direct_pattern(exchange_name)
 
-        result = self.channel.queue_declare(queue='')
+        result = self.channel.queue_declare(queue='', arguments={"x-max-priority": 2})
         self.queue_name = result.method.queue
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
         self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback)
@@ -18,7 +18,7 @@ class QueueConsumer(AbstractQueueHandler):
     def _build_topic_pattern(self, exchange_name, callback, routing_key):
         super()._build_topic_pattern(exchange_name)
 
-        result = self.channel.queue_declare(queue='')
+        result = self.channel.queue_declare(queue='', arguments={"x-max-priority": 2})
         self.queue_name = result.method.queue
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
         self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback)

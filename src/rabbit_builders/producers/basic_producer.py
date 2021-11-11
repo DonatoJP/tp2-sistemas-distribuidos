@@ -22,16 +22,16 @@ class QueueProducer(AbstractQueueHandler):
         for rk in range(0, self.centinels_to_send):
             if self.pattern == 'work_queue':
                 print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {self.queue_name}")
-                self.send(centinel)
+                self.send(centinel, priority=0)
             else:
                 print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {str(rk)}")
-                self.send(centinel, str(rk))
+                self.send(centinel, str(rk), priority=0)
     
     def _send_centinel_by_routing_keys(self, centinel, routing_keys):
         for _ in range(0, self.centinels_to_send):
             for rk in routing_keys:
                 print(f"[CENTINEL] Sending {centinel} to exchange {self.exchange_name} and routing key {str(rk)}")
-                self.send(centinel, str(rk))
+                self.send(centinel, str(rk), priority=0)
 
     def send_end_centinels(self, centinel, routing_keys=[]):
         if len(routing_keys) > 0:
@@ -39,15 +39,17 @@ class QueueProducer(AbstractQueueHandler):
         else:
             self._send_centinel_by_pattern(centinel)
     
-    def send(self, message, routing_key=''):
+    def send(self, message, routing_key='', priority=2):
         if routing_key == '':
             self.channel.basic_publish(exchange=self.exchange_name,
                 routing_key=self.queue_name,
-                body=message)
+                body=message,
+                properties=pika.BasicProperties(priority=priority))
         else:
             self.channel.basic_publish(exchange=self.exchange_name,
                 routing_key=str(routing_key),
-                body=message)
+                body=message,
+                properties=pika.BasicProperties(priority=priority))
 
     
     def close(self):

@@ -12,7 +12,7 @@ def main():
     credentials = pika.PlainCredentials('guest', 'guest')
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
     channel = connection.channel()
-    channel.queue_declare(queue=queue_name)
+    channel.queue_declare(queue=queue_name, arguments={"x-max-priority": 2})
 
 
     lines_to_write = []
@@ -35,7 +35,8 @@ def main():
                 message = '\n'.join(lines_to_write)
                 channel.basic_publish(exchange='',
                     routing_key=queue_name,
-                    body=message)
+                    body=message,
+                    properties=pika.BasicProperties(priority=2))
 
                 lines_to_write = []
     
