@@ -12,7 +12,58 @@ El presente informe tiene como objetivo presentar las caracteristicas mas releva
 
 El trabajo consiste en el desarrollo de un sistema de arquitectura *Pipe & Filters*, donde se deben procesar un set de datos de preguntas y respuestas de *Stack Overflow* utilizando filtros que ejecutan determinadas operaciones en los datos, comunicandolos mediante colas de **RabbitMQ**.
 
-A continuacion se presentan diagramas de robustez y DAGs que servirán de entendimiento del tipo de arquitectura que se adoptó en este trabajo.
+A continuacion se presentará el trabajo en las siguientes vistas:
+
+- Contexto
+- Componentes
+- Fisico
+- Desarrollo
+
+## Contexto
+
+Como se detalló en la introducción, el trabajo consistió en desarrollar una arquitectura *Pipe & Filters* para resolver un problema donde, teniendo un set de datos muy grande como entrada, procesar datos para obtener un resultado final sobre algúna problematica. En esta oportunidad, teniamos que resolver tres problemas:
+
+1. Porcentaje de respuestas con score mayor a 10 que posea un sentiment analysis negativo
+2. Top 10 de usuarios según score total (preguntas + respuestas), que tengan un puntaje promedio de preguntas mayor a la media general y un puntaje promedio de respuestas mayor a la media general
+3. Top 10 de tags con mayor score (incluye preguntas y respuestas) de cada año
+
+Cada uno de estos puntos, si bien toman como input datos del mismo set de datos, son de dificultad variada, lo que impone un desafio aún mayor a la hora de resolver este trabajo.
+
+Para encarar la solución, se realizó un DAG por cada uno de los puntos para detectar tareas a realizar y oportunidades de realizar algunas de ellas en paralelo. Comenzando con el punto 1:
+
+![](imagenes/dag-ej1.png)
+
+Este primer punto es el que menor dificultad presenta, por lo que el DAG que se presenta es bastante "lineal". En él vemos:
+
+- Necesitamos una tarea inicial para "inyectar" los datos de las respuestas de Stack Overflow
+- Se debe realizar cuanto antes en el flujo de datos una tarea de "remover columnas innecesarias" para el proceso, para lograr disminuir la cantidad de datos que se manipulan entre etapas y no perjudicar a la memoria de cada sistema.
+- Una vez consideradas las primeras tareas de preparación, se procede a resolver la problematica que plantea este ejercicio. Para eso, debemos filtrar cada respuesta donde `Score > 0`
+- Posteriormente, a aquellas que pasen este filtro, se calculará el Sentiment Analysis (SA) del contenido de la respuesta para distinguir aquellas que tengan SA positivo (1) de aquellas que tengan SA negativo (0).
+- Por último, se debe contabilizar el porcentaje de aquellas que cumplan con el primer filtro y que tengan SA negativo, sobre el total. En esta etapa es importantisimo esperar a la confirmación de la etapa anterior de que se hayan procesado **todos** los datos antes de devolver un resultado final.
+
+Ahora consideremos el punto 3, para aumentar apenas un poco la dificultad:
+
+![](imagenes/dag-ej3.png)
+
+- Volvemos a necesitar las primeras dos etapas por los mismos motivos que el punto anterior, pero ahora considerando ambos tipos de datos y cambiando las columnas necesarias en este proceso.
+- Debemos tener una etapa que pueda unir o "joinear" datos de preguntas y respuestas a medida que los va consumiendo, de forma tal de extraer año, tags y puntaje para cada pregunta o respuesta del set de datos, teniendo en cuenta que los "tags" son parte de la tabla de preguntas. Si esta etapa descubre una respuesta a la cuál no posea la pregunta correspondiente para extraer esta data, deberá mantenerla en memoria hasta tanto reciba dicho dato faltante para no perder información valiosa.
+- Finalmente, necesitamos de una etapa final que se encargue de armar el resultado final a medida que reciba año, tags y puntajes de la etapa anterior. Deberá devolver un resultado final sólo cuando se hayan procesado absolutamente todos los datos del dataset.
+
+Por último, revisemos las tareas pertinentes al punto de mayor dificultad de los tres planteados, el punto 2:
+
+![](imagenes/dag-ej2.png)
+
+- Al igual que los dos puntos anteriores, necesitamos inyectar datos y descartar informacion que no vayamos a utilizar.
+- Por cada pregunta y por cada respuesta, se debe:
+  - Calcular el promedio de Score *de un usuario* de todas sus preguntas/respuestas.
+  - Calcular el promedio de Score *global* de todas las preguntas/respuestas.
+- Una vez determinados estos valores, se deben filtrar aquellos usuarios que cumplan ambas siguientes condiciones: estar por arriba del promedio de Score de preguntas y de respuestas
+- Por último, necesitamos una etapa que vaya armando el Top 10 de usuarios con más score, que cumplan con la condicion detallada en el item anterior.
+
+
+Como conclusión de esta vista, podemos ver que el problema puede ser resuelto totalmente bajo un diseño "pipe & filters", haciendo atravezar los datos por distintos filtros que aplicarán determinadas acciones sobre ellos de analisis y alteración para finalmente obtener los resultados solicitados. También podemos ver de los DAGs que varias de estas etapas podrían paralelizarse, e incluso tener uno o más componentes efectuando *la misma tarea* sobre un dato, teniendo cuidado con ciertos aspectos como la afinidad de los datos, que fue un desafio lograr y que será detallado en las vistas siguientes.
+
+----------------
 
 ## Primer Punto
 
@@ -24,7 +75,6 @@ Porcentaje de respuestas con score mayor a 10 que posea un sentiment analysis ne
 
 Para implementar este punto, realicé el siguiente DAG para poder visualizar mejor las tareas necesarias a realizar:
 
-![](imagenes/dag-ej1.png)
 
 Podemos ver el flujo de datos desde la entrada a la salida, con el formato que debe tener entre etapas. Ademas, según el color de cada etapa:
 
@@ -47,7 +97,6 @@ Top 10 de usuarios según score total (preguntas + respuestas), que tengan un pu
 
 Para este caso (el más complejo de los tres), el DAG es el siguiente:
 
-![](imagenes/dag-ej2.png)
 
 Como vemos, ahora tenemos dos inputs de datos distintos, y los flujos se vuelven un poco mas "bifurcados". Para eso, formulé el siguiente esquema:
 
@@ -70,7 +119,6 @@ Top 10 de tags con mayor score (incluye preguntas y respuestas) de cada año
 
 Para esto, se formula el siguiente DAG, teniendo en cuenta las consideraciones de los puntos anteriores:
 
-![](imagenes/dag-ej3.png)
 
 Este punto de dificultad intermedia entre los dos primeros puntos comparte el esquema de multiples inputs de datos. Para implementar esto, me guíe del siguiente diagrama de robustez:
 
