@@ -68,20 +68,46 @@ Como conclusión de esta vista, podemos ver que el problema puede ser resuelto t
 
 Teniendo en cuenta lo detallado en la sección anterior, en esta sección mencionaré como se encaró el desarrollo del trabajo a nivel fisico, mostrando como se despliega la arquitectura y como es el empleo de RabbitMQ para la solución.
 
+Antes de comenzar a describir la arquitectura de cada punto, quiero mencionar la forma en como RabbitMQ ha sido utilizado como middleware de comunicación entre componentes, explicando los 3 patrones distintos que apareceran en la implementacion:
+
+- **Work queue**: es el caso mas sencillo, donde una cola *nombrada* es empleada por 1 o N procesos para extraer mensajes a procesar, de forma de distribuir la carga y realizar la misma tarea sobre los datos entrantes.
+- **Direct**: mediante una clave de enrutamiento (*routing key*) se utiliza este patrón para distribuir la carga pero de una forma mas inteligente, permitiendo dirigir ciertos mensajes que cumplan con una determinada condición siempre al mismo componente, aunque éste se encuentre escalado horizontalmente.
+- **Topic**: Similar al caso anterior, pero mediante el uso de topicos que los exchanges de RabbitMQ pueden utilizar, permitiendo distribuir la carga y además lograr una suerte de patrón *publisher-subscriber* en los casos en donde necesitamos que más de un componente distinto escuche el mismo dato para operar.
+
 Teniendo en mente los DAGs de la sección anterior, si pensamos que cada tarea puede ser realizada por un proceso que se dedique exclusivamente a eso, resulta facil entonces realizar diagramas de robustez para cada uno de los puntos:
 
+### Punto 1
 ![](imagenes/robustez-ej1.png)
 
-Para el primer punto, es facil ver que cada una de las tareas puede ser realizada por un proceso distinto, intercomunicandolos con colas básicas de RabbitMQ, e incluso pudiendo escalar horizontalmente cada componente del flujo. El uso de colas de RabbitMQ nos facilita esta tarea dado que cada componente que se escale horizontal puede extraer mensajes de la misma cola, distribuyendo el trabajo. El único componente que no se escalará será el último dado que es necesario que recolecte toda la información para dar el resultado final.
+Para el primer punto, es facil ver que cada una de las tareas puede ser realizada por un proceso distinto, intercomunicandolos con colas básicas de RabbitMQ, e incluso pudiendo escalar horizontalmente cada componente del flujo. El uso de colas de tipo *work queue* de RabbitMQ nos facilita esta tarea dado que cada componente que se escale horizontal puede extraer mensajes de la misma cola, distribuyendo el trabajo. El único componente que no se escalará será el último dado que es necesario que recolecte toda la información para dar el resultado final.
 
-![](imagenes/robustez-ej2.png)
-
-
-
-
+### Punto 3
 ![](imagenes/robustez-ej3.png)
 
+En el caso del punto 3, se introduce una nueva dificultad: si queremos escalar horizontalmente el componente *joiner* es necesario que a cada uno **siempre** les llegue la data vinculada a las mismas preguntas/respuestas. Esto es lo que denomino **afinidad de los datos**: la pregunta con identificador par deberá ir a un componente joiner, y los que tengan identificadores impares deberán ir a otro, asi mismo con las respuestas correspondientes, para poder hacer la junta.
 
+Para lograrlo, decidí utilizar el patrón *direct* de RabbitMQ, aplicando una función de hash sencilla (como tomar módulo de un determinado dato por la cantidad de procesos que realizan determinada tarea), agregando dicho resultado como una routing key del mensaje y configurando al componente que tiene que escuchar dicho dato para que capture siempre los mensajes que tengan dicha clave. De esta forma puedo distribuir la carga y lograr afinidad de los datos. La misma idea aplica al componente "Group By Worker" que agrupa por año y tag.
+
+### Punto 2
+![](imagenes/robustez-ej2.png)
+
+Finalmente, la solución de este ejercicio aplica todos los conceptos vistos hasta ahora para lograr afinidad y distribución de carga, sumando al patrón *topic* para el caso donde necesitamos que el componente *User Question AVG* y *General Question AVG* escuchen la salida del componente que elimina columnas (misma idea aplica para las respuestas). De esta forma, ademas de lograr afinidad de datos, permito que dos componentes que hacen tareas distintas escuchen el mismo dato saliente de la etapa anterior.
+
+### Solución global
+
+Una vez analizada la idea general de cada punto por separado, ahora hay que juntar todos en uno como pide el trabajo. Para hacerlo, podemos mantener gran parte de la arquitectura correspondiente a cada uno de los items, pero cambiando las primeras etapas del flujo:
+
+![](imagenes/robustez-global.png)
+
+Como se vé, se mantiene la esencia de cada uno de los problemas por separado, pero ahora el problema se encuentra en como introducir las preguntas y las respuestas en cada uno de los "pipes". La solución fue utilizar nuevamente el patrón *topic* entre el primer componente de cada ejercicio y la salida de los componentes que eliminan columnas. De esta forma, a estos componentes "Drop Columns" se les puede configurar, para cada topico, que columnas mantener y que columnas eliminar, y éstos se ocuparán de distribuir la data a cada *pipe* según como hayan sido configurados. Tambien tienen en cuenta si los componentes que siguen estuvieran escalados horizontalmente, para lograr afinidad de datos.
+
+### Despliegue
+
+Una vez visto la arquitectura y los diagramas de robustez globales, es importante ahora mencionar de que forma será el despliegue de la misma. En esta oportunidad, y dado que el trabajo está orientado al concepto de *multi-computing*, se decidió separar cada componente en un **contenedor de Docker**, que ejecuta únicamente el proceso que esta destinado a realizar dicha tarea. No se ejecutan multiples procesos dentro de un mismo contenedor, ni un mismo contenedor ejecuta dos tareas distintas. Simplemente, cada contenedor es un único componente.
+
+Entonces, por ejemplo, para la parte del comienzo del flujo de eliminacion de columnas tenemos:
+
+![](imagenes/diagrama-despliegue.png)
 
 ----------------
 
