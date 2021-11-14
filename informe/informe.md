@@ -109,6 +109,15 @@ Entonces, por ejemplo, para la parte del comienzo del flujo de eliminacion de co
 
 ![](imagenes/diagrama-despliegue.png)
 
+Como vemos, tanto las entradas de input del sistema, como los operadores "Drop Columns" y como los componentes de cada flujo por cada ejercicio estan desplegados en contenedores distintos. Si quisieramos escalar horizontalmente alguno de ellos, simplemente levantamos otro servicio de **docker-compose** con la misma imagen y las mismas configuraciones, teniendo en cuenta algunos parametros que deberán modificarse que se verán mas adelante en las siguientes secciones.
+
+En éste grafico ademas se evidencia la utilización de RabbitMQ como middleware de intercomunicacion, utilizando un exchange para intercambiar mensajes con el patrón topic. También se evidencia como es la estructura de dichos topicos: `<TIPO MENSAJE>.<N° EJERCICIO>.<AK>`, siendo `AK` la clave de afinidad, si es que los componentes que reciben los datos estuvieran replicados y necesitan tener afinidad de datos. No se grafican el resto de los componentes por cada "pipe" de cada ejercicio para no entorpecer el gráfico, pero se sobreentiende que el método de despliegue y comunicación es el mismo que vemos en este ejemplo.
+
+Por último, un detalle importante a destacar es la forma en como los "*input nodes*" y los "*drop columns operators*" envian los datos: en lugar de enviar linea por linea del archivo, agrupan N lineas (numero configurable) y luego envian un batch de ellas en un único mensaje. Esto favorece a los tiempos de resolución del trabajo, incluso mostrando mejoras de hasta un 72%: metiendo una a una las lineas el programa tardaba unos 14 minutos en finalizar con el dataset inicial, y luego de meter la mejora de envio de lineas por batches el programa finaliza en, aproximadamente, 4 minutos.
+
+
+
+
 ----------------
 
 ## Primer Punto
