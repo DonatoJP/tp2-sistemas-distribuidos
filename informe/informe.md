@@ -15,11 +15,11 @@ El trabajo consiste en el desarrollo de un sistema de arquitectura *Pipe & Filte
 A continuacion se presentará el trabajo en las siguientes vistas:
 
 - Contexto
-- Fisico
+- Fisica
 - Componentes
 - Desarrollo
 
-## Contexto
+## Vista de Contexto
 
 Como se detalló en la introducción, el trabajo consistió en desarrollar una arquitectura *Pipe & Filters* para resolver un problema donde, teniendo un set de datos muy grande como entrada, procesar datos para obtener un resultado final sobre algúna problematica. En esta oportunidad, teniamos que resolver tres problemas:
 
@@ -64,7 +64,7 @@ Por último, revisemos las tareas pertinentes al punto de mayor dificultad de lo
 Como conclusión de esta vista, podemos ver que el problema puede ser resuelto totalmente bajo un diseño "pipe & filters", haciendo atravezar los datos por distintos filtros que aplicarán determinadas acciones sobre ellos de analisis y alteración para finalmente obtener los resultados solicitados. También podemos ver de los DAGs que varias de estas etapas podrían paralelizarse, e incluso tener uno o más componentes efectuando *la misma tarea* sobre un dato, teniendo cuidado con ciertos aspectos como la afinidad de los datos, que fue un desafio lograr y que será detallado en las vistas siguientes.
 
 
-## Fisico
+## Vista Fisica
 
 Teniendo en cuenta lo detallado en la sección anterior, en esta sección mencionaré como se encaró el desarrollo del trabajo a nivel fisico, mostrando como se despliega la arquitectura y como es el empleo de RabbitMQ para la solución.
 
@@ -115,89 +115,58 @@ En éste grafico ademas se evidencia la utilización de RabbitMQ como middleware
 
 Por último, un detalle importante a destacar es la forma en como los "*input nodes*" y los "*drop columns operators*" envian los datos: en lugar de enviar linea por linea del archivo, agrupan N lineas (numero configurable) y luego envian un batch de ellas en un único mensaje. Esto favorece a los tiempos de resolución del trabajo, incluso mostrando mejoras de hasta un 72%: metiendo una a una las lineas el programa tardaba unos 14 minutos en finalizar con el dataset inicial, y luego de meter la mejora de envio de lineas por batches el programa finaliza en, aproximadamente, 4 minutos.
 
+## Vista de componentes
 
+La idea de esta sección será mostrar como el sistema se comunica y de que forma opera para resolver la problematica planteada, utilizando diagramas de actividades y secuencia para comprender el flujo de los datos y la toma de decisiones de cada componente.
 
+### Diagramas de actividades
+Comencemos viendo como es el diagrama de actividades de la inserción de datos en el sistema:
 
-----------------
+![](imagenes/actividades-1.png)
 
-## Primer Punto
+Las partes mas interesantes a analizar de este diagrama son:
+- El nodo de inserción de datos es muy básico, simplemente junta batches de N lineas para enviar, y finaliza enviando el *centinela de finalización*.
+- El componente inicial en la arquitectura es el *drop columns operator*. El mismo elimina columnas innecesarias y envia, para cada topico configurado para cada ejercicio, las columnas relevantes.
+- Debe analizar si el mensaje recibido es un centinela o no. Si lo fuera, debe esperar recibir todos los centinelas de todos los procesos de la etapa anterior para confirmar que todos los datos han sido introducidos y no queda nada mas para analizar. Recien en ese momento puede enviar sus propios *centinelas* para avisar a las etapas posteriores que la introducción de datos ha finalizado.
 
-La consigna del primer punto es:
+Siguiendo con la idea de los centinelas, podemos analizar como es la secuencia de acciones que toma un componente al recibir un centinela, según los mismos sean **operators** o **holders** (el detalle de ellos se verá en la sección siguiente):
 
-```text
-Porcentaje de respuestas con score mayor a 10 que posea un sentiment analysis negativo
-```
+![](imagenes/actividades-2.png)
 
-Para implementar este punto, realicé el siguiente DAG para poder visualizar mejor las tareas necesarias a realizar:
+- El centinela en un **operator** es simplemente la confirmación de que la etapa anterior ha finalizado, y ocasionará que el propio operator tambien deba finalizar (no habrá mas datos por los que debe operar).
+- En cambio, el centinela en un **holder** causará que el mismo 
+  - realice la operación que tiene asignado con todos los datos que guardó o proceso hasta el momento enviando el resultado a la etapa posterior, y
+  - envie los centinelas correspondientes a la etapa posterior.
 
+Para finalizar con los diagramas de actividades, tambien podemos analizar como se da la comunicación y operación de cada componente participe de los flujos o "pipes" de los ejercicios 1 y 3:
 
-Podemos ver el flujo de datos desde la entrada a la salida, con el formato que debe tener entre etapas. Ademas, según el color de cada etapa:
+![](imagenes/actividades-3.png)
 
-- Verde: la etapa puede recibir un dato, procesarlo, y otorgar una salida, sin esperar que la etapa previa finalice (lo llamaremos *operator*)
-- Rojo: la etapa recibe datos, los procesa, pero no otorga una salida hasta que la o las etapas previas finalicen en su totalidad (los llamaremos *holders*).
+En este gráfico vemos como opera cada componente del primer ejercicio mientras reciban datos de respuestas para procesar, distinguiendo los distintos caminos que toman al decidir que operación realizar sobre ellos, y a través de cuales colas toman mensajes de la etapa previa, y depositan mensajes para la etapa posterior. Algo análogo podemos ver en el siguiente gráfico correspondiente al punto 3.
 
-Teniendo en cuenta este DAG, se realiza un diagrama de robustez que muestra los distintos componentes a ser empleados para la resolución de este punto.
+![](imagenes/actividades-4.png)
 
-![](imagenes/robustez-ej1.png)
+### Diagrama de secuencia - Introducción de datos
 
-Como vemos, todos los componentes *operators* son **escalables**, y el último componente será el único que se mantendrá como único en su tipo. La comunicacion etapa a etapa se dará por colas de RabbitMQ *comunes*, a las que llamaremos *patron work_queue*.
+Veamos entonces como es la secuencia de mensajes que se intercambian a la hora de inyectar datos en nuestro sistema:
 
-## Segundo Punto
+![](imagenes/diagrama-secuencia.png)
 
-Para el segundo punto, la consigna fue:
+- Los componentes rojos (nodos input) reciben la señal inicial para insertar datos. Parsean los archivos de entrada, arman batches de N lineas en formato JSON con las columnas y los valores y los envian al sistema. Al finalizar con todo el contenido de los archivos, envian los centinelas.
+- Los componentes azules (drop column operators) toman la entrada, eliminan las columnas para cada uno de los ejericios (configurados mediante topicos) y los envian a los componentes de entrada a cada pipe de cada ejercicio utilizando el patrón topic de RabbitMQ. Notar como "DropColumns Answers" es capaz de enviar respuestas al "Filter" inicial del ejercicio 1, como al "Joiner" inicial del ejercicio 3.
+- Los Filtros y Joiners toman esta data, opera, y continuan enviando los resultados a los componentes que siguen.
 
-```text
-Top 10 de usuarios según score total (preguntas + respuestas), que tengan un puntaje promedio de preguntas mayor a la media general y un puntaje promedio de respuestas mayor a la media general
-```
+## Vista de desarrollo
+Por último, en esta vista detallaré como es el sistema mas a nivel código y configuración.
 
-Para este caso (el más complejo de los tres), el DAG es el siguiente:
+### Tipos de componentes
+Como mencioné en la sección anterior, existen dos tipos de componentes:
 
-
-Como vemos, ahora tenemos dos inputs de datos distintos, y los flujos se vuelven un poco mas "bifurcados". Para eso, formulé el siguiente esquema:
-
-![](imagenes/robustez-ej2.png)
-
-En este nuevo diagrama, los puntos mas relevantes son:
-
-- La aparicion de nuevos esquemas o **patrones** de colas de RabbitMQ que serviran para, ademas de intercomunicar filtros, darle afinidad a los datos, de forma de distribuirlos en multiples nodos de una misma etapa a partir de una clave de hashing básica (como tomar el módulo de un dato númerico). Entre estos pátrones, estan:
-  - **Direct**: nos servirá para darle afinidad a los datos y de esta forma distribuirlos en multiples nodos de una misma etapa por una clave de hashing básica de uno de los datos (como tomar el módulo de un dato númerico).
-  - **Topic**: nos servirá para darle afinidad a los datos para llegar a los componentes denominados *User Question AVG* pero además permitirá al componente *General AVG* recibir la totalidad de los mensajes de esa cola para calcular el promedio global.
-- La aparición de un nuevo componente (*partial operator*) en amarillo, el cuál recibe datos para procesarlos, generando una salida únicamente si ha recibido los datos necesarios para hacerlo.
-
-## Punto tres
-
-En éste último punto, la consigna fue:
-
-```text
-Top 10 de tags con mayor score (incluye preguntas y respuestas) de cada año
-```
-
-Para esto, se formula el siguiente DAG, teniendo en cuenta las consideraciones de los puntos anteriores:
-
-
-Este punto de dificultad intermedia entre los dos primeros puntos comparte el esquema de multiples inputs de datos. Para implementar esto, me guíe del siguiente diagrama de robustez:
-
-![](imagenes/robustez-ej3.png)
-
-En este caso tambien utilizacé el patrón **direct** para poder lograr afinidad de los datos al escalar los distintos componentes del flujo.
-
-## Estructura global
-
-La división punto por punto me fue útil para diferenciar el trabajo y el alcance de cada etapa. Pero la consigna implica que el sistema pueda hacer estos tres flujos, *de forma simultanea*. Si juntamos los tres esquemas, logramos algo como esto:
-
-![](imagenes/robustez-global.png)
-
-La principal diferencia al unir los tres esquemas está en el componente que **elimina columnas dado el flujo que deban seguir los datos**. En este caso, dicho componente toma un input de los datos, y según la etapa, encola en la cola correspondiente las columnas que cada flujo necesita en su operatoria, utilizando el patrón **topic**. De esta forma, estos componentes pueden:
-
-\begin{itemize}
-    \item Procesar no una linea a la vez, sino un *chunk* de cada archivo de data inicial, y ofrecer como salida un *chunks* de datos
-
-    \item Publicar mediante un exchange **topic** los datos en cada flujo, con las columnas que deban tomarse
-
-    \item Lograr afinidad en los datos en aquellos *front components* de cada flujo que estuvieran replicados
-\end{itemize}
-
-## Esquema del sistema
+- **Operators**: Estos componentes toman datos de la cola de entrada (sea cuál sea el patrón de RabbitMQ utilizado), operan sobre ellos, y dejan en la salida el resultado de esa operación. No deben esperar a que la etapa anterior finalice, sino que pueden ofrecer un resultado de una operacion a un dato al instante de que son recibidos.
+  - Algunos ejemplos de este tipo de componentes son los filtros, calculadores de Sentiment Analysis, intersectores de datos y "joiners".
+- **Holders**: Estos componentes toman datos de la cola de entrada, realizan alguna acción sobre ellos, pero **no ofrecen un resultado** de la operación realizada hasta tanto la etapa anterior no le confirme que no hay mas datos para procesar. Dicho de otra forma, que ha procesado todos los datos del dataset y que debe finalizar. Recien en este momento otorga un resultado a la etapa posterior.
+  - En esta clasificacion se encuentran los nodos que calculan porcentajes o promedios de datos sobre el total de los datos, o arman clasificaciones del tipo "Top N" bajo algun criterio (por ejemplo, Top N Users segun score).
+### Configuración del sistema
 
 El desarrollo del trabajo está **muy orientado a la configuración de cada componente**. Esto quiere decir que cada componente recibe una cantidad (considerable) de parámetros que definirán su comportamiento, cargando todos en dos tipos de bloques: *operator* y *holder*, segun su comportamiento. Esto nos permite:
 
@@ -207,7 +176,7 @@ El desarrollo del trabajo está **muy orientado a la configuración de cada comp
     \item Cambiando solamente las configuraciones adecuadas, poder adaptar y escalar nuestro sistema
 \end{itemize}
 
-### Listado de configuraciones y variables de ambiente
+#### <u> Listado de configuraciones y variables de ambiente </u>
 \begin{itemize}
 
     \item OPERATOR\_MODULE: Define el tipo de operador del bloque al que se asigna (ej: Operador que calcula el Sentiment Analysis del primer punto)
@@ -277,7 +246,21 @@ De esta forma, estamos diciendole al nuevo bloque que:
 
 Notar en el campo `command` el comando `\wait-for` para esperar por la inicializacion de RabbitMQ para ejecutar nuestro bloque, y el llamado a `basic_operator.py` indicando que nuestro componente es un *operator*.
 
+### Diagrama de clases y paquetes
+
+Para entender cómo esta estructurado el sistema y porqué es necesaria la configuración que vimos en la sección anterior, presentamos un diagrama de clases y paquetes del trabajo:
+
+![](imagenes/c4-4.1.png)
+![](imagenes/c4-4.2.png)
+
+Para no entorpecer los gráficos no se muestran todos los componentes de los operators y holders que hay en el trabajo, pero los conceptos que se ven en ambos graficos se pueden extender a todos los componentes del sistema.
+
+Como vemos, existen clases bases o abstractas denominadas *AbstractOperator* y *AbstractHolder* que tienen las operaciones básicas y comunes entre cada Operador o Holder del sistema. Luego, al momento de definir un nuevo componente de cada tipo, cada nuevo componente puede tener sus propios métodos para realizar la operación a la cuál fue asignado, pero todos deben implementar la funcion `exec_operation` que define la versión abstracta del tipo al que corresponden, porque es el único punto de entrada que tiene cada componente desde el *wrapper* que cada proceso que se levanta en nuestro sistema ejecuta al inicial. Dicho método opera y devuelve un resultado para la siguiente etapa.
+
+Los componentes tipo *holders* tienen un método `end` a implementar que se ejecuta cuando hemos recibido todos los centinelas de la etapa anterior y que dispara el cálculo del resultado final a enviar a la etapa posterior.
 # Diagrama C4
+
+Para finalizar con el informa, y dar un analisis desde otro punto de vista, se complementa todo lo visto en las secciones anteriores con unos gráficos del tipo C4.
 ## Level 1
 ![](imagenes/c4-1.png)
 
