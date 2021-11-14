@@ -15,8 +15,8 @@ El trabajo consiste en el desarrollo de un sistema de arquitectura *Pipe & Filte
 A continuacion se presentará el trabajo en las siguientes vistas:
 
 - Contexto
-- Componentes
 - Fisico
+- Componentes
 - Desarrollo
 
 ## Contexto
@@ -62,6 +62,26 @@ Por último, revisemos las tareas pertinentes al punto de mayor dificultad de lo
 
 
 Como conclusión de esta vista, podemos ver que el problema puede ser resuelto totalmente bajo un diseño "pipe & filters", haciendo atravezar los datos por distintos filtros que aplicarán determinadas acciones sobre ellos de analisis y alteración para finalmente obtener los resultados solicitados. También podemos ver de los DAGs que varias de estas etapas podrían paralelizarse, e incluso tener uno o más componentes efectuando *la misma tarea* sobre un dato, teniendo cuidado con ciertos aspectos como la afinidad de los datos, que fue un desafio lograr y que será detallado en las vistas siguientes.
+
+
+## Fisico
+
+Teniendo en cuenta lo detallado en la sección anterior, en esta sección mencionaré como se encaró el desarrollo del trabajo a nivel fisico, mostrando como se despliega la arquitectura y como es el empleo de RabbitMQ para la solución.
+
+Teniendo en mente los DAGs de la sección anterior, si pensamos que cada tarea puede ser realizada por un proceso que se dedique exclusivamente a eso, resulta facil entonces realizar diagramas de robustez para cada uno de los puntos:
+
+![](imagenes/robustez-ej1.png)
+
+Para el primer punto, es facil ver que cada una de las tareas puede ser realizada por un proceso distinto, intercomunicandolos con colas básicas de RabbitMQ, e incluso pudiendo escalar horizontalmente cada componente del flujo. El uso de colas de RabbitMQ nos facilita esta tarea dado que cada componente que se escale horizontal puede extraer mensajes de la misma cola, distribuyendo el trabajo. El único componente que no se escalará será el último dado que es necesario que recolecte toda la información para dar el resultado final.
+
+![](imagenes/robustez-ej2.png)
+
+
+
+
+![](imagenes/robustez-ej3.png)
+
+
 
 ----------------
 

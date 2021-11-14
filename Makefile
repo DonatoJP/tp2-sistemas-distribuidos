@@ -25,7 +25,7 @@ inject-data:
 
 system-down:
 	docker-compose --project-name "tp2-middleware" stop -t 1
-	docker-compose --project-name "tp2-middleware" down -v
+	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
 .PHONY: system-down
 
 system-ps:
