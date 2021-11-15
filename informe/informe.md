@@ -292,6 +292,7 @@ Para la segunda entrega del trabajo, las modificaciones realizadas en base a las
 - Se modificaron gráficos previamente existentes
 - En `Top N Users` se evita el guardado de la totalidad de los datos para ordenar al final, trayendo posibles problemas de memoria y eficiencia. En lugar de esto, a medida que los datos llegan, se arma una lista con ellos la cuál se ordena en cada mensaje recibido, dejando solamente los primeros N elementos de ella.
 - Se corrige la generalizacion del operador de `filter`, que solo permitía la operacion "`>`".
+- Se construye una imagen base `building-block:basic` y una imagen `building-block:full` que agrega la libreria `ntkl`, haciendo que se ejecute solamente en los componentes que requieren de la libreria de calculo de "Sentiment Analysis", haciendo mas chica las otras imagenes.
 
 ### Pendientes
 Por último en el informe, me gustaría aclarar algunas acciones "minor" que quedaron pendientes a realizar y que no pudieron hacerse por falta de tiempo:
