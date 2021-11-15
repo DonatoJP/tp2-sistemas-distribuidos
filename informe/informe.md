@@ -125,6 +125,7 @@ Comencemos viendo como es el diagrama de actividades de la inserción de datos e
 ![](imagenes/actividades-1.png)
 
 Las partes mas interesantes a analizar de este diagrama son:
+
 - El nodo de inserción de datos es muy básico, simplemente junta batches de N lineas para enviar, y finaliza enviando el *centinela de finalización*.
 - El componente inicial en la arquitectura es el *drop columns operator*. El mismo elimina columnas innecesarias y envia, para cada topico configurado para cada ejercicio, las columnas relevantes.
 - Debe analizar si el mensaje recibido es un centinela o no. Si lo fuera, debe esperar recibir todos los centinelas de todos los procesos de la etapa anterior para confirmar que todos los datos han sido introducidos y no queda nada mas para analizar. Recien en ese momento puede enviar sus propios *centinelas* para avisar a las etapas posteriores que la introducción de datos ha finalizado.
@@ -258,7 +259,7 @@ Para no entorpecer los gráficos no se muestran todos los componentes de los ope
 Como vemos, existen clases bases o abstractas denominadas *AbstractOperator* y *AbstractHolder* que tienen las operaciones básicas y comunes entre cada Operador o Holder del sistema. Luego, al momento de definir un nuevo componente de cada tipo, cada nuevo componente puede tener sus propios métodos para realizar la operación a la cuál fue asignado, pero todos deben implementar la funcion `exec_operation` que define la versión abstracta del tipo al que corresponden, porque es el único punto de entrada que tiene cada componente desde el *wrapper* que cada proceso que se levanta en nuestro sistema ejecuta al inicial. Dicho método opera y devuelve un resultado para la siguiente etapa.
 
 Los componentes tipo *holders* tienen un método `end` a implementar que se ejecuta cuando hemos recibido todos los centinelas de la etapa anterior y que dispara el cálculo del resultado final a enviar a la etapa posterior.
-# Diagrama C4
+## Diagrama C4
 
 Para dar otro tipo de documentación y un analisis desde otro punto de vista, se complementa todo lo visto en las secciones anteriores con unos gráficos del tipo C4.
 ## Level 1
@@ -267,7 +268,7 @@ Para dar otro tipo de documentación y un analisis desde otro punto de vista, se
 \newpage
 
 ## Level 2
-![](imagenes/c4-2.png)
+![](imagenes/c4-2.1.png)
 
 ## Level 3
 ![](imagenes/c4-3.1.png)
@@ -281,3 +282,19 @@ Para dar otro tipo de documentación y un analisis desde otro punto de vista, se
 ## Level 4
 ![](imagenes/c4-4.1.png)
 ![](imagenes/c4-4.2.png)
+
+
+## Correcciones
+
+Para la segunda entrega del trabajo, las modificaciones realizadas en base a las correcciones obtenidas fueron:
+
+- Se agregaron varios gráficos más, incluyendo diagramas de despliegue, actividades y secuencias que faltaban en la version anterior
+- Se modificaron gráficos previamente existentes
+- En `Top N Users` se evita el guardado de la totalidad de los datos para ordenar al final, trayendo posibles problemas de memoria y eficiencia. En lugar de esto, a medida que los datos llegan, se arma una lista con ellos la cuál se ordena en cada mensaje recibido, dejando solamente los primeros N elementos de ella.
+- Se corrige la generalizacion del operador de `filter`, que solo permitía la operacion "`>`".
+
+### Pendientes
+Por último en el informe, me gustaría aclarar algunas acciones "minor" que quedaron pendientes a realizar y que no pudieron hacerse por falta de tiempo:
+
+- Abstraer a los "patrones" de RabbitMQ implementados como "clases" separadas para evitar el uso de "ifs" y facilitar la configuración del sistema
+- Generación de un script que permita armar la configuración del sistema de forma "dinamica", evitando errores de configuración de parte de la persona que lo administra
