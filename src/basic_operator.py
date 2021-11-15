@@ -38,6 +38,8 @@ def main():
             returnables = operator_to_use.exec_operation(decoded)
             for returnable in returnables:
                 print(f"{block_id} - {returnable}")
+
+                # returnable = (message_to_be_sent, routing_key)
                 queue_producer.send(returnable[0], returnable[1])
         
         ch.basic_ack(method.delivery_tag)
