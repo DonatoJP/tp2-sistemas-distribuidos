@@ -260,7 +260,7 @@ Como vemos, existen clases bases o abstractas denominadas *AbstractOperator* y *
 Los componentes tipo *holders* tienen un método `end` a implementar que se ejecuta cuando hemos recibido todos los centinelas de la etapa anterior y que dispara el cálculo del resultado final a enviar a la etapa posterior.
 # Diagrama C4
 
-Para finalizar con el informa, y dar un analisis desde otro punto de vista, se complementa todo lo visto en las secciones anteriores con unos gráficos del tipo C4.
+Para dar otro tipo de documentación y un analisis desde otro punto de vista, se complementa todo lo visto en las secciones anteriores con unos gráficos del tipo C4.
 ## Level 1
 ![](imagenes/c4-1.png)
 

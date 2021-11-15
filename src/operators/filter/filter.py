@@ -17,7 +17,7 @@ class FilterOperator(AbstractOperator):
         op = self.op
         to_filter = float(data[self.column])
 
-        if operator.gt(to_filter, self.to_compare):
+        if op(to_filter, self.to_compare):
             return True
         
         return False
