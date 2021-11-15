@@ -210,7 +210,7 @@ De esta forma, por ejemplo en el punto 3 podemos agregar un nuevo **joiner** en 
 ```yaml
 ej3-joiner-1:
     container_name: ej3-joiner-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.joiner

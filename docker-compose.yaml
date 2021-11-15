@@ -13,7 +13,7 @@ services:
   
   drop-input-column-answers-1:
     container_name: drop-input-column-answers-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -31,7 +31,7 @@ services:
 
   drop-input-column-answers-2:
     container_name: drop-input-column-answers-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -49,7 +49,7 @@ services:
 
   drop-input-column-answers-3:
     container_name: drop-input-column-answers-3
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -67,7 +67,7 @@ services:
 
   drop-input-column-questions-1:
     container_name: drop-input-column-questions-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -85,7 +85,7 @@ services:
 
   drop-input-column-questions-2:
     container_name: drop-input-column-questions-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -103,7 +103,7 @@ services:
   
   ej1-filter-1:
     container_name: ej1-filter-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -121,7 +121,7 @@ services:
   
   ej1-filter-2:
     container_name: ej1-filter-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -139,7 +139,7 @@ services:
   
   ej1-sentiment-analyser-1:
     container_name: ej1-sentiment-analyser-1
-    image: building-block:latest
+    image: building-block:full
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -157,7 +157,7 @@ services:
 
   ej1-sentiment-analyser-2:
     container_name: ej1-sentiment-analyser-2
-    image: building-block:latest
+    image: building-block:full
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -175,7 +175,7 @@ services:
 
   ej1-avg-holder-1:
     container_name: ej1-avg-holder-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -193,7 +193,7 @@ services:
 
   ej2-user-avg-questions-1:
     container_name: ej2-user-avg-questions-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -211,7 +211,7 @@ services:
   
   ej2-user-avg-questions-2:
     container_name: ej2-user-avg-questions-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -229,7 +229,7 @@ services:
   
   ej2-general-avg-questions:
     container_name: ej2-general-avg-questions
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -247,7 +247,7 @@ services:
 
   ej2-user-avg-answers-1:
     container_name: ej2-user-avg-answers-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -265,7 +265,7 @@ services:
 
   ej2-user-avg-answers-2:
     container_name: ej2-user-avg-answers-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -283,7 +283,7 @@ services:
   
   ej2-general-avg-answers:
     container_name: ej2-general-avg-answers
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -301,7 +301,7 @@ services:
   
   ej2-user-questions-filter-1:
     container_name: ej2-user-questions-filter-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -319,7 +319,7 @@ services:
 
   ej2-user-questions-filter-2:
     container_name: ej2-user-questions-filter-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -337,7 +337,7 @@ services:
   
   ej2-user-answers-filter-1:
     container_name: ej2-user-answers-filter-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -355,7 +355,7 @@ services:
 
   ej2-user-answers-filter-2:
     container_name: ej2-user-answers-filter-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -373,7 +373,7 @@ services:
   
   ej2-user-intersector-1:
     container_name: ej2-user-intersector-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -391,7 +391,7 @@ services:
 
   ej2-user-intersector-2:
     container_name: ej2-user-intersector-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -409,7 +409,7 @@ services:
   
   ej2-top-n-users:
     container_name: ej2-top-n-users
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -427,7 +427,7 @@ services:
 
   ej3-joiner-1:
     container_name: ej3-joiner-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -445,7 +445,7 @@ services:
 
   ej3-joiner-2:
     container_name: ej3-joiner-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -463,7 +463,7 @@ services:
 
   ej3-joiner-3:
     container_name: ej3-joiner-3
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -481,7 +481,7 @@ services:
   
   ej3-group-by-holder-1:
     container_name: ej3-group-by-holder-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -499,7 +499,7 @@ services:
 
   ej3-group-by-holder-2:
     container_name: ej3-group-by-holder-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1

@@ -9,6 +9,11 @@
 make
 ```
 
+Existen 3 tipos de imagenes:
+1. `building-block:basic` posee todo lo necesario y básico para ejecutar un operador/holder
+2. `building-block:full` basado en el anterior, posee la libreria `ntkl`
+3. `input_node:latest` imagen para los nodos que ingresan información
+
 - Para levantar el sistema
 
 ```

@@ -13,7 +13,7 @@ services:
 
   drop-input-column-answers-1:
     container_name: drop-input-column-answers-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -31,7 +31,7 @@ services:
 
   drop-input-column-answers-2:
     container_name: drop-input-column-answers-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -49,7 +49,7 @@ services:
 
   drop-input-column-answers-3:
     container_name: drop-input-column-answers-3
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -67,7 +67,7 @@ services:
 
   drop-input-column-questions-1:
     container_name: drop-input-column-questions-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -85,7 +85,7 @@ services:
 
   drop-input-column-questions-2:
     container_name: drop-input-column-questions-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -103,7 +103,7 @@ services:
   
   ej3-joiner-1:
     container_name: ej3-joiner-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -121,7 +121,7 @@ services:
 
   ej3-joiner-2:
     container_name: ej3-joiner-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -139,7 +139,7 @@ services:
 
   ej3-joiner-3:
     container_name: ej3-joiner-3
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
@@ -157,7 +157,7 @@ services:
   
   ej3-group-by-holder-1:
     container_name: ej3-group-by-holder-1
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
@@ -175,7 +175,7 @@ services:
 
   ej3-group-by-holder-2:
     container_name: ej3-group-by-holder-2
-    image: building-block:latest
+    image: building-block:basic
     environment: 
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
