@@ -259,18 +259,23 @@ Para no entorpecer los gráficos no se muestran todos los componentes de los ope
 Como vemos, existen clases bases o abstractas denominadas *AbstractOperator* y *AbstractHolder* que tienen las operaciones básicas y comunes entre cada Operador o Holder del sistema. Luego, al momento de definir un nuevo componente de cada tipo, cada nuevo componente puede tener sus propios métodos para realizar la operación a la cuál fue asignado, pero todos deben implementar la funcion `exec_operation` que define la versión abstracta del tipo al que corresponden, porque es el único punto de entrada que tiene cada componente desde el *wrapper* que cada proceso que se levanta en nuestro sistema ejecuta al inicial. Dicho método opera y devuelve un resultado para la siguiente etapa.
 
 Los componentes tipo *holders* tienen un método `end` a implementar que se ejecuta cuando hemos recibido todos los centinelas de la etapa anterior y que dispara el cálculo del resultado final a enviar a la etapa posterior.
+
 ## Diagrama C4
 
 Para dar otro tipo de documentación y un analisis desde otro punto de vista, se complementa todo lo visto en las secciones anteriores con unos gráficos del tipo C4.
-## Level 1
+
+### Level 1
+
 ![](imagenes/c4-1.png)
 
 \newpage
 
-## Level 2
+### Level 2
+
 ![](imagenes/c4-2.1.png)
 
-## Level 3
+### Level 3
+
 ![](imagenes/c4-3.1.png)
 
 \newpage
@@ -279,7 +284,8 @@ Para dar otro tipo de documentación y un analisis desde otro punto de vista, se
 
 \newpage
 
-## Level 4
+### Level 4
+
 ![](imagenes/c4-4.1.png)
 ![](imagenes/c4-4.2.png)
 
