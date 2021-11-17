@@ -18,7 +18,7 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop_topics
-      - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
+      - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":2}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
       - CENTINELS_TO_RECEIVE=1
@@ -36,7 +36,7 @@ services:
       - BLOCK_ID=1
       - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop_topics
-      - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
+      - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":2}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
       - CENTINELS_TO_RECEIVE=1
