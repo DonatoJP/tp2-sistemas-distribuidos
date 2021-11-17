@@ -5,7 +5,7 @@ services:
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/answers.csv
+      - FILE_TO_PROCESS=data/red_answers.csv
       - CHUNK_SIZE=1000
       - OUTPUT_QUEUE_NAME=input-answers
       - CENTINELS_TO_SEND=3
@@ -20,7 +20,7 @@ services:
     image: input_node:latest
     environment: 
       - PYTHONUNBUFFERED=1
-      - FILE_TO_PROCESS=data/questions.csv
+      - FILE_TO_PROCESS=data/red_questions.csv
       - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-questions
       - CENTINELS_TO_SEND=2

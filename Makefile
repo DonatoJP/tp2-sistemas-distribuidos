@@ -64,7 +64,7 @@ docker-compose-logs-1:
 
 # Ejercicio 3
 docker-compose-up-3:
-	docker-compose -f docker-compose-ej3.yaml --project-name "tp2-middleware" up -d
+	docker-compose -f docker-compose-ej3.2.yaml --project-name "tp2-middleware" up -d
 	sleep 3s
 	docker-compose -f docker-compose-input.yaml --project-name "tp2-middleware" up -d
 .PHONY: docker-compose-up-3
