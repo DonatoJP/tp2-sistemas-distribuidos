@@ -2,6 +2,7 @@ import operator, json
 from ..operator import AbstractOperator
 from ..column_drop import ImportedOperator as ColumnDropOperator
 from io import StringIO
+from functools import reduce
 
 class FilterOperator(AbstractOperator):
     def __init__(self, column, keep_columns=[], to_compare=10, op='<', **kwargs) -> None:
@@ -36,12 +37,11 @@ class FilterOperator(AbstractOperator):
 
     
     def exec_operation(self, data) -> list:
-        print('FILTER', data)
         io_string = StringIO(data)
-        aux = [ self._make_filter_operation(line) for line in io_string ]
-        res = list( filter(None, aux) )
-        
-        return res
+        res_aff_tuples = [ self._make_filter_operation(line) for line in io_string ]
+        no_nones = list( filter(None, res_aff_tuples) )
+
+        return self._group_by_ak(no_nones)
 
 
 

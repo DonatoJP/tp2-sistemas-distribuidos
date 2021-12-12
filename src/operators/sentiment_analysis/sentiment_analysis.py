@@ -16,8 +16,12 @@ class SentimentAnalysisOperator(AbstractOperator):
         return 1
 
     def exec_operation(self, data) -> list:
-        result = {}
-        data_dict = json.loads(data)
-        result["result"] = self._calc_sentiment(data_dict)
-        return [ (json.dumps(result), self.get_affinity(result)) ]
+        def operation(data):
+            result = {}
+            data_dict = json.loads(data)
+            result["result"] = self._calc_sentiment(data_dict)
+            return (json.dumps(result), self.get_affinity(result))
+
+        res = [ operation(x) for x in data ]
+        return self._group_by_ak(res)
     

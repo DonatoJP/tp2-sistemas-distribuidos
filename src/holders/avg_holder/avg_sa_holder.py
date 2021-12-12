@@ -14,8 +14,9 @@ class AvgSAHolder(AbstractHolder):
             self.positive_sa_count += 1
 
     def exec_operation(self, data) -> list:
-        data_dict = json.loads(data)
-        self._count_new_result(data_dict)
+        for d in data:
+            data_dict = json.loads(d)
+            self._count_new_result(data_dict)
     
     def end(self):
         if self.total_count == 0:

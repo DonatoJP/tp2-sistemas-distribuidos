@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from utils.workload import Task
+from functools import reduce
 
 class AbstractOperator:
     def __init__(self, perform_affinity=False, affinity_key='', affinity_divider=1) -> None:
@@ -20,6 +21,18 @@ class AbstractOperator:
     def get_all_routing_keys(self):
         return []
     
+    @staticmethod
+    def _group_by_ak(data):
+        def reduce_by_ak(acc, value):
+            if value[1] in acc:
+                acc[value[1]].append(value[0])
+            else:
+                acc[value[1]] = [ value[0] ]
+            return acc
+
+        res = reduce(reduce_by_ak, data, {})
+        return [ (x[1], x[0]) for x in res.items() ]
+
     @abstractmethod
     def exec_operation(self, data, **kwargs) -> list:
         pass
