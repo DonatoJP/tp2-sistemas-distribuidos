@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  rabbitmq-tp2:
+    container_name: "rabbitmq-tp2"
+    image: rabbitmq:3.9.7-management-alpine
+    ports:
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - tp2-network
+  
+  drop-input-column-answers-1:
+    container_name: drop-input-column-answers-1
+    image: building-block:basic
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop_topics
+      - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":1}},"perform_affinity":true,"max_affinity":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
+networks:
+  tp2-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.201.0/24

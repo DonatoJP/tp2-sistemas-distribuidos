@@ -36,6 +36,7 @@ def main():
                 message = '\n'.join(lines_to_write)
                 task = Task(1, message)
                 task_ser = task.serialize()
+                print(task_ser)
                 channel.basic_publish(exchange='',
                     routing_key=queue_name,
                     body=task_ser,
@@ -45,9 +46,11 @@ def main():
     
     print(f"Finished in {iterations} iterations. Sending {centinels_to_send} centinels...")
     for _ in range(0, centinels_to_send):
+        end_task = Task(1, '')
+        end_task.centinel = True
         channel.basic_publish(exchange='',
             routing_key=queue_name,
-            body="END")
+            body=end_task.serialize())
 
     channel.close()
 

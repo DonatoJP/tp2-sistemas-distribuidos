@@ -10,6 +10,7 @@ services:
       - '15672:15672'
     networks:
       - tp2-network
+
   input_node-answers:
     container_name: input_node-answers
     image: input_node:latest
@@ -31,7 +32,7 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_questions.csv
-      - CHUNK_SIZE=2000
+      - CHUNK_SIZE=1000
       - OUTPUT_QUEUE_NAME=input-questions
       - CENTINELS_TO_SEND=2
     volumes:

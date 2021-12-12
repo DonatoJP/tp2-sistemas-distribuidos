@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from utils.workload import Task
 
 class AbstractOperator:
     def __init__(self, perform_affinity=False, affinity_key='', affinity_divider=1) -> None:
@@ -20,5 +21,5 @@ class AbstractOperator:
         return []
     
     @abstractmethod
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, task: Task, **kwargs) -> list:
         pass

@@ -102,3 +102,18 @@ docker-compose-logs-2:
 	docker-compose --project-name "tp2-middleware" logs -f $(service-2)
 .PHONY: docker-compose-logs-2
 
+
+example-up:
+	docker-compose -f "docker-compose-examples.yaml" --project-name "tp2-middleware" up
+	# sleep 3s
+	# docker-compose -f docker-compose-input.yaml --project-name "tp2-middleware" up -d
+.PHONY: example-up
+
+example-down:
+	docker-compose --project-name "tp2-middleware" stop -t 1
+	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
+.PHONY: example-down
+
+example-ps:
+	docker-compose --project-name "tp2-middleware" ps
+.PHONY: example-ps
