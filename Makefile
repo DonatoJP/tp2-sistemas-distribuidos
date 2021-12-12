@@ -6,7 +6,7 @@ default: build
 build:
 	docker build --target basic -f ./src/building_blocks.dockerfile -t "building-block:basic" .
 	docker build -f ./src/building_blocks.dockerfile -t "building-block:full" .
-	docker build -f "input_node/input_node.dockerfile" -t "input_node:latest" .
+	docker build -f "./src/input_node.dockerfile" -t "input_node:latest" .
 .PHONY: build
 
 # Trabajo completo

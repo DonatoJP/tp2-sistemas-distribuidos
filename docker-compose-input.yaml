@@ -1,5 +1,15 @@
 version: "3.8"
 services:
+  rabbitmq-tp2:
+    container_name: "rabbitmq-tp2"
+    image: rabbitmq:3.9.7-management-alpine
+    ports:
+      # AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - tp2-network
   input_node-answers:
     container_name: input_node-answers
     image: input_node:latest

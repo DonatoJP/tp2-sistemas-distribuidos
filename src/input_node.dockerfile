@@ -4,6 +4,7 @@ RUN pip3 install pika
 RUN apt-get -q update && apt-get -qy install netcat
 RUN wget 'https://raw.githubusercontent.com/eficode/wait-for/master/wait-for'
 
-COPY /input_node .
+COPY /src/input_node .
+COPY /src/utils ./utils
 RUN mkdir data
 ENTRYPOINT [ "/bin/sh" ]

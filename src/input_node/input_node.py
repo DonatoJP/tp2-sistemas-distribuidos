@@ -1,4 +1,5 @@
 import csv, pika, json, os
+from utils.workload import Task
 
 def main():
     file_to_read = os.environ["FILE_TO_PROCESS"] # 'data/red_answers.csv'
@@ -33,9 +34,11 @@ def main():
                 count += 1
             if (len(lines_to_write) > 0):
                 message = '\n'.join(lines_to_write)
+                task = Task(1, message)
+                task_ser = task.serialize()
                 channel.basic_publish(exchange='',
                     routing_key=queue_name,
-                    body=message,
+                    body=task_ser,
                     properties=pika.BasicProperties(priority=2))
 
                 lines_to_write = []
