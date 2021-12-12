@@ -28,14 +28,15 @@ def main():
         finish = False
         task = Task.deserialize(body)
 
-
-        # decoded = body.decode('UTF-8')
         if centinels_manager.is_centinel(task):
             print("Received Centinel")
-            centinels_manager.count_centinel()
-            if centinels_manager.are_all_received():
+            centinels_manager.count_centinel(task)
+            if centinels_manager.are_all_received(task):
                 print(f"{block_id} - Received all centinels. Stopping...")
-                queue_producer.send_end_centinels(centinels_manager.centinel, operator_to_use.get_all_routing_keys())
+                queue_producer.send_end_centinels(
+                    centinels_manager.build_centinel(task),
+                    operator_to_use.get_all_routing_keys()
+                )
                 finish = True
 
         else:

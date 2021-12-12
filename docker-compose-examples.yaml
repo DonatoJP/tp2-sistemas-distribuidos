@@ -29,6 +29,24 @@ services:
     networks:
       - tp2-network
 
+  drop-input-column-questions-1:
+    container_name: drop-input-column-questions-1
+    image: building-block:basic
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.column_drop_topics
+      - OPERATOR_PARAMS={"params_by_topic":{"question.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"question.ej3":{"columns_to_keep":["Id","CreationDate","Tags","Score"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    networks:
+      - tp2-network
+
 networks:
   tp2-network:
     ipam:
