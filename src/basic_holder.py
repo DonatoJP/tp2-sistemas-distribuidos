@@ -3,6 +3,7 @@ from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
 from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
+from utils.workload import Task
 
 def main():
     try:
@@ -25,21 +26,23 @@ def main():
 
     def callback_consuming_queue(ch, method, properties, body):
         finish = False
-        decoded = body.decode('UTF-8')
-        if centinels_manager.is_centinel(decoded):
+        task = Task.deserialize(body)
+
+        if centinels_manager.is_centinel(task):
             print(f"{block_id} - Received Centinel")
-            centinels_manager.count_centinel()
-            if centinels_manager.are_all_received():
+            centinels_manager.count_centinel(task)
+            if centinels_manager.are_all_received(task):
                 result = holder_to_use.end()
                 for returnable in result:
-                    queue_producer.send(returnable[0], returnable[1])
+                    new_task = Task(task.workload_id, returnable[0])
+                    queue_producer.send(new_task.serialize(), returnable[1])
 
                 print(f"{block_id} - {result}")
                 print(f"{block_id} - Received all centinels. Stopping...")
                 queue_producer.send_end_centinels(centinels_manager.centinel)
                 finish = True
         else:
-            holder_to_use.exec_operation(decoded)
+            holder_to_use.exec_operation(task.data)
         
         ch.basic_ack(method.delivery_tag)
         if finish:
