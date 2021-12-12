@@ -12,7 +12,6 @@ def parse_parameters():
         params["operator_params"] = json.loads(os.environ['OPERATOR_PARAMS'])
         params["input_queue_params"] = os.environ['INPUT_QUEUE_PARAMS']
         params["output_queue_params"] = os.environ['OUTPUT_QUEUE_PARAMS']
-        params["block_id"] = os.environ['BLOCK_ID']
         params["centinels_to_receive"] = int(os.environ['CENTINELS_TO_RECEIVE'])
         params["centinels_to_send"] = int(os.environ['CENTINELS_TO_SEND'])
     except KeyError as e:
