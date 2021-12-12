@@ -36,6 +36,7 @@ class FilterOperator(AbstractOperator):
 
     
     def exec_operation(self, data) -> list:
+        print('FILTER', data)
         io_string = StringIO(data)
         aux = [ self._make_filter_operation(line) for line in io_string ]
         res = list( filter(None, aux) )

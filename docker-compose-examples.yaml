@@ -46,6 +46,23 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
+  ej1-filter-1:
+    container_name: ej1-filter-1
+    image: building-block:basic
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.filter
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
+      - CENTINELS_TO_RECEIVE=3
+      - CENTINELS_TO_SEND=2
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
 networks:
   tp2-network:

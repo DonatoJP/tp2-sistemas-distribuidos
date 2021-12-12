@@ -8,7 +8,6 @@ class Task():
 
     @classmethod
     def deserialize(cls, serialized_model: bytes):
-        print(serialized_model)
         des = pickle.loads(serialized_model) 
         return cls(des["workload_id"], des["data"], des["centinel"])
 
