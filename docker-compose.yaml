@@ -10,13 +10,15 @@ services:
       - '15672:15672'
     networks:
       - tp2-network
-  
+
   drop-input-column-answers-1:
     container_name: drop-input-column-answers-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
@@ -25,16 +27,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   drop-input-column-answers-2:
     container_name: drop-input-column-answers-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
@@ -43,16 +47,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   drop-input-column-answers-3:
     container_name: drop-input-column-answers-3
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":2},"answer.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"answer.ej3":{"columns_to_keep":["CreationDate","ParentId","Score"],"perform_affinity":true,"affinity_key":"ParentId","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
@@ -61,16 +67,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   drop-input-column-questions-1:
     container_name: drop-input-column-questions-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"question.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"question.ej3":{"columns_to_keep":["Id","CreationDate","Tags","Score"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
@@ -79,16 +87,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   drop-input-column-questions-2:
     container_name: drop-input-column-questions-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"question.ej2":{"columns_to_keep":["OwnerUserId","Score"],"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2},"question.ej3":{"columns_to_keep":["Id","CreationDate","Tags","Score"],"perform_affinity":true,"affinity_key":"Id","affinity_divider":3}},"perform_affinity":true,"max_affinity":3}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-questions"}
@@ -97,52 +107,60 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej1-filter-1:
     container_name: ej1-filter-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
+        "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
       - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej1-filter-2:
     container_name: ej1-filter-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
+        "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.1"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
       - CENTINELS_TO_RECEIVE=3
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej1-sentiment-analyser-1:
     container_name: ej1-sentiment-analyser-1
     image: building-block:full
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
@@ -151,16 +169,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej1-sentiment-analyser-2:
     container_name: ej1-sentiment-analyser-2
     image: building-block:full
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.sentiment_analysis
       - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
@@ -169,16 +189,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej1-avg-holder-1:
     container_name: ej1-avg-holder-1
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.avg_holder
       - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output"}
@@ -187,16 +209,18 @@ services:
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
   ej2-user-avg-questions-1:
     container_name: ej2-user-avg-questions-1
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.user_avg_holder
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.0"}
@@ -205,16 +229,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-avg-questions-2:
     container_name: ej2-user-avg-questions-2
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.user_avg_holder
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.1"}
@@ -223,16 +249,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
   ej2-general-avg-questions:
     container_name: ej2-general-avg-questions
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.general_avg
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.*"}
@@ -241,16 +269,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
   ej2-user-avg-answers-1:
     container_name: ej2-user-avg-answers-1
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.user_avg_holder
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.0"}
@@ -259,16 +289,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
   ej2-user-avg-answers-2:
     container_name: ej2-user-avg-answers-2
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.user_avg_holder
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.1"}
@@ -277,16 +309,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
   ej2-general-avg-answers:
     container_name: ej2-general-avg-answers
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.general_avg
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.*"}
@@ -295,16 +329,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-questions-filter-1:
     container_name: ej2-user-questions-filter-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.user_avg_filter
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions","routing_key":"0"}
@@ -313,16 +349,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej2-user-questions-filter-2:
     container_name: ej2-user-questions-filter-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.user_avg_filter
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions","routing_key":"1"}
@@ -331,16 +369,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-answers-filter-1:
     container_name: ej2-user-answers-filter-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.user_avg_filter
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers","routing_key":"0"}
@@ -349,16 +389,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej2-user-answers-filter-2:
     container_name: ej2-user-answers-filter-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.user_avg_filter
       - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers","routing_key":"1"}
@@ -367,16 +409,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-intersector-1:
     container_name: ej2-user-intersector-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.intersector
       - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters","routing_key":"0"}
@@ -385,16 +429,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej2-user-intersector-2:
     container_name: ej2-user-intersector-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.intersector
       - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters","routing_key":"1"}
@@ -403,16 +449,18 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-top-n-users:
     container_name: ej2-top-n-users
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.top_n_users_holder
       - OPERATOR_PARAMS={"top_n":10}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
@@ -421,16 +469,18 @@ services:
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
   ej3-joiner-1:
     container_name: ej3-joiner-1
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.joiner
       - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.0"}
@@ -439,16 +489,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej3-joiner-2:
     container_name: ej3-joiner-2
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.joiner
       - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.1"}
@@ -457,16 +509,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
   ej3-joiner-3:
     container_name: ej3-joiner-3
     image: building-block:basic
-    environment: 
-      - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=operators.joiner
       - OPERATOR_PARAMS={"perform_affinity":true,"perform_affinity":true,"affinity_key":"Year","affinity_divider":2}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"*.ej3.2"}
@@ -475,16 +529,18 @@ services:
       - CENTINELS_TO_SEND=2
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej3-group-by-holder-1:
     container_name: ej3-group-by-holder-1
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.top_n_years_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner","routing_key":"0"}
@@ -493,16 +549,18 @@ services:
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
   ej3-group-by-holder-2:
     container_name: ej3-group-by-holder-2
     image: building-block:basic
-    environment: 
-      - PYTHONUNBUFFERED=1
-      - BLOCK_ID=1
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - OPERATOR_MODULE=holders.top_n_years_holder
       - OPERATOR_PARAMS={"top_n":10, "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej3-output-joiner","routing_key":"1"}
@@ -511,10 +569,10 @@ services:
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_holder.py"]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
 networks:
   tp2-network:
     ipam:

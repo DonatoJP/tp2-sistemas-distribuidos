@@ -21,7 +21,7 @@ def main():
     queue_producer.init_queue_pattern(**params["output_queue_params"])
 
     centinels_manager = CentinelsManager(params["centinels_to_receive"])
-    block_id = params["block_id"]
+    block_id = 1
 
     def callback_consuming_queue(ch, method, properties, body):
         finish = False
