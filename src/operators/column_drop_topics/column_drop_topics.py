@@ -37,7 +37,7 @@ class ColumnDropTopicOperator(AbstractOperator):
         
         return [f"{topic}.{aff}" for topic in topic_wo_aff for aff in range(0, self.max_affinity)]
 
-    def exec_operation(self, task: Task) -> list:
-        io_string = StringIO(task.data)
+    def exec_operation(self, data) -> list:
+        io_string = StringIO(data)
         result = map(lambda line: self._build_output_by_topic(json.loads(line)), io_string)
         return self._group_chunks_by_rk(result)

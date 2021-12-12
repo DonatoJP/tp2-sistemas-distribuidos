@@ -21,5 +21,5 @@ class AbstractOperator:
         return []
     
     @abstractmethod
-    def exec_operation(self, task: Task, **kwargs) -> list:
+    def exec_operation(self, data, **kwargs) -> list:
         pass

@@ -25,7 +25,7 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
@@ -43,7 +43,7 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "basic_operator.py"]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 

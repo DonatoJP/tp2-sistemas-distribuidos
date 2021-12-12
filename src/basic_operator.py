@@ -40,7 +40,7 @@ def main():
                 finish = True
 
         else:
-            returnables = operator_to_use.exec_operation(task)
+            returnables = operator_to_use.exec_operation(task.data)
             for returnable in returnables:
                 print(f"{block_id} - {returnable}")
 
