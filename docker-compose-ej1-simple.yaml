@@ -61,7 +61,7 @@ services:
       - CENTINELS_TO_SEND=1
     depends_on:
       - "rabbitmq-tp2"
-    command: [ basic_operator.py" ]
+    command: [ "basic_operator.py" ]
     networks:
       - tp2-network
 
@@ -79,7 +79,7 @@ services:
       - CENTINELS_TO_SEND=0
     depends_on:
       - "rabbitmq-tp2"
-    command: [ basic_holder.py" ]
+    command: [ "basic_holder.py" ]
     networks:
       - tp2-network
 
