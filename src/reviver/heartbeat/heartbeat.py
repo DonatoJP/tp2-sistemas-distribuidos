@@ -1,4 +1,5 @@
 from threading import Thread
+import threading
 import time
 from socket import *
 import json
@@ -17,14 +18,15 @@ HEARTBEAT_TIME = 1
 
 
 class Heartbeat(Thread):
-    def __init__(self):
+    def __init__(self, event: threading.Event):
         # Call the Thread class's init function
         Thread.__init__(self)
+        self.__event = event
 
     def run(self):
         pings = 0
         logging.info(f"Created {HOSTNAME}")
-        while True:
+        while not self.__event.is_set():
             idx = random.randint(1, COORDINATOR_AMOUNT)
             clientSocket = socket(AF_INET, SOCK_DGRAM)
             coordinator_host = f"{COORDINATOR_HOSTNAME}{idx}"

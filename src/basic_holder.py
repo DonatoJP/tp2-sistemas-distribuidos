@@ -1,4 +1,5 @@
 import importlib, sys, os, signal, json
+import threading
 from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
 from rabbit_builders.centinels_manager import CentinelsManager
@@ -13,7 +14,8 @@ def main():
         print(e.message)
         exit()
 
-    heartbeat_t = Heartbeat()
+    exit_ev= threading.Event()
+    heartbeat_t = Heartbeat(exit_ev)
     heartbeat_t.start()
 
     operation_module = importlib.import_module(params["module"])
@@ -52,6 +54,7 @@ def main():
         
         ch.basic_ack(method.delivery_tag)
         if finish:
+            exit_ev.set()
             exit([queue_consumer, queue_producer])
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
@@ -59,14 +62,14 @@ def main():
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
-        heartbeat_t.join()
+        exit_ev.set()
         exit([queue_consumer])
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
     print('Starting to consume...')
     queue_consumer.start_consuming()
-    heartbeat_t.join()
+    exit_ev.set()
 
 if __name__ == '__main__':
     try:

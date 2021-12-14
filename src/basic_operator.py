@@ -5,6 +5,7 @@ from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
 from utils.workload import Task
 from reviver.heartbeat.heartbeat import Heartbeat
+import threading
 
 def main():
     try:
@@ -12,8 +13,9 @@ def main():
     except ParseParametersError as e:
         print(e.message)
         exit()
+    event = threading.Event()
 
-    heartbeat_t = Heartbeat()
+    heartbeat_t = Heartbeat(event)
     heartbeat_t.start()
 
     operation_module = importlib.import_module(params["module"])
@@ -54,6 +56,7 @@ def main():
         
         ch.basic_ack(method.delivery_tag)
         if finish:
+            event.set()
             exit([queue_consumer, queue_producer])
     
     params["input_queue_params"]["callback"] = callback_consuming_queue
@@ -61,14 +64,15 @@ def main():
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
-        heartbeat_t.join()
+        event.set()
         exit([queue_consumer, queue_producer], 0)
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
     print('Starting to consume...')
     queue_consumer.start_consuming()
-    heartbeat_t.join()
+    event.set()
+
 
 
 if __name__ == '__main__':

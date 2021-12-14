@@ -119,8 +119,20 @@ example-down:
 	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
 .PHONY: example-down
 
+
+
+start-ej1-simple:
+	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml up -d
+.PHONY: start-ej1-simple
+
+
+stop-ej1-simple:
+	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml down
+.PHONY: stop-ej1-simple
+
+
 start-input:
-	docker-compose -f docker-compose-input.yaml --project-name "tp2-middleware" up -d
+	docker-compose --project-name "tp2-middleware" -f  docker-compose-input.yaml up -d
 .PHONY: start-input
 
 

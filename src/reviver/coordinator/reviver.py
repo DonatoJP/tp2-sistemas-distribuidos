@@ -6,8 +6,8 @@ from threading import Thread, Timer
 import time
 
 
-STATE_CHECK_TIME = 2
-CHECK_TIME_DIFF = 10
+STATE_CHECK_TIME = 3
+CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
 state = {}

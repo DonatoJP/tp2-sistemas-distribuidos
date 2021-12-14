@@ -25,7 +25,8 @@ logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 def main():
     threads = []
 
-    heartbeat_t = Heartbeat()
+    event = threading.Event()
+    heartbeat_t = Heartbeat(event)
     heartbeat_t.start()
     threads.append(heartbeat_t)
 
@@ -47,6 +48,7 @@ def main():
 
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
+        event.set()
         cm.shutdown_connections()
         sys.exit(0)
 
@@ -66,7 +68,7 @@ def main():
     threads.append(state_checker)
 
     [t.join() for t in threads]
-
+    event.set()
     cm._join_listen_thread()
 
 
