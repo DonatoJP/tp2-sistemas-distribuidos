@@ -39,7 +39,9 @@ def main():
 
                 print(f"{block_id} - {result}")
                 print(f"{block_id} - Received all centinels. Stopping...")
-                queue_producer.send_end_centinels(centinels_manager.centinel)
+                queue_producer.send_end_centinels(
+                    centinels_manager.build_centinel(task)
+                )
                 finish = True
         else:
             holder_to_use.exec_operation(task.data)

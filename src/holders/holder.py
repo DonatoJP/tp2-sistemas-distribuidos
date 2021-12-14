@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from functools import reduce
 
 class AbstractHolder:
     def __init__(self, perform_affinity, affinity_key='', affinity_divider=1) -> None:
@@ -15,6 +16,18 @@ class AbstractHolder:
 
     def get_affinity(self, msg_to_send: dict):
         return '' if (not self.perform_affinity) else self._get_affinity(msg_to_send)
+    
+    @staticmethod
+    def _group_by_ak(data):
+        def reduce_by_ak(acc, value):
+            if value[1] in acc:
+                acc[value[1]].append(value[0])
+            else:
+                acc[value[1]] = [ value[0] ]
+            return acc
+
+        res = reduce(reduce_by_ak, data, {})
+        return [ (x[1], x[0]) for x in res.items() ]
     
     @abstractmethod
     def exec_operation(self, data, **kwargs) -> list:

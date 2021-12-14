@@ -32,6 +32,7 @@ class UserAvgHolder(AbstractHolder):
 
 
     def end(self):
-        result = [self._build_output(x[0], x[1][0], x[1][1]) for x in self.user_counters.items()]
-        return [ (json.dumps(x), self.get_affinity(x)) for x in result ]
+        output = [self._build_output(x[0], x[1][0], x[1][1]) for x in self.user_counters.items()]
+        before_grouping = [ (json.dumps(x), self.get_affinity(x)) for x in output ]
+        return self._group_by_ak(before_grouping)
     
