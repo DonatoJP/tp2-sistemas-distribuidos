@@ -46,7 +46,9 @@ class Joiner(AbstractOperator):
             return self.process_question(dict_data)
 
     def exec_operation(self, data) -> list:
-        io_string = StringIO(data)
-        res = [self._process_line_of_chunk(line) for line in io_string]
+        def operation(data):
+            io_string = StringIO(data)
+            res = [self._process_line_of_chunk(line) for line in io_string]
+            return [(json.dumps(x), self.get_affinity(x)) for i in res for x in i]
 
-        return [(json.dumps(x), self.get_affinity(x)) for i in res for x in i]
+        return self._group_by_ak(operation(data))
