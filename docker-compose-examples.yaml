@@ -243,6 +243,24 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
+  
+  ej2-user-intersector-1:
+    container_name: ej2-user-intersector-1
+    image: building-block:basic
+    environment: 
+      - BLOCK_ID=1
+      - PYTHONUNBUFFERED=1
+      - OPERATOR_MODULE=operators.intersector
+      - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters","routing_key":"0"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 networks:
   tp2-network:
     ipam:
