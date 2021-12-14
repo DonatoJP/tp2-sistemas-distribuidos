@@ -8,18 +8,19 @@ class TopNYearsHolder(AbstractHolder):
         super().__init__(**kwargs)
     
     def exec_operation(self, data, **kwargs) -> list:
-        dict_data = json.loads(data)
-        if dict_data["Year"] not in self.group_by_year.keys():
-            self.group_by_year[dict_data["Year"]] = {}
-        
-        if not dict_data["Tags"]:
-            return
+        for item in data:
+            dict_data = json.loads(item)
+            if dict_data["Year"] not in self.group_by_year.keys():
+                self.group_by_year[dict_data["Year"]] = {}
+            
+            if not dict_data["Tags"]:
+                return
 
-        tags = dict_data["Tags"].split(' ')
-        for tag in tags:
-            if tag not in self.group_by_year[dict_data["Year"]].keys():
-                self.group_by_year[dict_data["Year"]][tag] = 0
-            self.group_by_year[dict_data["Year"]][tag] += int(dict_data["Score"])
+            tags = dict_data["Tags"].split(' ')
+            for tag in tags:
+                if tag not in self.group_by_year[dict_data["Year"]].keys():
+                    self.group_by_year[dict_data["Year"]][tag] = 0
+                self.group_by_year[dict_data["Year"]][tag] += int(dict_data["Score"])
     
     def _make_top_n(self, year):
         tags = self.group_by_year[year]
