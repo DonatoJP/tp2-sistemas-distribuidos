@@ -33,5 +33,5 @@ class GeneralAvg(AbstractHolder):
     def end(self):
         result = self._build_output()
 
-        return [ (json.dumps(result), x) for x in self.get_affinity() ]
+        return [ ( [json.dumps(result)] , x) for x in self.get_affinity() ]
     

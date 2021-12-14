@@ -28,9 +28,13 @@ class UserAvgFilter(AbstractOperator):
         return result
 
     def exec_operation(self, data) -> list:
-        data_dict = json.loads(data)
-        if data_dict["User_Avg"]:
-            return [(json.dumps(x), self.get_affinity(x)) for x in self.parse_user_avg_message(data_dict)]
-        else:
-            return [(json.dumps(x), self.get_affinity(x)) for x in self.parse_general_avg_message(data_dict)]
-    
+        before_grouping = []
+        for item in data:
+            data_dict = json.loads(item)
+            if data_dict["User_Avg"]:
+                before_grouping.append( [(json.dumps(x), self.get_affinity(x)) for x in self.parse_user_avg_message(data_dict)] )
+            else:
+                before_grouping.append( [(json.dumps(x), self.get_affinity(x)) for x in self.parse_general_avg_message(data_dict)] )
+
+        before_grouping = [tup for item in before_grouping for tup in item]
+        return self._group_by_ak(before_grouping)    
