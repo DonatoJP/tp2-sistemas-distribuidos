@@ -1,0 +1,113 @@
+version: '3.8'
+services:
+  app1:
+    container_name: app1
+    build: .
+    env_file:
+      - .env
+    environment:
+      - NODE_ID=1
+    volumes: &appvolumes
+      - ./state.txt:/app/state.txt
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: python3 main.py
+    networks:
+      - bully-example
+  
+  app2:
+    container_name: app2
+    build: .
+    env_file:
+      - .env
+    environment:
+      - NODE_ID=2
+    volumes: *appvolumes
+    command: ["./wait-for", "app1:9000", "--", "python", "main.py"]
+    networks:
+      - bully-example
+  
+  app3:
+    container_name: app3
+    build: .
+    env_file:
+      - .env
+    environment:
+      - NODE_ID=3
+    volumes: *appvolumes
+    command: ["./wait-for", "app2:9000", "--", "python", "main.py"]
+    networks:
+      - bully-example
+  
+  app4:
+    container_name: app4
+    build: .
+    env_file:
+      - .env
+    environment:
+      - NODE_ID=4
+    volumes: *appvolumes
+    command: ["./wait-for", "app3:9000", "--", "python", "main.py"]
+    networks:
+      - bully-example
+  
+  app5:
+    container_name: app5
+    build: .
+    env_file:
+      - .env
+    environment:
+      - NODE_ID=5
+    volumes: *appvolumes
+    command: ["./wait-for", "app4:9000", "--", "python", "main.py"]
+    networks:
+      - bully-example
+
+      
+  heartbeat_1:
+    build: .
+    env_file:
+      - .env
+    volumes: &heartbeat_volumes
+      - .:/app
+    entrypoint: python3 heartbeat/main.py
+    networks:
+      - bully-example
+
+        
+  heartbeat_2:
+    build: .
+    env_file:
+      - .env
+    volumes: *heartbeat_volumes
+    entrypoint: python3 heartbeat/main.py
+    networks:
+      - bully-example
+
+  heartbeat_3:
+    build: .
+    env_file:
+      - .env
+    volumes: *heartbeat_volumes
+    entrypoint: python3 heartbeat/main.py
+    networks:
+      - bully-example
+
+  heartbeat_4:
+    build: .
+    env_file:
+      - .env
+    volumes: *heartbeat_volumes
+    entrypoint: python3 heartbeat/main.py
+    networks:
+      - bully-example
+
+
+
+
+networks:
+  bully-example:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.210.0/24

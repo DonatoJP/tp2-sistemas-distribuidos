@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   rabbitmq-tp2:
-    container_name: "rabbitmq-tp2"
+    # container_name: "rabbitmq-tp2"
     image: rabbitmq:3.9.7-management-alpine
     ports:
       # AMQP protocol port
@@ -10,13 +10,16 @@ services:
       - '15672:15672'
     networks:
       - tp2-network
-  
+
   drop-input-column-answers-1:
-    container_name: drop-input-column-answers-1
+    # container_name: drop-input-column-answers-1
     image: building-block:basic
-    environment: 
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":1}},"perform_affinity":true,"max_affinity":1}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"input-answers"}
@@ -28,15 +31,19 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej1-filter-1:
-    container_name: ej1-filter-1
+    # container_name: ej1-filter-1
     image: building-block:basic
-    environment: 
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - BLOCK_ID=1
-      - PYTHONUNBUFFERED=1
       - OPERATOR_MODULE=operators.filter
-      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">", "perform_affinity":false}
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
+        "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.0"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
       - CENTINELS_TO_RECEIVE=1
@@ -46,11 +53,15 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej1-sentiment-analyser-1:
-    container_name: ej1-sentiment-analyser-1
+    # container_name: ej1-sentiment-analyser-1
     image: building-block:full
-    environment: 
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.sentiment_analysis
@@ -66,9 +77,13 @@ services:
       - tp2-network
 
   ej1-avg-holder-1:
-    container_name: ej1-avg-holder-1
+    # container_name: ej1-avg-holder-1
     image: building-block:basic
-    environment: 
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    environment:
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
@@ -80,6 +95,70 @@ services:
     depends_on:
       - "rabbitmq-tp2"
     command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
+
+  app1:
+    container_name: app1
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=1
+    volumes:
+      &appvolumes
+      - ./src/reviver/state.txt:/app/state.txt
+      - ./src/reviver:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
+
+  app2:
+    container_name: app2
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=2
+    volumes: *appvolumes
+    command: [ "./wait-for", "app1:9000", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
+
+  app3:
+    container_name: app3
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=3
+    volumes: *appvolumes
+    command: [ "./wait-for", "app2:9000", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
+
+  app4:
+    container_name: app4
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=4
+    volumes: *appvolumes
+    command: [ "./wait-for", "app3:9000", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
+
+  app5:
+    container_name: app5
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=5
+    volumes: *appvolumes
+    command: [ "./wait-for", "app4:9000", "--", "python", "main.py" ]
     networks:
       - tp2-network
 
