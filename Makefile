@@ -120,7 +120,6 @@ example-down:
 .PHONY: example-down
 
 
-
 start-ej1-simple:
 	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml up -d
 .PHONY: start-ej1-simple
@@ -128,6 +127,7 @@ start-ej1-simple:
 
 stop-ej1-simple:
 	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml down
+	docker-compose --project-name "tp2-middleware" down -v --remove-orphans
 .PHONY: stop-ej1-simple
 
 
