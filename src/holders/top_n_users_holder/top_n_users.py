@@ -8,10 +8,11 @@ class TopNUsersHolder(AbstractHolder):
         super().__init__(perform_affinity=False, **kwargs)
     
     def exec_operation(self, data, **kwargs) -> list:
-        dict_data = json.loads(data)
-        self.users_scores = self.users_scores + [(dict_data["OwnerUserId"], dict_data["TotalScore"])]
-        self.users_scores.sort(key=lambda x: x[1], reverse=True)
-        self.users_scores = self.users_scores[0:self.top_n]
+        for item in data:
+            dict_data = json.loads(item)
+            self.users_scores = self.users_scores + [(dict_data["OwnerUserId"], dict_data["TotalScore"])]
+            self.users_scores.sort(key=lambda x: x[1], reverse=True)
+            self.users_scores = self.users_scores[0:self.top_n]
 
     def _make_top_n(self):
         return self.users_scores

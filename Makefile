@@ -105,8 +105,8 @@ docker-compose-logs-2:
 
 example-up:
 	docker-compose -f "docker-compose-examples.yaml" --project-name "tp2-middleware" up -d
-	sleep 3s
-	docker-compose -f docker-compose-input.yaml --project-name "tp2-middleware" up -d
+	# sleep 3s
+	# docker-compose -f docker-compose-input.yaml --project-name "tp2-middleware" up -d
 .PHONY: example-up
 
 
