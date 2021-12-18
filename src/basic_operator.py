@@ -41,6 +41,7 @@ def main():
                     centinels_manager.build_centinel(task),
                     operator_to_use.get_all_routing_keys()
                 )
+            # TODO: Integrar con vault
 
         else:
             returnables = operator_to_use.exec_operation(task.data)

@@ -51,6 +51,7 @@ def main():
             
             duplicates_manager.register_task(task)
 
+        # TODO: Integrar Vault para guardar estado
         ch.basic_ack(method.delivery_tag)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
