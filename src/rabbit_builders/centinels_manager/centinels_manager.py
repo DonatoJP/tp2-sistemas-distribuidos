@@ -19,7 +19,7 @@ class CentinelsManager:
         return self.received_centinels[task.workload_id] == self.previous_step_components
     
     def build_centinel(self, task: Task) -> bytes:
-        centinel_task = Task(task.workload_id, '', True)
+        centinel_task = Task(task.workload_id, '', True) # TODO: Deberiamos enviar el mismo task_id para los centinelas?
         return centinel_task.serialize()
     
     @property

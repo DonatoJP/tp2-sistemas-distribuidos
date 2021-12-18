@@ -4,7 +4,7 @@ from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
 from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
-from utils.workload import Task
+from utils.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
 
 def main():
@@ -28,27 +28,29 @@ def main():
     queue_producer.init_queue_pattern(**params["output_queue_params"])
 
     centinels_manager = CentinelsManager(params["centinels_to_receive"])
-    block_id = 1
+    duplicates_manager = DuplicatesManager()
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
 
-        if centinels_manager.is_centinel(task):
-            print(f"{block_id} - Received Centinel")
-            centinels_manager.count_centinel(task)
-            if centinels_manager.are_all_received(task):
-                result = holder_to_use.end()
-                for returnable in result:
-                    new_task = Task(task.workload_id, returnable[0])
-                    queue_producer.send(new_task.serialize(), returnable[1])
+        if not duplicates_manager.is_duplicate(task):
+            if centinels_manager.is_centinel(task):
+                centinels_manager.count_centinel(task)
+                if centinels_manager.are_all_received(task):
+                    result = holder_to_use.end()
+                    for returnable in result:
+                        new_task = Task(task.workload_id, returnable[0])
+                        queue_producer.send(new_task.serialize(), returnable[1])
 
-                print(f"{block_id} - Received all centinels. Stopping...")
-                queue_producer.send_end_centinels(
-                    centinels_manager.build_centinel(task)
-                )
-        else:
-            holder_to_use.exec_operation(task.data)
-        
+                    print(f"Received all centinels for workload {task.workload_id}.")
+                    queue_producer.send_end_centinels(
+                        centinels_manager.build_centinel(task)
+                    )
+            else:
+                holder_to_use.exec_operation(task.data)
+            
+            duplicates_manager.register_task(task)
+
         ch.basic_ack(method.delivery_tag)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue

@@ -47,7 +47,7 @@ def main():
             for returnable in returnables:
 
                 # returnable = (task_data, routing_key)
-                new_task = Task(task.workload_id, returnable[0])
+                new_task = Task(task.workload_id, returnable[0], task_id=task.task_id)
                 queue_producer.send(new_task.serialize(), returnable[1])
         
         ch.basic_ack(method.delivery_tag)
