@@ -31,7 +31,6 @@ def main():
     block_id = 1
 
     def callback_consuming_queue(ch, method, properties, body):
-        finish = False
         task = Task.deserialize(body)
 
         if centinels_manager.is_centinel(task):
@@ -47,14 +46,10 @@ def main():
                 queue_producer.send_end_centinels(
                     centinels_manager.build_centinel(task)
                 )
-                finish = True
         else:
             holder_to_use.exec_operation(task.data)
         
         ch.basic_ack(method.delivery_tag)
-        if finish:
-            exit_ev.set()
-            exit([queue_consumer, queue_producer])
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])

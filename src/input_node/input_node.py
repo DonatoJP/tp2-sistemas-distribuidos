@@ -5,6 +5,7 @@ def main():
     file_to_read = os.environ["FILE_TO_PROCESS"] # 'data/red_answers.csv'
     chunk_size = int(os.environ["CHUNK_SIZE"])
     centinels_to_send = int(os.environ["CENTINELS_TO_SEND"])
+    workload_id = int(os.environ["WORKLOAD_ID"])
 
     host = 'rabbitmq-tp2'
     port = '5672'
@@ -34,7 +35,7 @@ def main():
                 count += 1
             if (len(lines_to_write) > 0):
                 message = '\n'.join(lines_to_write)
-                task = Task(2, message)
+                task = Task(workload_id, message)
                 task_ser = task.serialize()
                 channel.basic_publish(exchange='',
                     routing_key=queue_name,
@@ -45,7 +46,7 @@ def main():
     
     print(f"Finished in {iterations} iterations. Sending {centinels_to_send} centinels...")
     for _ in range(0, centinels_to_send):
-        end_task = Task(1, '')
+        end_task = Task(workload_id, '')
         end_task.centinel = True
         channel.basic_publish(exchange='',
             routing_key=queue_name,
