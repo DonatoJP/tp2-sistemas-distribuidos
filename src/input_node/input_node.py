@@ -34,9 +34,8 @@ def main():
                 count += 1
             if (len(lines_to_write) > 0):
                 message = '\n'.join(lines_to_write)
-                task = Task(1, message)
+                task = Task(2, message)
                 task_ser = task.serialize()
-                print(task_ser)
                 channel.basic_publish(exchange='',
                     routing_key=queue_name,
                     body=task_ser,

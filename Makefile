@@ -124,6 +124,10 @@ start-ej1-simple:
 	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml up -d
 .PHONY: start-ej1-simple
 
+simple-logs:
+	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml logs -f
+.PHONY: simple-logs
+
 
 stop-ej1-simple:
 	docker-compose --project-name "tp2-middleware" -f docker-compose-ej1-simple.yaml down

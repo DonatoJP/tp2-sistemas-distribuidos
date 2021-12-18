@@ -3,25 +3,25 @@ from ..abstract_builder import AbstractQueueHandler
 
 class QueueConsumer(AbstractQueueHandler):
 
-    def _build_work_queue_pattern(self, queue_name, callback):
+    def _build_work_queue_pattern(self, queue_name, callback, consumer_tag=None):
         super()._build_work_queue_pattern(queue_name)
-        self.channel.basic_consume(queue=queue_name, on_message_callback=callback)
+        self.channel.basic_consume(queue=queue_name, on_message_callback=callback, consumer_tag=consumer_tag)
 
-    def _build_direct_pattern(self, exchange_name, callback, routing_key):
+    def _build_direct_pattern(self, exchange_name, callback, routing_key, consumer_tag=None, queue_name=''):
         super()._build_direct_pattern(exchange_name)
 
-        result = self.channel.queue_declare(queue='', arguments={"x-max-priority": 2})
+        result = self.channel.queue_declare(queue=queue_name, arguments={"x-max-priority": 2})
         self.queue_name = result.method.queue
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
-        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback)
+        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, consumer_tag=consumer_tag)
 
-    def _build_topic_pattern(self, exchange_name, callback, routing_key):
+    def _build_topic_pattern(self, exchange_name, callback, routing_key, consumer_tag=None, queue_name=''):
         super()._build_topic_pattern(exchange_name)
 
-        result = self.channel.queue_declare(queue='', arguments={"x-max-priority": 2})
+        result = self.channel.queue_declare(queue=queue_name, arguments={"x-max-priority": 2})
         self.queue_name = result.method.queue
         self.channel.queue_bind(exchange=exchange_name, queue=self.queue_name, routing_key=routing_key)
-        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback)
+        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, consumer_tag=consumer_tag)
 
     def __init__(self) -> None:
         super().__init__()

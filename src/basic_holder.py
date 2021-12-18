@@ -43,7 +43,6 @@ def main():
                     new_task = Task(task.workload_id, returnable[0])
                     queue_producer.send(new_task.serialize(), returnable[1])
 
-                print(f"{block_id} - {result}")
                 print(f"{block_id} - Received all centinels. Stopping...")
                 queue_producer.send_end_centinels(
                     centinels_manager.build_centinel(task)
