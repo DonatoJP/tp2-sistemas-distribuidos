@@ -1,4 +1,4 @@
-from utils.workload import Task
+from reviver.workload import Task
 
 class CentinelsManager:
     def __init__(self, previous_step_components) -> None:
