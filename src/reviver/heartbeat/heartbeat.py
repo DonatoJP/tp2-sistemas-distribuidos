@@ -8,7 +8,7 @@ import random
 import logging
 
 # format = "%(asctime)s: %(message)s"
-logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
+# logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
 logger = logging.getLogger("Heartbeat")
 
 HOSTNAME = os.getenv("HOSTNAME", "tp3_heartbeat")

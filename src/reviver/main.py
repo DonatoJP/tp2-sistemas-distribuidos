@@ -8,12 +8,11 @@ from heartbeat.heartbeat import Heartbeat
 
 
 state = State()
-state.init(threading.Lock())
 
 # format = "%(asctime)s: %(message)s"
 # reduce log level
 logging.getLogger("pika").setLevel(logging.WARNING)
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 
 def main():

@@ -5,7 +5,6 @@ import logging
 from threading import Thread, Timer
 import time
 
-
 STATE_CHECK_TIME = 3
 CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
@@ -41,8 +40,10 @@ class Reviver(Thread):
                     return {"key": key, "status": STATUS_INVALID_KEY}
 
         Timer(STATE_CHECK_TIME, self.check_state).start()
+        logger.info("Checking Leadership...")
 
         if self.bully.get_is_leader():
+            logger.info("Is Leader!")
             now = datetime.now()
             res = [
                 check_key_value(key, value, now)

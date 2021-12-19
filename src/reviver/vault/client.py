@@ -39,7 +39,7 @@ class VaultClient:
     def post_key(self, key1: str, key2: str, value):
         validate_key(key1)
         validate_key(key2)
-        validate_value(value)
+        # validate_value(value)
 
         value = pickle.dumps(value).hex()
         message = f"POST_KEY {key1}={key2}={value}"

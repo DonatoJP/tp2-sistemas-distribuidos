@@ -3,12 +3,12 @@ import json
 import logging
 from datetime import datetime
 from threading import Thread
-
+from coordinator.state import State
 
 logger = logging.getLogger("Server")
 
 class UdpServer(Thread):
-    def __init__(self, state):
+    def __init__(self, state: State):
         # Call the Thread class's init function
         Thread.__init__(self)
         self.state = state
