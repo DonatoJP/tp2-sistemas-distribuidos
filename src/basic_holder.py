@@ -6,6 +6,7 @@ from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
 from reviver.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
+from reviver.state_saver import StateSaver
 
 def main():
     try:
@@ -17,6 +18,12 @@ def main():
     exit_ev= threading.Event()
     heartbeat_t = Heartbeat(exit_ev)
     heartbeat_t.start()
+
+    node_name = params["node_name"]
+    state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
+    state = state_saver.retrieve_state(node_name)
+
+    print("State retrieved: ", state)
 
     operation_module = importlib.import_module(params["module"])
     ImportedHolder = getattr(operation_module, 'ImportedHolder')

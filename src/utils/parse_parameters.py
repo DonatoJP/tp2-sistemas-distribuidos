@@ -8,6 +8,8 @@ class ParseParametersError(Exception):
 def parse_parameters():
     params = {}
     try:
+        params["node_name"] = os.environ["NODE_NAME"]
+        params["vault_queue_name"] = os.environ["VAULT_QUEUE_NAME"]
         params["module"] = os.environ['OPERATOR_MODULE']
         params["operator_params"] = json.loads(os.environ['OPERATOR_PARAMS'])
         params["input_queue_params"] = os.environ['INPUT_QUEUE_PARAMS']

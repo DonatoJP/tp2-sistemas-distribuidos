@@ -20,6 +20,7 @@ services:
       - .env
     environment:
       - NODE_NAME=drop-input-column-answers-1
+      - VAULT_QUEUE_NAME=vault-input
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":1}},"perform_affinity":true,"max_affinity":1}
@@ -42,6 +43,7 @@ services:
       - .env
     environment:
       - NODE_NAME=ej1-filter-1
+      - VAULT_QUEUE_NAME=vault-input
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
@@ -65,6 +67,7 @@ services:
       - .env
     environment:
       - NODE_NAME=ej1-sentiment-analyser-1
+      - VAULT_QUEUE_NAME=vault-input
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.sentiment_analysis
@@ -88,6 +91,7 @@ services:
       - .env
     environment:
       - NODE_NAME=ej1-avg-holder-1
+      - VAULT_QUEUE_NAME=vault-input
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
