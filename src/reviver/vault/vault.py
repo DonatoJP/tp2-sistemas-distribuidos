@@ -180,4 +180,13 @@ class Vault:
         return responses.count("ACK") < self.cluster_quorum
 
     def _get_responses(self):
-        return self.pool.map(self.cluster.recv_from, self.cluster.addresses)
+        def recv (peer_addr):
+            for i in range(5):
+                try:
+                    return self.cluster.recv_from(peer_addr)
+                except RecvTimeout:
+                    pass
+
+            return None
+
+        return self.pool.map(recv, self.cluster.addresses)

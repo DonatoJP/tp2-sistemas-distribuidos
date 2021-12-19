@@ -44,9 +44,9 @@ class RabbitConsumerServer:
 
             self.channel.close()
             self.connection.close()
-        except:
-            print('======================================================================================================================================================================================================================================================================================================')
-            pass
+        except Exception as e:
+            logging.info(e)
+            logging.info('Start consuming error')
 
     def stop(self):
         try:

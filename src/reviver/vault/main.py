@@ -124,6 +124,9 @@ def main():
             started[0] = True
             started_cv.notify_all()
             started_cv.release()
+
+            logging.info(f"CALLBACK {started[0]}")
+
         else:
             logging.info(f"CALLBACK Started, checking leader {i_am_leader[0]}")
             if i_am_leader[0] and not bully.get_is_leader():
