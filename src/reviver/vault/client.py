@@ -1,10 +1,10 @@
 import pika
-import pickle
+import pickle, logging
 from threading import Lock
 
 from .validate import validate_key, validate_value
 
-
+logger = logging.getLogger("VaultClient")
 class VaultClient:
     def __init__(self, rabbit_addr, input_queue_name):
         self.rabbit_lock = Lock()
@@ -30,10 +30,15 @@ class VaultClient:
             method_frame, properties, body = next(self.channel.consume(
                 self.res_queue_name, auto_ack=True))
 
+            ret = ""
             if len(body) == 0:
-                return ""
+                return ret
+            try:
+                ret = pickle.loads(bytes.fromhex(body.decode()))
+            except Exception as e:
+                logger.warning("Exception %s: cant decode body %s with %s", e, body, body.decode())
 
-            return pickle.loads(bytes.fromhex(body.decode()))
+            return ret
 
     def post(self, key: str, value):
         with self.rabbit_lock:

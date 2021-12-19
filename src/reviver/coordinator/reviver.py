@@ -13,7 +13,6 @@ STATE_CHECK_TIME = 5
 CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
-state = {}
 
 # logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
 logger = logging.getLogger("Reviver")
@@ -55,6 +54,7 @@ class Reviver(Thread):
             res = [
                 self.check_key_value(key, value, now)
                 for key, value in hosts_to_revive.items()
+                if value != ""
             ]
             # logging.debug("RES: %s", res)
             [

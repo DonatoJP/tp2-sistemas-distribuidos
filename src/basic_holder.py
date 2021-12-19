@@ -1,4 +1,4 @@
-import importlib, sys, os, signal, json
+import importlib, sys, os, signal, json, logging
 import threading
 from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
@@ -7,6 +7,9 @@ from utils import parse_parameters, ParseParametersError, exit
 from reviver.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
 from reviver.state_saver import StateSaver
+
+
+logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 def main():
     try:

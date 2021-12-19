@@ -13,6 +13,8 @@ from heartbeat import Heartbeat
 from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
 
+logger = logging.getLogger("VaultMessageProcessor")
+logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 class VaultMessageProcessor(RabbitMessageProcessor):
     def __init__(self, vault: Vault, retry_wait):
@@ -38,7 +40,11 @@ class VaultMessageProcessor(RabbitMessageProcessor):
             if len(user_dict_value) == 0:
                 user_dict = dict()
             else:
-                user_dict = pickle.loads(bytes.fromhex(user_dict_value))
+                try: 
+                    user_dict = pickle.loads(bytes.fromhex(user_dict_value))
+                except Exception as e:
+                    logger.warning("Error %s =>  loading user dict value. Key1:  %s; Key2: %s; Value: %s, UserDictValue: %s", e, key1, key2, value, user_dict_value )
+                    return None, None 
                 if not isinstance(user_dict, dict):
                     return None, None
 
@@ -116,10 +122,9 @@ def follower_start(vault: Vault, leader_addr):
 
 
 def main():
-    logging.basicConfig(format="[%(asctime)s] %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
     node_id = os.environ['NODE_ID']
-    logging.info(f'Starting node {node_id}')
+    logger.info(f'Starting node {node_id}')
 
     event = THEvent()
     heartbeat = Heartbeat(event)
@@ -132,9 +137,9 @@ def main():
     vault_cm = ConnectionsManager(
         node_id, vault_port, vault_peers, vault_timeout)
 
-    logging.info("Waiting for initialization...")
+    logger.info("Waiting for initialization...")
 
-    logging.info("Initialization finished!")
+    logger.info("Initialization finished!")
 
     storage_path = os.environ['STORAGE_PATH']
     storage_buckets_number = int(os.environ['STORAGE_BUCKETS_NUMBER'])
@@ -159,7 +164,7 @@ def main():
     leader_elected_cv = Condition(Lock())
 
     def new_leader_callback(bully: Bully):
-        logging.info(f"CALLBACK {started[0]}")
+        logger.info(f"CALLBACK {started[0]}")
         if not started[0]:
             # print("Before ACQ started_cv")
             started_cv.acquire()
@@ -167,18 +172,18 @@ def main():
             started_cv.notify_all()
             started_cv.release()
 
-            logging.info(f"CALLBACK {started[0]}")
+            logger.info(f"CALLBACK {started[0]}")
 
         else:
-            logging.info(f"CALLBACK Started, checking leader {i_am_leader[0]}")
+            logger.info(f"CALLBACK Started, checking leader {i_am_leader[0]}")
             if i_am_leader[0] and not bully.get_is_leader():
-                logging.info(f'[NODE {node_id}] I was the leader. Now exiting')
+                logger.info(f'[NODE {node_id}] I was the leader. Now exiting')
                 server.stop()
             elif not i_am_leader[0]:
-                logging.info(f'[NODE {node_id}] I was follower. follower.stop()')
+                logger.info(f'[NODE {node_id}] I was follower. follower.stop()')
                 vault.follower_stop()
 
-        logging.info("CALLBACK Follower or server stopped")
+        logger.info("CALLBACK Follower or server stopped")
 
         # print("Before ACQ leader_elected_cv")
         leader_elected_cv.acquire()
@@ -187,7 +192,7 @@ def main():
         leader_elected_cv.release()
         # print("After REL leader_elected_cv")
 
-        logging.info("CALLBACK finished")
+        logger.info("CALLBACK finished")
 
     bully_port = os.environ['BULLY_LISTEN_PORT']
     bully_peer_addrs = os.environ['BULLY_PEERS_INFO'].split(',')
@@ -208,14 +213,14 @@ def main():
 
         i_am_leader[0] = bully.get_is_leader()
         if i_am_leader[0]:
-            logging.info(f"Leader Started: {exited}")
+            logger.info(f"Leader Started: {exited}")
             exited = leader_start(server)
-            logging.info(f"Leader finished: {exited}")
+            logger.info(f"Leader finished: {exited}")
         else:
-            logging.info(f"Follower Started: {exited}")
+            logger.info(f"Follower Started: {exited}")
             leader_addr = bully.get_leader_addr()
             exited = follower_start(vault, leader_addr)
-            logging.info(f"Follower finished: {exited}")
+            logger.info(f"Follower finished: {exited}")
 
     vault_cm.shutdown_connections()
     event.set()

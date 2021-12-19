@@ -146,3 +146,10 @@ start-input:
 example-ps:
 	docker-compose --project-name "tp2-middleware" ps
 .PHONY: example-ps
+
+rs:
+	./dcp down
+	rm -rf storage
+	mkdir storage 
+	./dcp up -d
+.PHONY: rs
