@@ -22,17 +22,13 @@ def main():
     threads = []
 
     event = threading.Event()
-    # heartbeat_t = Heartbeat(event)
-    # heartbeat_t.start()
-    # threads.append(heartbeat_t)
+    heartbeat_t = Heartbeat(event)
+    heartbeat_t.start()
+    threads.append(heartbeat_t)
 
-    # udp_server = UdpServer(state)  # threading.Thread(target=server.run, args=(state,))
-    # udp_server.start()
-    # threads.append(udp_server)
-
-    # bully_manager = BullyManager(event)
-    # bully_manager.start()
-    # threads.append(bully_manager)
+    udp_server = UdpServer(state)  # threading.Thread(target=server.run, args=(state,))
+    udp_server.start()
+    threads.append(udp_server)
 
     node_id = os.getenv('NODE_ID', 1)
     bully_port = os.getenv('BULLY_LISTEN_PORT', 9000)
@@ -47,9 +43,9 @@ def main():
 
 
     # signal.signal(signal.SIGTERM, bully_manager.exit_gracefully)
-    # state_checker = Reviver(state, bully)
-    # state_checker.start()
-    # threads.append(state_checker)
+    state_checker = Reviver(state, bully)
+    state_checker.start()
+    threads.append(state_checker)
 
     [t.join() for t in threads]
     bully._join_listen_thread()
