@@ -32,8 +32,6 @@ class Vault:
 
         logging.info("Waiting for messages from leader")
         while self.follower_keep_listening:
-            # TODO: fletar el sleep
-            time.sleep(1)
             # Solo se puede cambiar el leader cuando no hay una operacion siendo procesada
             with self.follower_lock:
 
@@ -73,10 +71,7 @@ class Vault:
         logging.info("Follower quiting")
 
     def follower_stop(self):
-        logging.info("Stopping follower proc")
-        with self.follower_lock:
-            logging.info("Follower lock acquired")
-            self.follower_keep_listening = False
+        self.follower_keep_listening = False
 
     def _follower_get(self, key):
         res = self.storage.get(key)
@@ -100,13 +95,26 @@ class Vault:
 
         if error is false and value is none, it means that the key was not found in the store
         """
+
+        start = time.time()
+
         key = key.strip()
         validate_key(key)
 
+        logging.info(f"VALIDATED KEYS: {time.time() - start}")
+
         message = f"GET {key}"
         self.cluster.send_to_all(message)
+
+        logging.info(f"SENT GET TO FOLLOWERS: {time.time() - start}")
+
         responses = self._get_responses()
+
+        logging.info(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+
         responses.append(self._follower_get(key))
+
+        logging.info(f"GOT OWN RESPONSE: {time.time() - start}")
 
         if len(responses) < self.cluster_quorum:
             return True, None
@@ -121,6 +129,8 @@ class Vault:
 
         if most_recent_value[0] == 0:
             return False, None
+
+        logging.info(f"PROCESS RESPONSES: {time.time() - start}")
 
         return False, most_recent_value[1]
 
