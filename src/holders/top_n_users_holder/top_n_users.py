@@ -2,8 +2,20 @@ from ..holder import AbstractHolder
 import json
 
 class TopNUsersHolder(AbstractHolder):
-    def __init__(self, top_n, **kwargs) -> None:
-        self.users_scores = []
+    name = 'top_n_users'
+
+    def export_state(self):
+        ret = super().export_state()
+        ret["users_scores"] = self.users_scores
+        ret["top_n"] = self.top_n
+        return ret
+    
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls(**state)
+
+    def __init__(self, top_n, users_scores = [], **kwargs) -> None:
+        self.users_scores = users_scores
         self.top_n = top_n
         super().__init__(perform_affinity=False, **kwargs)
     

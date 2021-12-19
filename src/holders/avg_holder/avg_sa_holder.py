@@ -2,9 +2,22 @@ import json
 from ..holder import AbstractHolder
 
 class AvgSAHolder(AbstractHolder):
-    def __init__(self, column, **kwargs) -> None:
-        self.total_count = 0
-        self.positive_sa_count = 0
+    name = 'avg_sa_holder'
+
+    def export_state(self):
+        ret = super().export_state()
+        ret["total_count"] = self.total_count
+        ret["positive_sa_count"] = self.positive_sa_count
+        ret["column"] = self.column
+        return ret
+    
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls(**state)
+
+    def __init__(self, column, total_count = 0, positive_sa_count = 0, **kwargs) -> None:
+        self.total_count = total_count
+        self.positive_sa_count = positive_sa_count
         self.column = column
         super().__init__(**kwargs)
     
