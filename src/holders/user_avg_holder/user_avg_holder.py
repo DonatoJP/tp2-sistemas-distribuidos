@@ -3,8 +3,19 @@ from ..holder import AbstractHolder
 from io import StringIO
 
 class UserAvgHolder(AbstractHolder):
-    def __init__(self, **kwargs) -> None:
-        self.user_counters = {}
+    name = 'user_avg'
+
+    def export_state(self):
+        ret = super().export_state()
+        ret["user_counters"] = self.user_counters
+        return ret
+    
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls(**state)
+
+    def __init__(self, user_counters = {}, **kwargs) -> None:
+        self.user_counters = user_counters
         super().__init__(**kwargs)
 
     def _process_line_of_chunk(self, line_data):

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from utils.workload import Task
+from  reviver.workload import Task
 from functools import reduce
 
 class AbstractOperator:

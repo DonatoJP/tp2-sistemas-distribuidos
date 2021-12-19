@@ -51,7 +51,7 @@ class Vault:
                         logging.info("Follower exiting")
                         break
 
-                logging.info(f"Got message {message} from leader")
+                # logging.info(f"Got message {message} from leader")
 
                 # Se podria optimizar esto con una pool de workers?
                 op, params = message.split(" ", 1)
@@ -163,7 +163,7 @@ class Vault:
         if len(responses) < self.cluster_quorum:
             return True
 
-        print(f"Got responses: {responses}")
+        # print(f"Got responses: {responses}")
 
         def parse_response(res):
             try:
@@ -185,7 +185,7 @@ class Vault:
         responses = self._get_responses()
         responses.append(self._follower_post(next_version, key, value))
 
-        print(f"Got responses: {responses}")
+        # print(f"Got responses: {responses}")
 
         return responses.count("ACK") < self.cluster_quorum
 

@@ -2,9 +2,21 @@ import json
 from ..holder import AbstractHolder
 from io import StringIO
 class GeneralAvg(AbstractHolder):
-    def __init__(self, **kwargs) -> None:
-        self.total_score = 0
-        self.total_count = 0
+    name = 'general_avg'
+
+    def export_state(self):
+        ret = super().export_state()
+        ret["total_score"] = self.total_score
+        ret["total_count"] = self.total_count
+        return ret
+    
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls(**state)
+
+    def __init__(self, total_score = 0, total_count = 0, **kwargs) -> None:
+        self.total_score = total_score
+        self.total_count = total_count
         super().__init__(**kwargs)
 
     def _process_line_of_chunk(self, line_data):

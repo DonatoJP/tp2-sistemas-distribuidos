@@ -5,6 +5,8 @@ RUN apt-get -q update && apt-get -qy install netcat
 RUN wget 'https://raw.githubusercontent.com/eficode/wait-for/master/wait-for'
 
 COPY /src/input_node .
+COPY /src/reviver .
+COPY /src/reviver ./reviver
 COPY /src/utils ./utils
 RUN mkdir data
 ENTRYPOINT [ "/bin/sh" ]

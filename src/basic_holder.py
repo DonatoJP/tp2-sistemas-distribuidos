@@ -4,8 +4,9 @@ from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
 from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
-from utils.workload import Task, DuplicatesManager
+from reviver.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
+from reviver.state_saver import StateSaver
 
 def main():
     try:
@@ -18,17 +19,28 @@ def main():
     heartbeat_t = Heartbeat(exit_ev)
     heartbeat_t.start()
 
+    node_name = params["node_name"]
+    state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
+    state = state_saver.retrieve_state(node_name)
+
     operation_module = importlib.import_module(params["module"])
     ImportedHolder = getattr(operation_module, 'ImportedHolder')
-    holder_to_use = ImportedHolder(**params["operator_params"])
 
     queue_producer = QueueProducer(params["centinels_to_send"])
     queue_consumer = QueueConsumer()
 
     queue_producer.init_queue_pattern(**params["output_queue_params"])
 
-    centinels_manager = CentinelsManager(params["centinels_to_receive"])
-    duplicates_manager = DuplicatesManager()
+    if state is None:
+        centinels_manager = CentinelsManager(params["centinels_to_receive"])
+        duplicates_manager = DuplicatesManager()
+        holder_to_use = ImportedHolder(**params["operator_params"])
+    else:
+        duplicates_manager = DuplicatesManager.from_state(state[DuplicatesManager.name])
+        centinels_manager = CentinelsManager.from_state(state[CentinelsManager.name])
+        holder_to_use = ImportedHolder.from_state(state[ImportedHolder.name])
+    
+    print(holder_to_use)
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
@@ -51,7 +63,9 @@ def main():
             
             duplicates_manager.register_task(task)
 
-        # TODO: Integrar Vault para guardar estado
+            # TODO: Integrar Vault para guardar estado
+            state_saver.save_state(node_name, [duplicates_manager, centinels_manager, holder_to_use])
+
         ch.basic_ack(method.delivery_tag)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue

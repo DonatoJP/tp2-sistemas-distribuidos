@@ -2,8 +2,20 @@ from ..holder import AbstractHolder
 import json
 
 class TopNYearsHolder(AbstractHolder):
-    def __init__(self, top_n, **kwargs) -> None:
-        self.group_by_year = {}
+    name = 'top_n_years'
+
+    def export_state(self):
+        ret = super().export_state()
+        ret["group_by_year"] = self.group_by_year
+        ret["top_n"] = self.top_n
+        return ret
+    
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls(**state)
+
+    def __init__(self, top_n, group_by_year = {}, **kwargs) -> None:
+        self.group_by_year = group_by_year
         self.top_n = top_n
         super().__init__(**kwargs)
     

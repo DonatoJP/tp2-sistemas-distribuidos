@@ -2,7 +2,7 @@ import json
 from io import StringIO
 from ..operator import AbstractOperator
 from ..column_drop.column_drop import DropColumnOperator
-from utils.workload import Task
+from  reviver.workload import Task
 
 class ColumnDropTopicOperator(AbstractOperator):
     def __init__(self, params_by_topic, perform_affinity, max_affinity) -> None:

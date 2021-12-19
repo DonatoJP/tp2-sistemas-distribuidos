@@ -1,10 +1,16 @@
-from utils.workload import Task
+from reviver.workload import Task
+from reviver.state_saver import Storable
+class CentinelsManager(Storable):
+    name = "centinels_manager"
 
-class CentinelsManager:
-    def __init__(self, previous_step_components) -> None:
+    def __init__(self, previous_step_components, received_centinels = {}) -> None:
         self.previous_step_components = previous_step_components
-        self.received_centinels = {}
+        self.received_centinels = received_centinels
         self._centinel = 'END'
+        super().__init__(self.name)
+    
+    def __str__(self) -> str:
+        return f'CentinelsManager {self.previous_step_components} {self.received_centinels}'
 
     def is_centinel(self, task: Task):
         return task.centinel
@@ -25,3 +31,15 @@ class CentinelsManager:
     @property
     def centinel(self):
         return self._centinel
+
+    def export_state(self):
+        ret = {}
+        ret["previous_step_components"] = self.previous_step_components
+        ret["received_centinels"] = self.received_centinels
+        return ret
+    
+    @classmethod
+    def from_state(cls, state):
+        previous_step_components = state['previous_step_components']
+        received_centinels = state['received_centinels']
+        return cls(previous_step_components, received_centinels)
