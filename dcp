@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker-compose --project-name "tp2-middleware" -f  docker-compose-ej1-simple.yaml $@

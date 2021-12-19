@@ -1,22 +1,29 @@
 import socket
-from threading import Thread
+import logging
+from threading import Thread, Event, Condition, Lock
 from .peer_connection import PeerConnection
 from typing import Optional
 
 
 class ConnectionsManager:
-    def __init__(self, node_id: str, self_port_n: str, connections_to_create: list):
+    def __init__(self, node_id: str, self_port_n: str, connections_to_create: list, event: Event, timeout=None):
         self.connections: list[PeerConnection] = []
         self.node_id = int(node_id)
         self.port_n = int(self_port_n)
         self.listener_stream = None
-        self.addresses = connections_to_create
+        self.addresses = []
+        self.event = event
+
+        self.all_connected = False
+        self.all_connected_cv = Condition(Lock())
 
         for c in connections_to_create:
-            id_addr, port = c.split(':')
-            id, addr = id_addr.split('-')
+            id, addr = c.split('-', 1)
+            host, port = addr.split(':', 1)
+            self.addresses.append(addr)
             if id != node_id:
-                self.connections.append(PeerConnection(addr, port, id))
+                self.connections.append(
+                    PeerConnection(host, port, id, timeout))
 
         # Open Listening process
         self.t1 = Thread(target=self._init_listening_port)
@@ -25,6 +32,18 @@ class ConnectionsManager:
 
         # Begin Connections with active peers
         self._init_peer_connections()
+
+
+        self.all_connected_cv.acquire()
+        self.all_connected_cv.wait_for(self._all_peers_are_connected)
+        self.all_connected_cv.release()
+        
+        self.event.set()
+
+    def _all_peers_are_connected(self):
+        print("Are all peers connected?", all([ peer.is_connected() for peer in self.connections]))
+        return all([ peer.is_connected() for peer in self.connections])
+
 
     def _join_listen_thread(self):
         self.t1.join()
@@ -39,24 +58,37 @@ class ConnectionsManager:
         for peer_connection in self.connections:
             peer_connection.init_connection()
 
+        self.all_connected_cv.acquire()
+        self.all_connected_cv.notify_all()
+        self.all_connected_cv.release()
+
     def _init_listening_port(self):
         stream = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         stream.bind(('0.0.0.0', self.port_n))
         stream.listen()
         self.listener_stream = stream
-        print(f'[Node {self.node_id} Listener Thread] Begin listening in {self.port_n}')
+        logging.info(
+            f'[Node {self.node_id} Listener Thread] Begin listening in {self.port_n}')
         while True:
+            logging.info("Starting to accept Connections")
             conn, client_addr = stream.accept()
+            logging.info("Connectinos Accepted")
             peer_connection = self._find_peer(client_addr[0])
             if not peer_connection:
+                logging.info("Connectinos closed")
+
                 conn.close()
                 continue
 
-            print(
+            logging.info(
                 f'[Node {self.node_id} Listener Thread] Incoming connection request from {socket.gethostbyaddr(client_addr[0])[0].split(".")[0]}')
             peer_connection.set_connection(conn)
+            self.all_connected_cv.acquire()
+            self.all_connected_cv.notify_all()
+            self.all_connected_cv.release()
 
     def _find_peer(self, peer_addr) -> Optional[PeerConnection]:
+        
         return next((x for x in self.connections if x.is_peer(peer_addr)), None)
 
     def send_to(self, peer_addr, message):
@@ -68,7 +100,10 @@ class ConnectionsManager:
 
     def send_to_all(self, message):
         for peer in self.connections:
-            peer.send_message(message)
+            try:
+                peer.send_message(message)
+            except BrokenPipeError:
+                pass
 
     def recv_from(self, peer_addr) -> str:
         peer = self._find_peer(peer_addr)
@@ -78,8 +113,15 @@ class ConnectionsManager:
         return peer.recv_message()
 
     def send_to_higher(self, message: str):
-        # TODO: Change port_n to conn_id
-        higher_peers = filter(lambda pc: pc.is_higher(self.node_id) , self.connections)
+        higher_peers = filter(lambda pc: pc.is_higher(
+            self.node_id), self.connections)
 
         for mp in higher_peers:
             mp.send_message(message)
+
+    def wait_until_back_again(self, peer_addr):
+        peer = self._find_peer(peer_addr)
+        if peer is None:
+            raise Exception('Invalid peer address')
+
+        return peer._wait_until_back_again()

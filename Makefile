@@ -143,7 +143,6 @@ start-input:
 	docker-compose --project-name "tp2-middleware" -f  docker-compose-input.yaml up -d
 .PHONY: start-input
 
-
 example-ps:
 	docker-compose --project-name "tp2-middleware" ps
 .PHONY: example-ps

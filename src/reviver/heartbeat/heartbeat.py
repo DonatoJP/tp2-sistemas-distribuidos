@@ -7,8 +7,9 @@ import os
 import random
 import logging
 
-format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+# format = "%(asctime)s: %(message)s"
+logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
+logger = logging.getLogger("Heartbeat")
 
 HOSTNAME = os.getenv("HOSTNAME", "tp3_heartbeat")
 COORDINATOR_HOSTNAME = os.getenv("COORDINATOR_HOSTNAME", "coordinator")
@@ -25,21 +26,21 @@ class Heartbeat(Thread):
 
     def run(self):
         pings = 0
-        logging.info(f"Created {HOSTNAME}")
+        logger.info(f"Created {HOSTNAME}")
         while not self.__event.is_set():
             idx = random.randint(1, COORDINATOR_AMOUNT)
             clientSocket = socket(AF_INET, SOCK_DGRAM)
             coordinator_host = f"{COORDINATOR_HOSTNAME}{idx}"
             message = {"host": HOSTNAME, "message": "ping"}
             addr = (coordinator_host, COORDINATOR_PORT)
-            logging.info("Sending status to %s", coordinator_host)
+            logger.debug("Sending status to %s", coordinator_host)
             try:
                 res = clientSocket.sendto(
                     bytes(json.dumps(message), encoding="utf-8"), addr
                 )
-                # logging.info("res %s", res)
+                # logger.info("res %s", res)
                 pings += 1
-                # logging.info("PINGS COUNT %s", pings)
+                # logger.info("PINGS COUNT %s", pings)
                 time.sleep(HEARTBEAT_TIME)
             except Exception:
-                logging.info(f"Coordinator <{idx}> unrechable, next random?")
+                logger.debug(f"Coordinator <{idx}> unrechable, next random?")

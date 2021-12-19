@@ -12,6 +12,8 @@ STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
 state = {}
 
+# logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
+logger = logging.getLogger("Reviver")
 
 class Reviver(Thread):
     def __init__(self, state, bully):
@@ -21,16 +23,16 @@ class Reviver(Thread):
         self.bully = bully
 
     def thread_function(name):
-        logging.info("Thread %s: starting", name)
+        logger.info("Thread %s: starting", name)
         time.sleep(2)
-        logging.info("Thread %s: finishing", name)
+        logger.info("Thread %s: finishing", name)
 
     def check_state(self):
         def check_key_value(key, value, now):
             diff = (now - value).total_seconds()
-            logging.info("Key %s, Diff %s", key, diff)
+            logger.info("Key %s, Diff %s", key, diff)
             if diff > CHECK_TIME_DIFF:
-                logging.info("Client %s Down, restarting!", key)
+                logger.info("Client %s Down, restarting!", key)
                 try:
                     c = self.client.containers.get(key)
                     c.restart()
@@ -59,11 +61,9 @@ class Reviver(Thread):
                 if r is not None and r["status"] == STATUS_RESTART
             ]
         else:
-            logging.info("Not Leader, skipping!")
+            logger.info("Not Leader, skipping!")
 
     def run(self):
-        format = "%(asctime)s: %(message)s"
-        logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
         self.client = docker.from_env()
         self.check_state()
