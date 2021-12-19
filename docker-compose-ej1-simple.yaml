@@ -15,7 +15,7 @@ services:
   #   # container_name: drop-input-column-answers-1
   #   image: building-block:basic
   #   volumes:
-  #     - ./src:/app
+  #     - ./src:/reviver
   #   env_file:
   #     - .env
   #   environment:
@@ -36,7 +36,7 @@ services:
   #   # container_name: ej1-filter-1
   #   image: building-block:basic
   #   volumes:
-  #     - ./src:/app
+  #     - ./src:/reviver
   #   env_file:
   #     - .env
   #   environment:
@@ -58,7 +58,7 @@ services:
   #   # container_name: ej1-sentiment-analyser-1
   #   image: building-block:full
   #   volumes:
-  #     - ./src:/app
+  #     - ./src:/reviver
   #   env_file:
   #     - .env
   #   environment:
@@ -80,7 +80,7 @@ services:
   #   # container_name: ej1-avg-holder-1
   #   image: building-block:basic
   #   volumes:
-  #     - ./src:/app
+  #     - ./src:/reviver
   #   env_file:
   #     - .env
   #   environment:
@@ -98,45 +98,83 @@ services:
   #   networks:
   #     - tp2-network
 
-  app1:
-    container_name: app1
+  vault1:
+    container_name: vault1
     build: ./src/reviver
     env_file:
-      - ./src/reviver/.env
+      - ./src/reviver/vault/.env
     environment:
       - NODE_ID=1
     volumes:
-      &appvolumes
-      - ./src/reviver/state.txt:/app/state.txt
+      &vaultvolumes
       - ./src/reviver:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
+    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
     networks:
       - tp2-network
 
-  app2:
-    container_name: app2
+  vault2:
+    container_name: vault2
     build: ./src/reviver
     env_file:
-      - ./src/reviver/.env
+      - ./src/reviver/vault/.env
     environment:
       - NODE_ID=2
-    volumes: *appvolumes
-    command: [ "./wait-for", "app1:9000", "--", "python", "main.py" ]
+    volumes: *vaultvolumes
+    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
     networks:
       - tp2-network
 
-  app3:
-    container_name: app3
+  vault3:
+    container_name: vault3
     build: ./src/reviver
     env_file:
-      - ./src/reviver/.env
+      - ./src/reviver/vault/.env
     environment:
       - NODE_ID=3
-    volumes: *appvolumes
-    command: [ "./wait-for", "app2:9000", "--", "python", "main.py" ]
+    volumes: *vaultvolumes
+    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
     networks:
       - tp2-network
+
+  # reviver1:
+  #   container_name: reviver1
+  #   build: ./src/reviver
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=1
+  #   volumes:
+  #     &appvolumes
+  #     - ./src/reviver/state.txt:/app/state.txt
+  #     - ./src/reviver:/app
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
+
+  # reviver2:
+  #   container_name: reviver2
+  #   build: ./src/reviver
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=2
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
+
+  # reviver3:
+  #   container_name: reviver3
+  #   build: ./src/reviver
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=3
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
   # app4:
   #   # container_name: app4
@@ -146,7 +184,7 @@ services:
   #   environment:
   #     - NODE_ID=4
   #   volumes: *appvolumes
-  #   command: [ "./wait-for", "app3:9000", "--", "python", "main.py" ]
+  #   command: [ "./wait-for", "reviver3:9000", "--", "python", "main.py" ]
   #   networks:
   #     - tp2-network
 

@@ -5,6 +5,7 @@ RUN apt-get -q update && apt-get -qy install netcat
 RUN wget 'https://raw.githubusercontent.com/eficode/wait-for/master/wait-for'
 
 RUN pip install docker
+RUN pip install pika
 
 COPY . .
 ENTRYPOINT [ "/bin/sh" ]
