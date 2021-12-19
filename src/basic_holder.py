@@ -15,9 +15,9 @@ def main():
         print(e.message)
         exit()
 
-    # exit_ev= threading.Event()
-    # heartbeat_t = Heartbeat(exit_ev)
-    # heartbeat_t.start()
+    exit_ev= threading.Event()
+    heartbeat_t = Heartbeat(exit_ev)
+    heartbeat_t.start()
 
     node_name = params["node_name"]
     state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
@@ -73,14 +73,14 @@ def main():
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
-        # exit_ev.set()
+        exit_ev.set()
         exit([queue_consumer])
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
     print('Starting to consume...')
     queue_consumer.start_consuming()
-    # exit_ev.set()
+    exit_ev.set()
 
 if __name__ == '__main__':
     try:

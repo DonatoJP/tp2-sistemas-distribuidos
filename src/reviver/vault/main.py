@@ -51,14 +51,14 @@ class VaultMessageProcessor(RabbitMessageProcessor):
             key1, key2 = keys.split("=", 1)
             user_dict_value = self._get(key1)
 
-            logging.info(f"GOT {user_dict_value}")
+            # logging.info(f"GOT {user_dict_value}")
 
             if len(user_dict_value) == 0:
                 return ""
 
             user_dict = pickle.loads(bytes.fromhex(user_dict_value))
 
-            logging.info(f"GOT DICT {user_dict}")
+            # logging.info(f"GOT DICT {user_dict}")
 
             if not isinstance(user_dict, dict):
                 return ""

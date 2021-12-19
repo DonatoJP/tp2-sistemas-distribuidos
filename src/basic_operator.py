@@ -16,8 +16,8 @@ def main():
         exit()
     event = threading.Event()
 
-    # heartbeat_t = Heartbeat(event)
-    # heartbeat_t.start()
+    heartbeat_t = Heartbeat(event)
+    heartbeat_t.start()
 
     node_name = params["node_name"]
     state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])

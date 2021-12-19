@@ -17,7 +17,6 @@ class SentimentAnalysisOperator(AbstractOperator):
 
     def exec_operation(self, data) -> list:
         def operation(data):
-            print(data)
             result = {}
             data_dict = json.loads(data)
             result["result"] = self._calc_sentiment(data_dict)
