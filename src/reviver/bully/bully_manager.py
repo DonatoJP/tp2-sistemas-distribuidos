@@ -7,14 +7,15 @@ from . import Bully
 import os, time
 
 class BullyManager(Thread):
-    def __init__(self, node_id, peer_hostnames, port_n):
+    def __init__(self, node_id, peer_hostnames, port_n, new_leader_callback=None):
         Thread.__init__(self)
         self.node_id = node_id
         self.peer_hostnames = peer_hostnames
         self.port_n = int(port_n)
         self.bully = None
         self.bully_cv = Condition(Lock())
-    
+        self.new_leader_callback = new_leader_callback
+
     def run(self) -> None:
         bully_port = self.port_n
         event_con_start = THEvent()
@@ -26,9 +27,12 @@ class BullyManager(Thread):
         # time.sleep(5)
 
         self.bully_cv.acquire()
-        self.bully = Bully(bully_cm, bully_peers, event_con_start)
+        self.bully = Bully(bully_cm, bully_peers, event_con_start, self.new_leader_callback)
         self.bully_cv.notify_all()
         self.bully_cv.release()
+
+        # if self.new_leader_callback is not None:
+        #     self.bully.set_callback(Event.NEW_LEADER, self.new_leader_callback)
 
         self.bully.begin_election_process()
 
@@ -43,7 +47,7 @@ class BullyManager(Thread):
     def set_callback(self, event: Event, callback) -> None:
         self._wait_until_bully_is_ready()
         self.bully.set_callback(event, callback)
-    
+
     def shutdown_connections(self):
         self._wait_until_bully_is_ready()
         self.bully.conn_manager.shutdown_connections()
@@ -51,15 +55,15 @@ class BullyManager(Thread):
     def _join_listen_thread(self):
         self._wait_until_bully_is_ready()
         self.bully.conn_manager._join_listen_thread()
-    
+
     def begin_election_process(self):
         self._wait_until_bully_is_ready()
         self.bully.begin_election_process()
-    
+
     def get_is_leader(self):
         self._wait_until_bully_is_ready()
         return self.bully.get_is_leader()
-    
+
     def get_leader_addr(self):
         self._wait_until_bully_is_ready()
         return self.bully.get_leader_addr()

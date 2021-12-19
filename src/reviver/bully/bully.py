@@ -10,7 +10,8 @@ class Bully:
     def __init__(self,
                  connection_manager: ConnectionsManager,
                  peer_hostnames: "list[str]",
-                 event: THEvent
+                 event: THEvent,
+                 new_leader_callback=None
                  ) -> None:
         self.conn_manager = connection_manager
         self.peer_hostnames = peer_hostnames
@@ -19,6 +20,9 @@ class Bully:
         self.event = event
         self.is_in_election = False
         self.is_in_election_cv = Condition(Lock())
+        self.ready_peers = 0
+        self.bully_is_ready = False
+        self.bully_is_ready_cv = Condition(Lock())
 
         self.received_ok = False
         self.received_ok_cv = Condition(Lock())
@@ -32,6 +36,8 @@ class Bully:
         self.is_leader = False
         self.is_leader_cv = Condition(Lock())
 
+        self.new_leader_callback = new_leader_callback
+
         self.event.wait()
         for ph in peer_hostnames:
             th = Thread(target=self._start_receiving_from_peer, args=(ph,))
@@ -44,6 +50,18 @@ class Bully:
         ping_thread.start()
         self.threads.append(ping_thread)
 
+        self._wait_until_all_are_ready()
+
+    def wait_bully_ready(self):
+        self.bully_is_ready_cv.acquire()
+        self.bully_is_ready_cv.wait_for(lambda: self.bully_is_ready)
+        self.bully_is_ready_cv.release()
+
+    def _wait_until_all_are_ready(self):
+        self.conn_manager.send_to_all('READY')
+
+        self.wait_bully_ready()
+
     def _poll_leader(self):
         """
             Private function. If the node is not the leader, it sends PING messages expecting to receive
@@ -55,13 +73,15 @@ class Bully:
             self.leader_addr_cv.acquire()
 
             if not self.is_leader and not self.is_in_election and self.leader_addr is not None:
-                self.is_leader_cv.release()
                 self.is_in_election_cv.release()
+                self.is_leader_cv.release()
+
+                logging.info(f"Sending PING to {self.leader_addr}")
 
                 self.conn_manager.send_to(self.leader_addr, 'PING')
                 self.leader_addr_cv.release()
 
-                received_ping_echo = self.wait_get_received_ping_echo(3)
+                received_ping_echo = self.wait_get_received_ping_echo(7)
                 if not received_ping_echo:
                     logging.info(
                         f'I detect that LEADER is down. Beggining with election process...')
@@ -72,7 +92,7 @@ class Bully:
                 self.leader_addr_cv.release()
 
             self.set_received_ping_echo(False)
-            time.sleep(5)
+            time.sleep(15)
 
     def get_is_leader(self):
         """
@@ -204,8 +224,15 @@ class Bully:
 
         self._reset_election_variables()
 
+        logging.info("Calling callback 1")
+
         if Event.NEW_LEADER in self.callbacks:
-            self.callbacks[Event.NEW_LEADER]()
+            logging.info("Calling callback 2")
+            self.callbacks[Event.NEW_LEADER](self)
+
+        if self.new_leader_callback:
+            logging.info("Calling callback 3")
+            self.new_leader_callback(self)
 
     def _process_election_message(self, peer_addr):
         """
@@ -236,7 +263,11 @@ class Bully:
         self._reset_election_variables()
 
         if Event.NEW_LEADER in self.callbacks:
-            self.callbacks[Event.NEW_LEADER]()
+            self.callbacks[Event.NEW_LEADER](self)
+
+        if self.new_leader_callback:
+            logging.info("Calling callback 3")
+            self.new_leader_callback(self)
 
     def _reset_election_variables(self):
         self.set_is_in_election(False)
@@ -246,12 +277,18 @@ class Bully:
         """
             Process message of type PING. Answers with ECHO_PING
         """
+
         self.conn_manager.send_to(peer_addr, 'ECHO_PING')
+        logging.info(f"Sent ECHO_PING to {peer_addr}")
 
     def _start_receiving_from_peer(self, peer_addr):
         logging.info(f'Starting to receive from {peer_addr}')
         while True:
-            msg = self.conn_manager.recv_from(peer_addr)
+            try:
+                msg = self.conn_manager.recv_from(peer_addr)
+            except Exception as e:
+                logging.info(e)
+
             if msg is None:
                 logging.info(f'Waiting until {peer_addr} is back again')
                 self.conn_manager.wait_until_back_again(peer_addr)
@@ -265,9 +302,33 @@ class Bully:
             elif msg == 'LEADER':
                 self._process_leader_message(peer_addr)
             elif msg == 'PING':
+                logging.info(f"Received PING from {peer_addr}")
                 self._echo_ping(peer_addr)
             elif msg == 'ECHO_PING':
+                logging.info(f"Received ECHO PING from {peer_addr}")
                 self.notify_set_received_ping_echo(True)
+            elif msg == 'READY':
+                self._process_ready_message(peer_addr)
+            elif msg == 'ECHO_READY':
+                self._process_echo_ready_message()
+
+    def _process_ready_message(self, peer_addr):
+        self.bully_is_ready_cv.acquire()
+        if self.bully_is_ready:
+            self.conn_manager.send_to(peer_addr, 'ECHO_READY')
+            self.bully_is_ready_cv.release()
+        else:
+            self.ready_peers += 1
+            if self.ready_peers == len(self.conn_manager.connections):
+                self.bully_is_ready = True
+                self.bully_is_ready_cv.notify_all()
+            self.bully_is_ready_cv.release()
+
+    def _process_echo_ready_message(self):
+        self.bully_is_ready_cv.acquire()
+        self.bully_is_ready = True
+        self.bully_is_ready_cv.notify_all()
+        self.bully_is_ready_cv.release()
 
     def set_callback(self, event: Event, callback: Callable):
         """

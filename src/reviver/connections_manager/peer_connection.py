@@ -1,7 +1,7 @@
 import socket
 import select
 import logging
-from .conn_errors import ConnectionClosed
+from .conn_errors import ConnectionClosed, RecvTimeout
 from threading import Condition, Lock
 
 
@@ -32,7 +32,6 @@ class PeerConnection:
             logging.info("is ip!")
         else:
             hostname = peer_addr.split(":")[0]
-        logging.info("%s, %s, %s", peer_addr, hostname, self.node_id)
         return self.peer_addr == hostname
 
     def is_higher(self, peer_id: int):
@@ -102,9 +101,13 @@ class PeerConnection:
         msg_len = len(msg_bytes)
         to_send = msg_len.to_bytes(4, byteorder='big') + msg_bytes
 
-        self.peer_conn.sendall(to_send)
+        try:
+            self.peer_conn.sendall(to_send)
+        except BrokenPipeError:
+            logging.info("BROKEN PIPE")
+            pass
 
-    
+
     def is_connected(self):
         return self.peer_conn != None
 
@@ -128,6 +131,8 @@ class PeerConnection:
                 result += received
                 if bytes_read >= to_receive:
                     break
+            else:
+                raise RecvTimeout("Receive Timeout")
 
         return result
 

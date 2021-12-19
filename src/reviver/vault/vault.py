@@ -2,8 +2,10 @@ import logging
 from math import ceil
 from multiprocessing.pool import ThreadPool
 from threading import Lock
+import time
 
 from connections_manager import ConnectionsManager
+from connections_manager.conn_errors import RecvTimeout
 from .storage import Storage
 
 
@@ -42,12 +44,17 @@ class Vault:
 
         logging.info("Waiting for messages from leader")
         while self.follower_keep_listening:
+            # TODO: fletar el sleep
+            time.sleep(1)
             # Solo se puede cambiar el leader cuando no hay una operacion siendo procesada
             with self.follower_lock:
 
                 # Necesitamos un timeout para que cada tanto salga del recv_from y pueda cambiar de leader
                 # logging.info("Waiting for new message from leader")
-                message = self.cluster.recv_from(self.leader_addr)
+                try:
+                    message = self.cluster.recv_from(self.leader_addr)
+                except RecvTimeout:
+                    continue
                 if message is None:
                     if self.follower_keep_listening:
                         # logging.info("Follower continueing")

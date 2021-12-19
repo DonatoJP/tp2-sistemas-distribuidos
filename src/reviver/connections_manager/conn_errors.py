@@ -5,3 +5,7 @@ class PeerDownError(Exception):
 class ConnectionClosed(Exception):
     """Raised when trying to read data from a connection that is closed"""
     pass
+
+class RecvTimeout(Exception):
+    """Raised when a timeout occurs while receiving from socket"""
+    pass

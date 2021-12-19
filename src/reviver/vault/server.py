@@ -49,7 +49,10 @@ class RabbitConsumerServer:
             pass
 
     def stop(self):
-        self.channel.stop_consuming()
+        try:
+            self.channel.stop_consuming()
+        except:
+            pass
         # self.channel.close()
         # self.connection.close()
 

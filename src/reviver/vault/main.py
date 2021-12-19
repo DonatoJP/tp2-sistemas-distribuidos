@@ -3,9 +3,10 @@ import logging
 import signal
 import time
 from threading import Condition, Lock, Event as THEvent
-from bully.bully_manager import BullyManager, Event
+from bully.bully_manager import BullyManager
 
 from connections_manager import ConnectionsManager
+from bully import Bully, Event
 
 from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
@@ -76,23 +77,18 @@ def follower_start(vault: Vault, leader_addr):
 
 
 def main():
-    logging.basicConfig(level="INFO")
+    logging.basicConfig(format="[%(asctime)s] %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
     node_id = os.environ['NODE_ID']
     logging.info(f'Starting node {node_id}')
-
-    bully_port = os.getenv('BULLY_LISTEN_PORT', 9000)
-    bully_peer_addrs = os.environ['BULLY_PEERS_INFO'].split(',')
-    bully = BullyManager(node_id, bully_peer_addrs, bully_port)
-    bully.start()
 
     vault_peers = [addr for addr in os.environ['VAULT_PEERS_INFO'].split(
         ',') if not addr.startswith(f"{node_id}-")]
     vault_port = os.environ['VAULT_LISTEN_PORT']
     vault_timeout = int(os.environ['VAULT_TIMEOUT'])
-    event_con_start = THEvent()
+    event = THEvent()
     vault_cm = ConnectionsManager(
-        node_id, vault_port, vault_peers, event_con_start, vault_timeout)
+        node_id, vault_port, vault_peers, event, vault_timeout)
 
     logging.info("Waiting for initialization...")
 
@@ -103,10 +99,12 @@ def main():
     vault = Vault(vault_cm, storage_path, storage_buckets_number)
 
     retry_wait = float(os.environ['RETRY_WAIT'])
+
     message_processor = VaultMessageProcessor(vault, retry_wait)
 
     rabbit_adress = os.environ['RABBIT_ADDRESS']
     input_queue_name = os.environ['INPUT_QUEUE_NAME']
+
     server = RabbitConsumerServer(
         rabbit_adress, input_queue_name, message_processor)
 
@@ -115,10 +113,19 @@ def main():
     started = [False]
     started_cv = Condition(Lock())
 
-    def new_leader_callback():
-        print("CALLBACK")
+    leader_elected = [False]
+    leader_elected_cv = Condition(Lock())
 
-        if started[0]:
+    def new_leader_callback(bully: Bully):
+        logging.info(f"CALLBACK {started[0]}")
+        if not started[0]:
+            # print("Before ACQ started_cv")
+            started_cv.acquire()
+            started[0] = True
+            started_cv.notify_all()
+            started_cv.release()
+        else:
+            logging.info(f"CALLBACK Started, checking leader {i_am_leader[0]}")
             if i_am_leader[0] and not bully.get_is_leader():
                 logging.info(f'[NODE {node_id}] I was the leader. Now exiting')
                 server.stop()
@@ -126,14 +133,22 @@ def main():
                 logging.info(f'[NODE {node_id}] I was follower. follower.stop()')
                 vault.follower_stop()
 
-        if not started[0]:
-            # print("Before ACQ started_cv")
-            started_cv.acquire()
-            started[0] = True
-            started_cv.notify_all()
-            started_cv.release()
+        logging.info("CALLBACK Follower or server stopped")
 
-    bully.set_callback(Event.NEW_LEADER, new_leader_callback)
+        # print("Before ACQ leader_elected_cv")
+        leader_elected_cv.acquire()
+        leader_elected[0] = True
+        leader_elected_cv.notify_all()
+        leader_elected_cv.release()
+        # print("After REL leader_elected_cv")
+
+        logging.info("CALLBACK finished")
+
+    bully_port = os.environ['BULLY_LISTEN_PORT']
+    bully_peer_addrs = os.environ['BULLY_PEERS_INFO'].split(',')
+    bully = BullyManager(node_id, bully_peer_addrs, bully_port, new_leader_callback)
+    bully.start()
+
 
     started_cv.acquire()
     started_cv.wait_for(lambda: started[0])
@@ -141,20 +156,24 @@ def main():
 
     exited = False
     while not exited:
+        leader_elected_cv.acquire()
+        leader_elected_cv.wait_for(lambda: leader_elected[0])
+        leader_elected[0] = False
+        leader_elected_cv.release()
+
         i_am_leader[0] = bully.get_is_leader()
         if i_am_leader[0]:
-            logging.info(f"Leader Started")
+            logging.info(f"Leader Started: {exited}")
             exited = leader_start(server)
             logging.info(f"Leader finished: {exited}")
         else:
+            logging.info(f"Follower Started: {exited}")
             leader_addr = bully.get_leader_addr()
-            logging.info(f"Follower Started with leader: {leader_addr}")
             exited = follower_start(vault, leader_addr)
             logging.info(f"Follower finished: {exited}")
 
-    vault_cm.shutdown_connections()
-    bully.shutdown_connections()
+    # for thread in bully.threads:
+    #     thread.join()
 
-    bully.join()
     bully._join_listen_thread()
     vault_cm._join_listen_thread()

@@ -120,7 +120,7 @@ services:
     environment:
       - NODE_ID=2
     volumes: *vaultvolumes
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
+    entrypoint: [ "./wait-for", "vault1:9001", "--", "python", "main-vault.py" ]
     networks:
       - tp2-network
 
@@ -132,9 +132,19 @@ services:
     environment:
       - NODE_ID=3
     volumes: *vaultvolumes
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
+    entrypoint: [ "./wait-for", "vault2:9001", "--", "python", "main-vault.py" ]
     networks:
       - tp2-network
+
+  vault-playground:
+    build: ./src/reviver
+    env_file:
+      - ./src/reviver/vault/.env
+    volumes: *vaultvolumes
+    entrypoint: [ "./wait-for", "vault3:9001", "--", "python" ]
+    networks:
+      - tp2-network
+
 
   # reviver1:
   #   container_name: reviver1
