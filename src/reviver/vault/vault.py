@@ -45,7 +45,6 @@ class Vault:
                     if self.follower_keep_listening:
                         # logging.info("Follower continueing")
                         logging.info("Leader down")
-                        time.sleep(1)
                         break
                     else:
                         logging.info("Follower exiting")
