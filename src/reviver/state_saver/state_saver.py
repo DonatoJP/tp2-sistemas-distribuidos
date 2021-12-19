@@ -1,4 +1,4 @@
-from reviver.vault.client import VaultClient
+from ..vault.client import VaultClient
 from .storable import Storable
 
 class StateSaver():

@@ -1,5 +1,5 @@
 import csv, pika, json, os
-from utils.workload import Task
+from  reviver.workload import Task
 
 def main():
     file_to_read = os.environ["FILE_TO_PROCESS"] # 'data/red_answers.csv'

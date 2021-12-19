@@ -3,7 +3,7 @@ from rabbit_builders.consumers import QueueConsumer
 from rabbit_builders.producers import QueueProducer
 from rabbit_builders.centinels_manager import CentinelsManager
 from utils import parse_parameters, ParseParametersError, exit
-from utils.workload import Task
+from reviver.workload import Task
 from reviver.heartbeat.heartbeat import Heartbeat
 import threading
 
