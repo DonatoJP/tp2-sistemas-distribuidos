@@ -145,6 +145,8 @@ services:
     env_file:
       - ./src/reviver/vault/.env
     entrypoint: [ "./wait-for", "vault3:9001", "--", "python" ]
+    volumes:
+      - ./src/reviver:/app
     networks:
       - tp2-network
 

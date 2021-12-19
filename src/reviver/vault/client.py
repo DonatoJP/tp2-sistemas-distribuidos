@@ -1,6 +1,8 @@
 import pika
 import pickle
 
+from .validate import validate_key, validate_value
+
 
 class VaultClient:
     def __init__(self, rabbit_addr, input_queue_name):
@@ -16,6 +18,8 @@ class VaultClient:
         self.res_queue_name = res.method.queue
 
     def get(self, key):
+        validate_key(key)
+
         message = f"GET {self.res_queue_name} {key}"
         self.channel.basic_publish("", self.input_queue_name, message)
 
@@ -25,6 +29,9 @@ class VaultClient:
         return pickle.loads(bytes.fromhex(body.decode()))
 
     def post(self, key: str, value):
+        validate_key(key)
+        validate_value(value)
+
         value = pickle.dumps(value).hex()
         message = f"POST {key}={value}"
         self.channel.basic_publish("", self.input_queue_name, message)

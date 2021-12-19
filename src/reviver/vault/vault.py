@@ -6,7 +6,9 @@ import time
 
 from connections_manager import ConnectionsManager
 from connections_manager.conn_errors import RecvTimeout
+
 from .storage import Storage
+from .validate import validate_key, validate_value
 
 
 class Vault:
@@ -19,20 +21,6 @@ class Vault:
         self.follower_keep_listening = True
         self.follower_lock = Lock()
         self.cluster_quorum = ceil(len(self.cluster.connections) / 2)
-
-    def validate_key(self, key):
-        if not key:
-            raise ValueError("key must not be empty")
-        ILLEGAL_CHARS = ["=", "\r", "\n"]
-        if any(c in key for c in ILLEGAL_CHARS):
-            raise ValueError("key contains illegal characters")
-
-    def validate_value(self, value):
-        if not value:
-            raise ValueError("value must not be empty")
-        ILLEGAL_CHARS = ["\r", "\n"]
-        if any(c in value for c in ILLEGAL_CHARS):
-            raise ValueError("value contains illegal characters")
 
     def set_leader_addr(self, leader_addr):
         with self.follower_lock:
@@ -113,7 +101,7 @@ class Vault:
         if error is false and value is none, it means that the key was not found in the store
         """
         key = key.strip()
-        self.validate_key(key)
+        validate_key(key)
 
         message = f"GET {key}"
         self.cluster.send_to_all(message)
@@ -146,8 +134,8 @@ class Vault:
         returns True if client must retry
         """
         key = key.strip()
-        self.validate_key(key)
-        self.validate_value(key)
+        validate_key(key)
+        validate_value(key)
 
         print("Getting versions")
 
