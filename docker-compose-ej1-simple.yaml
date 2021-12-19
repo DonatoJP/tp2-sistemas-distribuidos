@@ -19,6 +19,7 @@ services:
     env_file:
       - .env
     environment:
+      - NODE_NAME=drop-input-column-answers-1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.column_drop_topics
       - OPERATOR_PARAMS={"params_by_topic":{"answer.ej1":{"columns_to_keep":["Score","Body"],"perform_affinity":true,"affinity_key":"Score","affinity_divider":1}},"perform_affinity":true,"max_affinity":1}
@@ -40,6 +41,7 @@ services:
     env_file:
       - .env
     environment:
+      - NODE_NAME=ej1-filter-1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.filter
       - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
@@ -62,6 +64,7 @@ services:
     env_file:
       - .env
     environment:
+      - NODE_NAME=ej1-sentiment-analyser-1
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.sentiment_analysis
@@ -84,6 +87,7 @@ services:
     env_file:
       - .env
     environment:
+      - NODE_NAME=ej1-avg-holder-1
       - PYTHONUNBUFFERED=1
       - BLOCK_ID=1
       - OPERATOR_MODULE=holders.avg_holder
@@ -100,7 +104,9 @@ services:
 
   vault1:
     container_name: vault1
-    build: ./src/reviver
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
     env_file:
       - ./src/reviver/vault/.env
     environment:
@@ -114,7 +120,9 @@ services:
 
   vault2:
     container_name: vault2
-    build: ./src/reviver
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
     env_file:
       - ./src/reviver/vault/.env
     environment:
@@ -128,7 +136,9 @@ services:
 
   vault3:
     container_name: vault3
-    build: ./src/reviver
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
     env_file:
       - ./src/reviver/vault/.env
     environment:
@@ -141,7 +151,9 @@ services:
       - tp2-network
 
   vault-playground:
-    build: ./src/reviver
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
     env_file:
       - ./src/reviver/vault/.env
     entrypoint: [ "./wait-for", "vault3:9001", "--", "python" ]
@@ -150,10 +162,11 @@ services:
     networks:
       - tp2-network
 
-
   reviver1:
     container_name: reviver1
-    build: ./src/reviver
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
     env_file:
       - ./src/reviver/.env
     environment:
@@ -191,29 +204,33 @@ services:
     networks:
       - tp2-network
 
-  # app4:
-  #   # container_name: app4
-  #   build: ./src/reviver
-  #   env_file:
-  #     - ./src/reviver/.env
-  #   environment:
-  #     - NODE_ID=4
-  #   volumes: *appvolumes
-  #   command: [ "./wait-for", "reviver3:9000", "--", "python", "main.py" ]
-  #   networks:
-  #     - tp2-network
+  app4:
+    # container_name: app4
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=4
+    volumes: *appvolumes
+    command: [ "./wait-for", "reviver3:9000", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
 
-  # app5:
-  #   # container_name: app5
-  #   build: ./src/reviver
-  #   env_file:
-  #     - ./src/reviver/.env
-  #   environment:
-  #     - NODE_ID=5
-  #   volumes: *appvolumes
-  #   command: [ "./wait-for", "app4:9000", "--", "python", "main.py" ]
-  #   networks:
-  #     - tp2-network
+  app5:
+    # container_name: app5
+    build: 
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
+    env_file:
+      - ./src/reviver/.env
+    environment:
+      - NODE_ID=5
+    volumes: *appvolumes
+    command: [ "./wait-for", "app4:9000", "--", "python", "main.py" ]
+    networks:
+      - tp2-network
 
 networks:
   tp2-network:
