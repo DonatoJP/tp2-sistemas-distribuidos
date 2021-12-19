@@ -6,6 +6,7 @@ from utils import parse_parameters, ParseParametersError, exit
 from reviver.workload import Task
 from reviver.heartbeat.heartbeat import Heartbeat
 import threading
+from reviver.state_saver import StateSaver
 
 def main():
     try:
@@ -18,6 +19,10 @@ def main():
     # heartbeat_t = Heartbeat(event)
     # heartbeat_t.start()
 
+    node_name = params["node_name"]
+    state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
+    state = state_saver.retrieve_state(node_name)
+
     operation_module = importlib.import_module(params["module"])
     ImportedOperator = getattr(operation_module, 'ImportedOperator')
     operator_to_use = ImportedOperator(**params['operator_params'])
@@ -27,7 +32,12 @@ def main():
 
     queue_producer.init_queue_pattern(**params["output_queue_params"])
     
-    centinels_manager = CentinelsManager(params["centinels_to_receive"])
+    if state is None:
+        centinels_manager = CentinelsManager(params["centinels_to_receive"])
+    else:
+        centinels_manager = CentinelsManager.from_state(state[CentinelsManager.name])
+    
+    print(centinels_manager)
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
@@ -42,6 +52,7 @@ def main():
                     operator_to_use.get_all_routing_keys()
                 )
             # TODO: Integrar con vault
+            state_saver.save_state(node_name, [ centinels_manager ])
 
         else:
             returnables = operator_to_use.exec_operation(task.data)

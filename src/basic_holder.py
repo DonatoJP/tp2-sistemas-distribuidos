@@ -23,8 +23,6 @@ def main():
     state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
     state = state_saver.retrieve_state(node_name)
 
-    print("State retrieved: ", state)
-
     operation_module = importlib.import_module(params["module"])
     ImportedHolder = getattr(operation_module, 'ImportedHolder')
     holder_to_use = ImportedHolder(**params["operator_params"])
@@ -41,10 +39,6 @@ def main():
     else:
         duplicates_manager = DuplicatesManager.from_state(state[DuplicatesManager.name])
         centinels_manager = CentinelsManager.from_state(state[CentinelsManager.name])
-
-    
-    print(duplicates_manager)
-    print(centinels_manager)
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
