@@ -35,3 +35,27 @@ class VaultClient:
         value = pickle.dumps(value).hex()
         message = f"POST {key}={value}"
         self.channel.basic_publish("", self.input_queue_name, message)
+
+    def post_key(self, key1: str, key2: str, value):
+        validate_key(key1)
+        validate_key(key2)
+        validate_value(value)
+
+        value = pickle.dumps(value).hex()
+        message = f"POST_KEY {key1}={key2}={value}"
+        self.channel.basic_publish("", self.input_queue_name, message)
+
+    def get_key(self, key1: str, key2: str):
+        validate_key(key1)
+        validate_key(key2)
+
+        message = f"GET_KEY {self.res_queue_name} {key1}={key2}"
+        self.channel.basic_publish("", self.input_queue_name, message)
+
+        method_frame, properties, body = next(self.channel.consume(
+            self.res_queue_name, auto_ack=True))
+
+        if len(body) == 0:
+            return ""
+
+        return pickle.loads(bytes.fromhex(body.decode()))

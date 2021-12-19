@@ -1,46 +1,29 @@
 import os
 import pickle
 
+from vault.client import VaultClient
+import os
+
 filename = "state.txt"
 
 
 class State:
-    _state = {}
+    def __init__(self):
+        rabbit_addr = os.getenv('RABBIT_ADDRESS')
+        vault_input_queue_name = os.getenv('VAULT_INPUT_QUEUE_NAME')
+        self.vault = VaultClient(rabbit_addr, vault_input_queue_name)
 
     def get(self, key):
-        with open(filename, "rb") as f:
-            self._state = pickle.load(f)
-        return self._state[key]
+        return self.vault.get(key)
 
     def set(self, key, val):
-        self.lock.acquire()
-        with open(filename, "rb") as f:
-            self._state = pickle.load(f)
-        self._state[key] = val
-        with open(filename, "wb") as f:
-            pickle.dump(self._state, f)
-        self.lock.release()
+        self.vault.post(key, val)
 
-    def set_k(self, key, key2, val):
-        self.lock.acquire()
-        with open(filename, "rb") as f:
-            self._state = pickle.load(f)
-        self._state[key][key2] = val
-        with open(filename, "wb") as f:
-            pickle.dump(self._state, f)
-        self.lock.release()
+    def set_k(self, key1, key2, val):
+        self.vault.post_key(key1, key2, val)
 
-    def remove_k(self, key, key2):
-        self.lock.acquire()
-        with open(filename, "rb") as f:
-            self._state = pickle.load(f)
-        del self._state[key][key2]
-        with open(filename, "wb") as f:
-            pickle.dump(self._state, f)
-        self.lock.release()
+    def get_k(self, key1, key2):
+        return self.vault.get_key(key1, key2)
 
-    def init(self, lock):
-        if os.stat(filename).st_size == 0:
-            with open(filename, "wb") as f:
-                pickle.dump({"coordinator": {}}, f)
-        self.lock = lock
+    def remove_k(self, key1, key2):
+        self.vault.post_key(key1, key2, "")

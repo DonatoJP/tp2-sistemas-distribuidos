@@ -2,6 +2,7 @@ import os
 import logging
 import signal
 import time
+import pickle
 from threading import Condition, Lock, Event as THEvent
 from bully.bully_manager import BullyManager
 
@@ -29,7 +30,44 @@ class VaultMessageProcessor(RabbitMessageProcessor):
             self._post(key, value)
             return None, None
 
-    def _get(self, key):
+        if op == "POST_KEY":
+            key1, key2, value = params.split("=", 2)
+            user_dict_value = self._get(key1)
+
+            if len(user_dict_value) == 0:
+                user_dict = dict()
+            else:
+                user_dict = pickle.loads(bytes.fromhex(user_dict_value))
+                if not isinstance(user_dict, dict):
+                    return None, None
+
+            user_dict[key2] = value
+            self._post(key1, pickle.dumps(user_dict).hex())
+
+            return None, None
+
+        if op == "GET_KEY":
+            queue, keys = params.split(" ", 1)
+            key1, key2 = keys.split("=", 1)
+            user_dict_value = self._get(key1)
+
+            logging.info(f"GOT {user_dict_value}")
+
+            if len(user_dict_value) == 0:
+                return ""
+
+            user_dict = pickle.loads(bytes.fromhex(user_dict_value))
+
+            logging.info(f"GOT DICT {user_dict}")
+
+            if not isinstance(user_dict, dict):
+                return ""
+
+            value = user_dict.get(key2)
+
+            return queue, value if value is not None else ""
+
+    def _get(self, key) -> str:
         retry, value = self.vault.leader_get(key)
         while retry:
             time.sleep(self.retry_wait)
