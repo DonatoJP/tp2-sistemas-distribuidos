@@ -63,6 +63,8 @@ class PeerConnection:
         if self.peer_conn is not None:
             return
 
+        logging.info(f"Connecting to {self.peer_addr}")
+
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         peer_host = (self.peer_addr, self.peer_port)
         try:
@@ -83,8 +85,10 @@ class PeerConnection:
             # Receive Final Message
             msg = self._recv(int.from_bytes(msg_len, byteorder='big'))
         except ConnectionClosed as e:
+            logging.info("CONNECTION CLOSED")
             return None
         except ConnectionResetError:
+            logging.info("CONNECTION RESET")
             return None
 
 

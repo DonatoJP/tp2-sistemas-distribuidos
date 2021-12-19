@@ -8,6 +8,7 @@ from bully.bully_manager import BullyManager
 
 from connections_manager import ConnectionsManager
 from bully import Bully, Event
+from heartbeat import Heartbeat
 
 from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
@@ -120,13 +121,16 @@ def main():
     node_id = os.environ['NODE_ID']
     logging.info(f'Starting node {node_id}')
 
+    event = THEvent()
+    heartbeat = Heartbeat(event)
+    heartbeat.start()
+
     vault_peers = [addr for addr in os.environ['VAULT_PEERS_INFO'].split(
         ',') if not addr.startswith(f"{node_id}-")]
     vault_port = os.environ['VAULT_LISTEN_PORT']
     vault_timeout = int(os.environ['VAULT_TIMEOUT'])
-    event = THEvent()
     vault_cm = ConnectionsManager(
-        node_id, vault_port, vault_peers, event, vault_timeout)
+        node_id, vault_port, vault_peers, vault_timeout)
 
     logging.info("Waiting for initialization...")
 
@@ -213,8 +217,9 @@ def main():
             exited = follower_start(vault, leader_addr)
             logging.info(f"Follower finished: {exited}")
 
-    # for thread in bully.threads:
-    #     thread.join()
+    vault_cm.shutdown_connections()
+    event.set()
 
+    heartbeat.join()
     bully._join_listen_thread()
     vault_cm._join_listen_thread()

@@ -1,7 +1,7 @@
-from bully import Bully, Event, BullyManager
-from connections_manager import ConnectionsManager
+import os, logging, threading
+
+from bully import BullyManager
 from coordinator.state import State
-import os, signal, sys, time, logging, threading
 from coordinator.server import UdpServer
 from coordinator.reviver import Reviver
 from heartbeat.heartbeat import Heartbeat
@@ -41,15 +41,14 @@ def main():
     bully.start()
 
 
-    # signal.signal(signal.SIGTERM, bully_manager.exit_gracefully)
     state_checker = Reviver(state, bully)
     state_checker.start()
     threads.append(state_checker)
 
-    [t.join() for t in threads]
+    # [t.join() for t in threads]
     bully._join_listen_thread()
     bully.join()
-    event.set()
+    # event.set()
 
 
 if __name__ == "__main__":

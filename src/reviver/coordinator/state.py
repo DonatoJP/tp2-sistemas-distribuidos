@@ -4,8 +4,6 @@ import pickle
 from vault.client import VaultClient
 import os
 
-filename = "state.txt"
-
 
 class State:
     def __init__(self):
@@ -24,6 +22,9 @@ class State:
 
     def get_k(self, key1, key2):
         return self.vault.get_key(key1, key2)
+
+    def get_a(self, key1):
+        return self.vault.get_all(key1)
 
     def remove_k(self, key1, key2):
         self.vault.post_key(key1, key2, "")

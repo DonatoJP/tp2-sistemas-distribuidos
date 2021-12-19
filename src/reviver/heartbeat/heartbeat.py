@@ -15,7 +15,7 @@ HOSTNAME = os.getenv("HOSTNAME", "tp3_heartbeat")
 COORDINATOR_HOSTNAME = os.getenv("COORDINATOR_HOSTNAME", "coordinator")
 COORDINATOR_PORT = int(os.getenv("COORDINATOR_PORT", 12000))
 COORDINATOR_AMOUNT = int(os.getenv("COORDINATOR_AMOUNT", 1))
-HEARTBEAT_TIME = 1
+HEARTBEAT_TIME = 5
 
 
 class Heartbeat(Thread):

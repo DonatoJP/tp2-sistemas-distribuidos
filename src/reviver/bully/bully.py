@@ -10,14 +10,12 @@ class Bully:
     def __init__(self,
                  connection_manager: ConnectionsManager,
                  peer_hostnames: "list[str]",
-                 event: THEvent,
                  new_leader_callback=None
                  ) -> None:
         self.conn_manager = connection_manager
         self.peer_hostnames = peer_hostnames
         self.threads = []
         self.callbacks = {}
-        self.event = event
         self.is_in_election = False
         self.is_in_election_cv = Condition(Lock())
         self.ready_peers = 0
@@ -38,7 +36,6 @@ class Bully:
 
         self.new_leader_callback = new_leader_callback
 
-        self.event.wait()
         for ph in peer_hostnames:
             th = Thread(target=self._start_receiving_from_peer, args=(ph,))
             th.daemon = True
@@ -50,7 +47,11 @@ class Bully:
         ping_thread.start()
         self.threads.append(ping_thread)
 
+        logging.info("Waiting for all connections")
+
         self._wait_until_all_are_ready()
+
+        logging.info("All peers connected")
 
     def wait_bully_ready(self):
         self.bully_is_ready_cv.acquire()
@@ -294,6 +295,7 @@ class Bully:
                 self.conn_manager.wait_until_back_again(peer_addr)
                 logging.info(
                     f'{peer_addr} is back again. The show must go on!')
+                self.conn_manager.send_to(peer_addr, "READY")
                 continue
             elif msg == 'ELECTION':
                 self._process_election_message(peer_addr)
@@ -308,12 +310,16 @@ class Bully:
                 logging.info(f"Received ECHO PING from {peer_addr}")
                 self.notify_set_received_ping_echo(True)
             elif msg == 'READY':
+                logging.info(f"Got READY message from {peer_addr}")
                 self._process_ready_message(peer_addr)
             elif msg == 'ECHO_READY':
+                logging.info(f"Got ECHO_READY message from {peer_addr}")
                 self._process_echo_ready_message()
 
     def _process_ready_message(self, peer_addr):
+        logging.info("Processing READY message")
         self.bully_is_ready_cv.acquire()
+        logging.info(f"Got is ready lock: {self.bully_is_ready}")
         if self.bully_is_ready:
             self.conn_manager.send_to(peer_addr, 'ECHO_READY')
             self.bully_is_ready_cv.release()

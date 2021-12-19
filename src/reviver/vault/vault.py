@@ -44,7 +44,9 @@ class Vault:
                 if message is None:
                     if self.follower_keep_listening:
                         # logging.info("Follower continueing")
-                        continue
+                        logging.info("Leader down")
+                        time.sleep(1)
+                        break
                     else:
                         logging.info("Follower exiting")
                         break
@@ -120,7 +122,11 @@ class Vault:
             return True, None
 
         def parse_respone(res):
-            version, value = res.split(':', 1)
+            try:
+                version, value = res.split(':', 1)
+            except ValueError:
+                return 0, None
+
             return int(version), value
 
         parsed_responses = map(parse_respone, filter(
@@ -159,7 +165,13 @@ class Vault:
 
         print(f"Got responses: {responses}")
 
-        parsed_responses = map(lambda res: int(res), filter(
+        def parse_response(res):
+            try:
+                return int(res)
+            except ValueError:
+                return 0
+
+        parsed_responses = map(parse_response, filter(
             lambda res: res is not None, responses))
         next_version = max(parsed_responses) + 1
 

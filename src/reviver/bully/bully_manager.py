@@ -1,5 +1,5 @@
 import logging
-from threading import Condition, Lock, Thread, Event as THEvent
+from threading import Condition, Lock, Thread
 from time import sleep
 from bully.events_enum import Event
 from connections_manager import ConnectionsManager
@@ -18,21 +18,21 @@ class BullyManager(Thread):
 
     def run(self) -> None:
         bully_port = self.port_n
-        event_con_start = THEvent()
-        bully_cm = ConnectionsManager(self.node_id, bully_port, self.peer_hostnames, event_con_start)
+        bully_cm = ConnectionsManager(self.node_id, bully_port, self.peer_hostnames)
         pre_bully_peers = list(filter(lambda x: not x.startswith(f'{self.node_id}-'), self.peer_hostnames))
         bully_peers = list(map(lambda x: x.split(':')[0].split('-')[1], pre_bully_peers))
+
+        logging.info(f"BULLY PEERS: {bully_peers}")
 
         # logging.info("SLEEPING... ")
         # time.sleep(5)
 
         self.bully_cv.acquire()
-        self.bully = Bully(bully_cm, bully_peers, event_con_start, self.new_leader_callback)
+        logging.info("Starting Bully")
+        self.bully = Bully(bully_cm, bully_peers, self.new_leader_callback)
+        logging.info("Bully finished")
         self.bully_cv.notify_all()
         self.bully_cv.release()
-
-        # if self.new_leader_callback is not None:
-        #     self.bully.set_callback(Event.NEW_LEADER, self.new_leader_callback)
 
         self.bully.begin_election_process()
 

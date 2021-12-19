@@ -160,7 +160,6 @@ services:
       - NODE_ID=1
     volumes:
       &appvolumes
-      - ./src/reviver/state.txt:/app/state.txt
       - ./src/reviver:/app
       - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
@@ -175,7 +174,7 @@ services:
     environment:
       - NODE_ID=2
     volumes: *appvolumes
-    command: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
+    entrypoint: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
     networks:
       - tp2-network
 
@@ -187,7 +186,7 @@ services:
     environment:
       - NODE_ID=3
     volumes: *appvolumes
-    command: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
+    entrypoint: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
     networks:
       - tp2-network
 

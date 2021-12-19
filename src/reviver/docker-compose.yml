@@ -8,13 +8,12 @@ services:
     environment:
       - NODE_ID=1
     volumes: &appvolumes
-      - ./state.txt:/app/state.txt
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: python3 main.py
     networks:
       - bully-example
-  
+
   app2:
     container_name: app2
     build: .
@@ -26,7 +25,7 @@ services:
     command: ["./wait-for", "app1:9000", "--", "python", "main.py"]
     networks:
       - bully-example
-  
+
   app3:
     container_name: app3
     build: .
@@ -38,7 +37,7 @@ services:
     command: ["./wait-for", "app2:9000", "--", "python", "main.py"]
     networks:
       - bully-example
-  
+
   app4:
     container_name: app4
     build: .
@@ -50,7 +49,7 @@ services:
     command: ["./wait-for", "app3:9000", "--", "python", "main.py"]
     networks:
       - bully-example
-  
+
   app5:
     container_name: app5
     build: .
@@ -63,7 +62,7 @@ services:
     networks:
       - bully-example
 
-      
+
   heartbeat_1:
     build: .
     env_file:
@@ -74,7 +73,7 @@ services:
     networks:
       - bully-example
 
-        
+
   heartbeat_2:
     build: .
     env_file:

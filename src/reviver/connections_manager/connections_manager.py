@@ -1,21 +1,22 @@
 import socket
 import logging
-from threading import Thread, Event, Condition, Lock
+from threading import Thread, Condition, Lock
 from .peer_connection import PeerConnection
 from typing import Optional
 
 
 class ConnectionsManager:
-    def __init__(self, node_id: str, self_port_n: str, connections_to_create: list, event: Event, timeout=None):
+    def __init__(self, node_id: str, self_port_n: str, connections_to_create: list, timeout=None):
         self.connections: list[PeerConnection] = []
         self.node_id = int(node_id)
         self.port_n = int(self_port_n)
         self.listener_stream = None
         self.addresses = []
-        self.event = event
 
         self.all_connected = False
         self.all_connected_cv = Condition(Lock())
+
+        logging.info(f"Creating connections: {connections_to_create}")
 
         for c in connections_to_create:
             id, addr = c.split('-', 1)
@@ -37,8 +38,6 @@ class ConnectionsManager:
         self.all_connected_cv.acquire()
         self.all_connected_cv.wait_for(self._all_peers_are_connected)
         self.all_connected_cv.release()
-        
-        self.event.set()
 
     def _all_peers_are_connected(self):
         print("Are all peers connected?", all([ peer.is_connected() for peer in self.connections]))
@@ -88,7 +87,7 @@ class ConnectionsManager:
             self.all_connected_cv.release()
 
     def _find_peer(self, peer_addr) -> Optional[PeerConnection]:
-        
+
         return next((x for x in self.connections if x.is_peer(peer_addr)), None)
 
     def send_to(self, peer_addr, message):
