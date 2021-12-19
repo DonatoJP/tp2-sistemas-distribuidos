@@ -26,6 +26,9 @@ class VaultClient:
         method_frame, properties, body = next(self.channel.consume(
             self.res_queue_name, auto_ack=True))
 
+        if len(body) == 0:
+            return ""
+
         return pickle.loads(bytes.fromhex(body.decode()))
 
     def post(self, key: str, value):

@@ -15,8 +15,8 @@ def main():
         exit()
     event = threading.Event()
 
-    heartbeat_t = Heartbeat(event)
-    heartbeat_t.start()
+    # heartbeat_t = Heartbeat(event)
+    # heartbeat_t.start()
 
     operation_module = importlib.import_module(params["module"])
     ImportedOperator = getattr(operation_module, 'ImportedOperator')

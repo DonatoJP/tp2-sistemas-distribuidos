@@ -8,6 +8,9 @@ class DuplicatesManager(Storable):
     def __init__(self, by_workload = {}) -> None:
         self.by_workload: Dict[str, list] = by_workload
         super().__init__(self.name)
+    
+    def __str__(self) -> str:
+        return f'DuplicatesManager {self.by_workload}'
 
     def register_task(self, task: Task):
         if task.workload_id not in self.by_workload.keys():

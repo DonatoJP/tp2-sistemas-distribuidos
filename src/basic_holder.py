@@ -15,9 +15,9 @@ def main():
         print(e.message)
         exit()
 
-    exit_ev= threading.Event()
-    heartbeat_t = Heartbeat(exit_ev)
-    heartbeat_t.start()
+    # exit_ev= threading.Event()
+    # heartbeat_t = Heartbeat(exit_ev)
+    # heartbeat_t.start()
 
     node_name = params["node_name"]
     state_saver = StateSaver("rabbitmq-tp2", params['vault_queue_name'])
@@ -35,7 +35,13 @@ def main():
     queue_producer.init_queue_pattern(**params["output_queue_params"])
 
     centinels_manager = CentinelsManager(params["centinels_to_receive"])
-    duplicates_manager = DuplicatesManager()
+
+    if state is None:
+        duplicates_manager = DuplicatesManager()
+    else:
+        duplicates_manager = DuplicatesManager.from_state(state[DuplicatesManager.name])
+    
+    print(duplicates_manager)
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
@@ -58,7 +64,9 @@ def main():
             
             duplicates_manager.register_task(task)
 
-        # TODO: Integrar Vault para guardar estado
+            # TODO: Integrar Vault para guardar estado
+            state_saver.save_state(node_name, [duplicates_manager])
+
         ch.basic_ack(method.delivery_tag)
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
@@ -66,14 +74,14 @@ def main():
     
     def __exit_gracefully(*args):
         print("Received SIGTERM signal. Starting graceful exit...")
-        exit_ev.set()
+        # exit_ev.set()
         exit([queue_consumer])
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
     print('Starting to consume...')
     queue_consumer.start_consuming()
-    exit_ev.set()
+    # exit_ev.set()
 
 if __name__ == '__main__':
     try:

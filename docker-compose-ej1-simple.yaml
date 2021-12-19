@@ -166,75 +166,75 @@ services:
     networks:
       - tp2-network
 
-  reviver1:
-    container_name: reviver1
-    build: 
-      context: .
-      dockerfile: ./src/reviver/Dockerfile
-    env_file:
-      - ./src/reviver/.env
-    environment:
-      - NODE_ID=1
-    volumes:
-      &appvolumes
-      - ./src/reviver/state.txt:/app/state.txt
-      - ./src/reviver:/app
-      - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
-    networks:
-      - tp2-network
+  # reviver1:
+  #   container_name: reviver1
+  #   build: 
+  #     context: .
+  #     dockerfile: ./src/reviver/Dockerfile
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=1
+  #   volumes:
+  #     &appvolumes
+  #     - ./src/reviver/state.txt:/app/state.txt
+  #     - ./src/reviver:/app
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
-  reviver2:
-    container_name: reviver2
-    build: ./src/reviver
-    env_file:
-      - ./src/reviver/.env
-    environment:
-      - NODE_ID=2
-    volumes: *appvolumes
-    command: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
-    networks:
-      - tp2-network
+  # reviver2:
+  #   container_name: reviver2
+  #   build: ./src/reviver
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=2
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
-  reviver3:
-    container_name: reviver3
-    build: ./src/reviver
-    env_file:
-      - ./src/reviver/.env
-    environment:
-      - NODE_ID=3
-    volumes: *appvolumes
-    command: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
-    networks:
-      - tp2-network
+  # reviver3:
+  #   container_name: reviver3
+  #   build: ./src/reviver
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=3
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
-  app4:
-    # container_name: app4
-    build: 
-      context: .
-      dockerfile: ./src/reviver/Dockerfile
-    env_file:
-      - ./src/reviver/.env
-    environment:
-      - NODE_ID=4
-    volumes: *appvolumes
-    command: [ "./wait-for", "reviver3:9000", "--", "python", "main.py" ]
-    networks:
-      - tp2-network
+  # app4:
+  #   # container_name: app4
+  #   build: 
+  #     context: .
+  #     dockerfile: ./src/reviver/Dockerfile
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=4
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "reviver3:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
-  app5:
-    # container_name: app5
-    build: 
-      context: .
-      dockerfile: ./src/reviver/Dockerfile
-    env_file:
-      - ./src/reviver/.env
-    environment:
-      - NODE_ID=5
-    volumes: *appvolumes
-    command: [ "./wait-for", "app4:9000", "--", "python", "main.py" ]
-    networks:
-      - tp2-network
+  # app5:
+  #   # container_name: app5
+  #   build: 
+  #     context: .
+  #     dockerfile: ./src/reviver/Dockerfile
+  #   env_file:
+  #     - ./src/reviver/.env
+  #   environment:
+  #     - NODE_ID=5
+  #   volumes: *appvolumes
+  #   command: [ "./wait-for", "app4:9000", "--", "python", "main.py" ]
+  #   networks:
+  #     - tp2-network
 
 networks:
   tp2-network:

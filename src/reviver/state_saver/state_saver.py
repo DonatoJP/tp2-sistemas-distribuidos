@@ -14,7 +14,7 @@ class StateSaver():
 
     def retrieve_state(self, node_name):
         state_retrieved = self.client.get(node_name)
-        if state_retrieved == b'':
+        if len(state_retrieved) == 0:
             return None
         
         return state_retrieved
