@@ -9,9 +9,10 @@ import threading
 from reviver.state_saver import StateSaver
 
 
-logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 def main():
+    logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+
     try:
         params = parse_parameters()
     except ParseParametersError as e:

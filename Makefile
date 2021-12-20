@@ -149,7 +149,7 @@ example-ps:
 
 rs:
 	./dcp down
-	rm -rf storage
+	sudo rm -rf storage
 	mkdir storage 
 	./dcp up -d
 .PHONY: rs

@@ -11,6 +11,8 @@ from .storage import Storage
 from .validate import validate_key, validate_value
 
 
+logger = logging.getLogger("Vault")
+
 class Vault:
     """Distributed, replicated, highly available kay-value store"""
 
@@ -30,27 +32,27 @@ class Vault:
         with self.follower_lock:
             self.follower_keep_listening = True
 
-        logging.info("Waiting for messages from leader")
+        logger.info("Waiting for messages from leader")
         while self.follower_keep_listening:
             # Solo se puede cambiar el leader cuando no hay una operacion siendo procesada
             with self.follower_lock:
 
                 # Necesitamos un timeout para que cada tanto salga del recv_from y pueda cambiar de leader
-                # logging.info("Waiting for new message from leader")
+                # logger.info("Waiting for new message from leader")
                 try:
                     message = self.cluster.recv_from(self.leader_addr)
                 except RecvTimeout:
                     continue
                 if message is None:
                     if self.follower_keep_listening:
-                        # logging.info("Follower continueing")
-                        logging.info("Leader down")
+                        # logger.info("Follower continueing")
+                        logger.info("Leader down")
                         break
                     else:
-                        logging.info("Follower exiting")
+                        logger.info("Follower exiting")
                         break
 
-                # logging.info(f"Got message {message} from leader")
+                # logger.info(f"Got message {message} from leader")
 
                 # Se podria optimizar esto con una pool de workers?
                 op, params = message.split(" ", 1)
@@ -69,7 +71,7 @@ class Vault:
                     # Leader down, abort operation
                     pass
 
-        logging.info("Follower quiting")
+        logger.info("Follower quiting")
 
     def follower_stop(self):
         self.follower_keep_listening = False
@@ -102,20 +104,20 @@ class Vault:
         key = key.strip()
         validate_key(key)
 
-        logging.info(f"VALIDATED KEYS: {time.time() - start}")
+        logger.debug(f"VALIDATED KEYS: {time.time() - start}")
 
         message = f"GET {key}"
         self.cluster.send_to_all(message)
 
-        logging.info(f"SENT GET TO FOLLOWERS: {time.time() - start}")
+        logger.debug(f"SENT GET TO FOLLOWERS: {time.time() - start}")
 
         responses = self._get_responses()
 
-        logging.info(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+        logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
 
         responses.append(self._follower_get(key))
 
-        logging.info(f"GOT OWN RESPONSE: {time.time() - start}")
+        logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
 
         if len(responses) < self.cluster_quorum:
             return True, None
@@ -135,7 +137,7 @@ class Vault:
         if most_recent_value[0] == 0:
             return False, None
 
-        logging.info(f"PROCESS RESPONSES: {time.time() - start}")
+        logger.debug(f"PROCESS RESPONSES: {time.time() - start}")
 
         return False, most_recent_value[1]
 
@@ -152,7 +154,7 @@ class Vault:
         validate_key(key)
         validate_value(key)
 
-        print("Getting versions")
+        logger.debug("Getting versions")
 
         message = f"VERSION {key}"
         self.cluster.send_to_all(message)
@@ -174,9 +176,8 @@ class Vault:
             lambda res: res is not None, responses))
         next_version = max(parsed_responses) + 1
 
-        print(f"Next version: {next_version}")
-
-        print(f"Executing posts")
+        logger.debug(f"Next version: {next_version}")
+        logger.debug(f"Executing posts")
 
         message = f"POST {next_version}:{key}={value}"
         self.cluster.send_to_all(message)
