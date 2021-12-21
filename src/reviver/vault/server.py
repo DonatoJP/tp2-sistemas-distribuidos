@@ -5,6 +5,13 @@ import signal
 import pika
 
 
+logger = logging.getLogger("Vault Leader Server")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
+sh = logging.StreamHandler()
+sh.setFormatter(formatter)
+logger.addHandler(sh)
+
 class RabbitMessageProcessor:
     def process(self, message):
         return message
@@ -32,21 +39,22 @@ class RabbitConsumerServer:
 
         self.channel.queue_declare(queue=self.input_queue_name)
 
-        logging.info(self.input_queue_name)
+        logger.info(self.input_queue_name)
 
         self.channel.basic_consume(queue=self.input_queue_name,
                                    on_message_callback=self.message_processor)
 
-        logging.info('Waiting for messages from rabbit. To exit press CTRL+C')
+        logger.info('Waiting for messages from rabbit. To exit press CTRL+C')
+
         try:
             self.channel.start_consuming()
-            logging.info('Server stopped')
+            logger.info('Server stopped')
 
             self.channel.close()
             self.connection.close()
         except Exception as e:
-            logging.info(e)
-            logging.info('Start consuming error')
+            logger.info(e)
+            logger.info('Start consuming error')
 
     def stop(self):
         try:
@@ -58,16 +66,16 @@ class RabbitConsumerServer:
 
     def _connect_to_rabbit(self):
         retries = 5
-        logging.info(f"Connecting to Rabbit at {self.connection_parameters}")
+        logger.info(f"Connecting to Rabbit at {self.connection_parameters}")
         while True:
             try:
                 return pika.BlockingConnection(self.connection_parameters)
             except pika.exceptions.AMQPConnectionError:
                 if retries > 0:
-                    logging.info(
+                    logger.info(
                         "Connection to rabbitMQ failed. Retrying after 1 second")
                     retries -= 1
                     time.sleep(1)
                 else:
-                    logging.info(f"{retries} retries failed. Exiting")
+                    logger.info(f"{retries} retries failed. Exiting")
                     return None

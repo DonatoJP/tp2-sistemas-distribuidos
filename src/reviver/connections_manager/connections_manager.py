@@ -118,6 +118,10 @@ class ConnectionsManager:
         for mp in higher_peers:
             mp.send_message(message)
 
+    def clear_all_responses(self):
+        for peer in self.connections:
+            peer.clear_responses()
+
     def wait_until_back_again(self, peer_addr):
         peer = self._find_peer(peer_addr)
         if peer is None:

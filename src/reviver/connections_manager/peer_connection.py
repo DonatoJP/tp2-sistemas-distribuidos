@@ -111,6 +111,15 @@ class PeerConnection:
             logging.info("BROKEN PIPE")
             pass
 
+    def clear_responses(self):
+        self.peer_conn.settimeout(0)
+        while select.select([self.peer_conn], [], [], 0)[0]:
+            res = self.peer_conn.recv(1024)
+            if len(res) == 0:
+                break
+
+        self.peer_conn.settimeout(None)
+
 
     def is_connected(self):
         return self.peer_conn != None

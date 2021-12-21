@@ -14,7 +14,8 @@ from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
 
 logger = logging.getLogger("VaultMessageProcessor")
-logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.DEBUG, datefmt="%H:%M:%S")
+
 
 class VaultMessageProcessor(RabbitMessageProcessor):
     def __init__(self, vault: Vault, retry_wait):
@@ -40,11 +41,11 @@ class VaultMessageProcessor(RabbitMessageProcessor):
             if len(user_dict_value) == 0:
                 user_dict = dict()
             else:
-                try: 
+                try:
                     user_dict = pickle.loads(bytes.fromhex(user_dict_value))
                 except Exception as e:
                     logger.warning("Error %s =>  loading user dict value. Key1:  %s; Key2: %s; Value: %s, UserDictValue: %s", e, key1, key2, value, user_dict_value )
-                    return None, None 
+                    return None, None
                 if not isinstance(user_dict, dict):
                     return None, None
 

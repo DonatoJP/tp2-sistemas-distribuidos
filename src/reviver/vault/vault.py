@@ -12,6 +12,11 @@ from .validate import validate_key, validate_value
 
 
 logger = logging.getLogger("Vault")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
+sh = logging.StreamHandler()
+sh.setFormatter(formatter)
+logger.addHandler(sh)
 
 class Vault:
     """Distributed, replicated, highly available kay-value store"""
@@ -91,7 +96,7 @@ class Vault:
     def _follower_version(self, key):
         return str(self.storage.version(key))
 
-    def leader_get(self, key: str) -> tuple:
+    def leader_get(self, key: str, last_responses=False) -> tuple:
         """
         gets from vault a value searching by the key
         returns (retry, value)
@@ -104,20 +109,22 @@ class Vault:
         key = key.strip()
         validate_key(key)
 
-        logger.debug(f"VALIDATED KEYS: {time.time() - start}")
+        # logger.debug(f"VALIDATED KEYS: {time.time() - start}")
+
+        self.cluster.clear_all_responses()
 
         message = f"GET {key}"
         self.cluster.send_to_all(message)
 
-        logger.debug(f"SENT GET TO FOLLOWERS: {time.time() - start}")
+        # logger.debug(f"SENT GET TO FOLLOWERS: {time.time() - start}")
 
         responses = self._get_responses()
 
-        logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+        # logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
 
         responses.append(self._follower_get(key))
 
-        logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
+        # logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
 
         if len(responses) < self.cluster_quorum:
             return True, None
@@ -137,11 +144,11 @@ class Vault:
         if most_recent_value[0] == 0:
             return False, None
 
-        logger.debug(f"PROCESS RESPONSES: {time.time() - start}")
+        # logger.debug(f"PROCESS RESPONSES: {time.time() - start}")
 
         return False, most_recent_value[1]
 
-    def leader_post(self, key: str, value: str) -> bool:
+    def leader_post(self, key: str, value: str, last_responses=False) -> bool:
         """
         inserts a value by indexed by key on vault
         key must not contain "=" or newline characters
@@ -155,6 +162,8 @@ class Vault:
         validate_value(key)
 
         logger.debug("Getting versions")
+
+        self.cluster.clear_all_responses()
 
         message = f"VERSION {key}"
         self.cluster.send_to_all(message)
@@ -185,7 +194,7 @@ class Vault:
         responses = self._get_responses()
         responses.append(self._follower_post(next_version, key, value))
 
-        # print(f"Got responses: {responses}")
+        logger.debug(f"Got responses: {responses}")
 
         return responses.count("ACK") < self.cluster_quorum
 
