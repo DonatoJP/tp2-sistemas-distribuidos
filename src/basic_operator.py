@@ -12,11 +12,11 @@ from reviver.state_saver import StateSaver
 
 def main():
     logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
-
+    logger = logging.getLogger("Basic Operator")
     try:
         params = parse_parameters()
     except ParseParametersError as e:
-        print(e.message)
+        logger.warning(e.message)
         exit()
     event = threading.Event()
 
@@ -41,16 +41,16 @@ def main():
     else:
         centinels_manager = CentinelsManager.from_state(state[CentinelsManager.name])
     
-    print(centinels_manager)
+    logger.debug(centinels_manager)
 
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
 
         if centinels_manager.is_centinel(task):
-            print("Received Centinel")
+            logger.debug("Received Centinel")
             centinels_manager.count_centinel(task)
             if centinels_manager.are_all_received(task):
-                print(f"Received all centinels for workload {task.workload_id}.")
+                logger.debug(f"Received all centinels for workload {task.workload_id}.")
                 queue_producer.send_end_centinels(
                     centinels_manager.build_centinel(task),
                     operator_to_use.get_all_routing_keys()
@@ -72,15 +72,20 @@ def main():
     queue_consumer.init_queue_pattern(**params["input_queue_params"])
     
     def __exit_gracefully(*args):
-        print("Received SIGTERM signal. Starting graceful exit...")
+        logger.warning("Received SIGTERM signal. Starting graceful exit...")
         event.set()
         exit([queue_consumer, queue_producer], 0)
 
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
-    print('Starting to consume...')
-    queue_consumer.start_consuming()
-    event.set()
+    logger.debug('Starting to consume...')
+    try:
+        queue_consumer.start_consuming()
+    except Exception as e:
+        logger.warning("Recieved Excetion %s", e)
+        event.set()
+        exit([queue_consumer, queue_producer], 0)
+
 
 
 
@@ -88,7 +93,7 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Interrupted')
+        logger.debug('Interrupted')
         try:
             sys.exit(0)
         except SystemExit:
