@@ -10,6 +10,7 @@ from reviver.state_saver import StateSaver
 
 
 logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+logger = logging.getLogger("Basic Operator")
 
 def main():
     try:
@@ -82,8 +83,13 @@ def main():
     signal.signal(signal.SIGTERM, __exit_gracefully)
 
     print('Starting to consume...')
-    queue_consumer.start_consuming()
-    exit_ev.set()
+    try:
+        queue_consumer.start_consuming()
+    except Exception as e:
+        logger.warning("Recieved Excetion %s", e)
+        exit_ev.set()
+        exit([queue_consumer, queue_producer], 0)
+
 
 if __name__ == '__main__':
     try:
