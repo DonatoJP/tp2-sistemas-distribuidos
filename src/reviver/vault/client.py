@@ -25,11 +25,14 @@ class VaultClient:
             validate_key(key)
 
             message = f"GET {self.res_queue_name} {key}"
+            logger.info("Publishing GET message")
             self.channel.basic_publish("", self.input_queue_name, message)
 
+            logger.info("Waiting on consume message")
             method_frame, properties, body = next(self.channel.consume(
                 self.res_queue_name, auto_ack=True))
 
+            logger.info("Got Message len %s", len(body))
             ret = ""
             if len(body) == 0:
                 return ret
