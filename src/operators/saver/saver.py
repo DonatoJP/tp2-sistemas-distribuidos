@@ -14,13 +14,13 @@ class Saver(AbstractOperator):
         self.vault = VaultClient(rabbit_addr, vault_input_queue_name)
         super().__init__(**kwargs)
 
-    def save_state(self, data: dict):
+    def save_state(self, data: dict, workload_id):
         result = {}
         result[self.column] = data[self.column]
-        self.vault.post(self.key, result[self.column])
+        self.vault.post(f"{self.key}-{workload_id}", result[self.column])
         return result
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         io_string = StringIO(data)
-        result = map(lambda line: self.save_state(json.loads(line)), io_string)
+        result = map(lambda line: self.save_state(json.loads(line), workload_id), io_string)
         return list(map(lambda x: (json.dumps(x), self.get_affinity(x)), result))

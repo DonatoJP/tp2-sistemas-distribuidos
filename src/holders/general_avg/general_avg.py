@@ -24,7 +24,7 @@ class GeneralAvg(AbstractHolder):
         self.total_count += 1
         self.total_score += int(dict_data["Score"])
 
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         io_string = StringIO(data)
         for line in io_string:
             self._process_line_of_chunk(line)

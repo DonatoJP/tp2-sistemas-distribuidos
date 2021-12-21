@@ -149,6 +149,7 @@ example-ps:
 
 rs:
 	./dcp down
+	sleep 3
 	sudo rm -rf storage
 	mkdir storage 
 	./dcp up -d

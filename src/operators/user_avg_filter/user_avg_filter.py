@@ -27,7 +27,7 @@ class UserAvgFilter(AbstractOperator):
         self.users_cache = []
         return result
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         before_grouping = []
         for item in data:
             data_dict = json.loads(item)

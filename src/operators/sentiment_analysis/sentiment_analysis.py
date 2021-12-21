@@ -15,7 +15,7 @@ class SentimentAnalysisOperator(AbstractOperator):
         
         return 1
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         def operation(data):
             result = {}
             data_dict = json.loads(data)

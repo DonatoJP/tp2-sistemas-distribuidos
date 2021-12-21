@@ -19,7 +19,7 @@ class TopNUsersHolder(AbstractHolder):
         self.top_n = top_n
         super().__init__(perform_affinity=False, **kwargs)
     
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         for item in data:
             dict_data = json.loads(item)
             self.users_scores = self.users_scores + [(dict_data["OwnerUserId"], dict_data["TotalScore"])]

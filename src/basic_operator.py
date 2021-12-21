@@ -59,7 +59,7 @@ def main():
             state_saver.save_state(node_name, [ centinels_manager ])
 
         else:
-            returnables = operator_to_use.exec_operation(task.data)
+            returnables = operator_to_use.exec_operation(task.data, task.workload_id)
             for returnable in returnables:
 
                 # returnable = (task_data, routing_key)

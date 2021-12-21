@@ -62,7 +62,7 @@ def main():
                         centinels_manager.build_centinel(task)
                     )
             else:
-                holder_to_use.exec_operation(task.data)
+                holder_to_use.exec_operation(task.data, task.workload_id)
             
             duplicates_manager.register_task(task)
 

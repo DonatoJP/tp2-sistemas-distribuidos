@@ -28,7 +28,7 @@ class UserAvgHolder(AbstractHolder):
         actual = self.user_counters[dict_data["OwnerUserId"]]
         self.user_counters[dict_data["OwnerUserId"]] = tuple([sum(x) for x in zip(actual, to_sum)])
     
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         io_string = StringIO(data)
         for line in io_string:
             self._process_line_of_chunk(line)

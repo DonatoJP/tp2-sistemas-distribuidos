@@ -45,7 +45,7 @@ class Joiner(AbstractOperator):
         else:
             return self.process_question(dict_data)
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         def operation(data):
             io_string = StringIO(data)
             res = [self._process_line_of_chunk(line) for line in io_string]

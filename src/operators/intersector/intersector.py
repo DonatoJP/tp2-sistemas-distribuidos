@@ -6,7 +6,7 @@ class Intersector(AbstractOperator):
         self.users = {}
         super().__init__(**kwargs)
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         before_grouping = []
         for item in data:
             dict_data: dict = json.loads(item)

@@ -34,5 +34,5 @@ class AbstractOperator:
         return [ (x[1], x[0]) for x in res.items() ]
 
     @abstractmethod
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         pass

@@ -36,7 +36,7 @@ class FilterOperator(AbstractOperator):
         return None
 
     
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         io_string = StringIO(data)
         res_aff_tuples = [ self._make_filter_operation(line) for line in io_string ]
         no_nones = list( filter(None, res_aff_tuples) )

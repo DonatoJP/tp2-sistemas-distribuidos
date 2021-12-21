@@ -19,7 +19,7 @@ class TopNYearsHolder(AbstractHolder):
         self.top_n = top_n
         super().__init__(**kwargs)
     
-    def exec_operation(self, data, **kwargs) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         for item in data:
             dict_data = json.loads(item)
             if dict_data["Year"] not in self.group_by_year.keys():

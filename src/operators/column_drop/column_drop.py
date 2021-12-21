@@ -17,7 +17,7 @@ class DropColumnOperator(AbstractOperator):
     def drop_columns(self, data):
         return self._drop_columns(data)
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         io_string = StringIO(data)
         result = map(lambda line: self._drop_columns(json.loads(line)), io_string)
         return list(map(lambda x: (json.dumps(x), self.get_affinity(x)), result))

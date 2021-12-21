@@ -26,7 +26,7 @@ class AvgSAHolder(AbstractHolder):
         if int(data[self.column]):
             self.positive_sa_count += 1
 
-    def exec_operation(self, data) -> list:
+    def exec_operation(self, data, workload_id) -> list:
         for d in data:
             data_dict = json.loads(d)
             self._count_new_result(data_dict)
