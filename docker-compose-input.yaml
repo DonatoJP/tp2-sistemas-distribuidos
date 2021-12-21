@@ -17,10 +17,10 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_answers.csv
-      - CHUNK_SIZE=1000
+      - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-answers
-      - CENTINELS_TO_SEND=3
-      - WORKLOAD_ID=3
+      - CENTINELS_TO_SEND=1
+      - WORKLOAD_ID=1
     volumes:
       - "./data:/app/data"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
@@ -33,9 +33,9 @@ services:
     environment: 
       - PYTHONUNBUFFERED=1
       - FILE_TO_PROCESS=data/red_questions.csv
-      - CHUNK_SIZE=1000
+      - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-questions
-      - CENTINELS_TO_SEND=2
+      - CENTINELS_TO_SEND=1
       - WORKLOAD_ID=1
     volumes:
       - "./data:/app/data"

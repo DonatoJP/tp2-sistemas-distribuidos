@@ -1,6 +1,4 @@
-from ..vault.client import VaultClient
-from .storable import Storable
-
+from reviver.vault.client import VaultClient
 class StateSaver():
     def __init__(self, mb_addr, input_queue_name) -> None:
         self.client = VaultClient(mb_addr, input_queue_name)
