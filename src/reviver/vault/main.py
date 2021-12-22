@@ -195,6 +195,10 @@ def main():
 
         logger.info("CALLBACK finished")
 
+    # Este sleep es para asegurarnos de que cada nodo comience a aceptar conexiones en orden,
+    # y no todos a la vez, lo cual genera errores
+    time.sleep(3 * (int(node_id) - 1))
+
     bully_port = os.environ['BULLY_LISTEN_PORT']
     bully_peer_addrs = os.environ['BULLY_PEERS_INFO'].split(',')
     bully = BullyManager(node_id, bully_peer_addrs, bully_port, new_leader_callback)
