@@ -9,7 +9,7 @@ from reviver.heartbeat.heartbeat import Heartbeat
 from reviver.state_saver import StateSaver
 
 
-logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+# logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 logger = logging.getLogger("Basic Operator")
 
 def main():

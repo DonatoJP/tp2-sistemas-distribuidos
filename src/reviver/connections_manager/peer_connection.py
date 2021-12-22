@@ -3,6 +3,8 @@ import select
 import logging
 from .conn_errors import ConnectionClosed, RecvTimeout
 from threading import Condition, Lock
+from log import create_logger
+logger = create_logger(__name__)
 
 
 class PeerConnection:
@@ -29,7 +31,7 @@ class PeerConnection:
     def is_peer(self, peer_addr):
         if self._is_ip(peer_addr):
             hostname = socket.gethostbyaddr(peer_addr)[0].split('.')[0]
-            logging.info("is ip!")
+            logger.info("is ip!")
         else:
             hostname = peer_addr.split(":")[0]
         return self.peer_addr == hostname
@@ -45,7 +47,7 @@ class PeerConnection:
             self.peer_conn.close()
 
         self.peer_conn = conn
-        logging.info(f'Setting new connection: {conn}')
+        logger.info(f'Setting new connection: {conn}')
         self.peer_conn_cv.notify_all()
         self.peer_conn_cv.release()
 
@@ -63,17 +65,17 @@ class PeerConnection:
         if self.peer_conn is not None:
             return
 
-        logging.info(f"Connecting to {self.peer_addr}")
+        logger.info(f"Connecting to {self.peer_addr}")
 
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         peer_host = (self.peer_addr, self.peer_port)
         try:
             conn.connect(peer_host)
             self.set_connection(conn)
-            logging.info(
+            logger.info(
                 f'[Main Thread] Connection to {peer_host} successfully done!')
         except ConnectionRefusedError as e:
-            logging.info(
+            logger.info(
                 f'[Main Thread] Could not connect to {peer_host}. It is not yet active...')
 
     def recv_message(self):
@@ -85,10 +87,10 @@ class PeerConnection:
             # Receive Final Message
             msg = self._recv(int.from_bytes(msg_len, byteorder='big'))
         except ConnectionClosed as e:
-            logging.info("CONNECTION CLOSED")
+            logger.info("CONNECTION CLOSED")
             return None
         except ConnectionResetError:
-            logging.info("CONNECTION RESET")
+            logger.info("CONNECTION RESET")
             return None
 
 
@@ -98,7 +100,7 @@ class PeerConnection:
         return self.peer_conn is not None and self.peer_conn.fileno() != -1
 
     def send_message(self, msg: str):
-        logging.info("Starting send message")
+        logger.debug("Starting send message")
 
         if self.peer_conn is None:
             raise Exception("No hay socket")
@@ -106,8 +108,8 @@ class PeerConnection:
         msg_bytes = bytes(msg, 'utf-8')
         msg_len = len(msg_bytes)
         to_send = msg_len.to_bytes(4, byteorder='big') + msg_bytes
-        logging.info("Sending to all! len %s", msg_len)
-        logging.info("Sending send.. %s, %s", len(to_send), to_send)
+        logger.debug("Sending to all! len %s", msg_len)
+        logging.debug("Sending send.. %s, %s", len(to_send), to_send)
 
         if select.select([], [self.peer_conn], [], 0)[1]:
             try:
@@ -119,15 +121,15 @@ class PeerConnection:
             logging.warning("Could not write to socket")
 
     def clear_responses(self):
-        logging.info("CLEARING RESPONSES")
+        logger.debug("CLEARING RESPONSES")
         while select.select([self.peer_conn], [], [], 0)[0]:
-            logging.info("WE HAVE SOME MESSAGES")
+            logger.debug("WE HAVE SOME MESSAGES")
             res = self.peer_conn.recv(1024)
             if len(res) == 0:
-                logging.info("BUT THEY WHERE EMPTY")
+                logger.info("BUT THEY WHERE EMPTY")
                 break
 
-        logging.info("NO MORE MESSAGES IN SOCKET")
+        logger.debug("NO MORE MESSAGES IN SOCKET")
 
 
     def is_connected(self):

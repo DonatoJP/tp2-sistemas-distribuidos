@@ -13,7 +13,8 @@ from heartbeat import Heartbeat
 from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
 import logging
-from log import logger
+from log import create_logger
+logger = create_logger(__name__)
 
 
 class VaultMessageProcessor(RabbitMessageProcessor):

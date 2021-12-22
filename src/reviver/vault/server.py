@@ -3,7 +3,8 @@ import logging
 import signal
 
 import pika
-from log import logger
+from log import create_logger
+logger = create_logger(__name__)
 
 class RabbitMessageProcessor:
     def process(self, message):

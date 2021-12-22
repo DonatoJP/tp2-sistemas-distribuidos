@@ -3,8 +3,8 @@ import logging
 from threading import Thread, Condition, Lock
 from .peer_connection import PeerConnection
 from typing import Optional
-
-logger = logging.getLogger("ConnectionsManager")
+from log import create_logger
+logger = create_logger(__name__)
 class ConnectionsManager:
     def __init__(self, node_id: str, self_port_n: str, connections_to_create: list, timeout=None):
         self.connections: list[PeerConnection] = []
@@ -16,7 +16,7 @@ class ConnectionsManager:
         self.all_connected = False
         self.all_connected_cv = Condition(Lock())
 
-        logging.info(f"Creating connections: {connections_to_create}")
+        logger.info(f"Creating connections: {connections_to_create}")
 
         for c in connections_to_create:
             id, addr = c.split('-', 1)
@@ -40,7 +40,7 @@ class ConnectionsManager:
         self.all_connected_cv.release()
 
     def _all_peers_are_connected(self):
-        print("Are all peers connected?", all([ peer.is_connected() for peer in self.connections]))
+        # logger.info("Are all peers connected?" %s, all([ peer.is_connected() for peer in self.connections]))
         return all([ peer.is_connected() for peer in self.connections])
 
 
@@ -66,20 +66,20 @@ class ConnectionsManager:
         stream.bind(('0.0.0.0', self.port_n))
         stream.listen()
         self.listener_stream = stream
-        logging.info(
+        logger.info(
             f'[Node {self.node_id} Listener Thread] Begin listening in {self.port_n}')
         while True:
-            logging.info("Starting to accept Connections")
+            logger.info("Starting to accept Connections")
             conn, client_addr = stream.accept()
-            logging.info("Connectinos Accepted")
+            logger.info("Connectinos Accepted")
             peer_connection = self._find_peer(client_addr[0])
             if not peer_connection:
-                logging.info("Connectinos closed")
+                logger.info("Connectinos closed")
 
                 conn.close()
                 continue
 
-            logging.info(
+            logger.info(
                 f'[Node {self.node_id} Listener Thread] Incoming connection request from {socket.gethostbyaddr(client_addr[0])[0].split(".")[0]}')
             peer_connection.set_connection(conn)
             self.all_connected_cv.acquire()

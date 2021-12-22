@@ -3,14 +3,14 @@ from connections_manager import ConnectionsManager
 from .events_enum import Event
 from threading import Thread, Condition, Lock, Event as THEvent
 import time
-import logging
+from log import create_logger
+logger = create_logger(__name__)
 
-
-logger = logging.getLogger("Bully")
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
-sh = logging.StreamHandler()
-sh.setFormatter(formatter)
+# logger = logging.getLogger("Bully")
+# logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
+# sh = logging.StreamHandler()
+# sh.setFormatter(formatter)
 # logger.addHandler(sh)
 
 

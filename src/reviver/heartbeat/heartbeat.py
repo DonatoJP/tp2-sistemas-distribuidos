@@ -5,7 +5,8 @@ from socket import *
 import json
 import os
 import random
-from log import logger
+from log import create_logger
+logger = create_logger(__name__)
 
 
 HOSTNAME = os.getenv("HOSTNAME", "tp3_heartbeat")

@@ -6,7 +6,8 @@ from threading import Thread, Timer
 import time
 
 from bully import BullyManager
-from log import logger
+from log import create_logger
+logger = create_logger(__name__)
 
 from .state import State
 

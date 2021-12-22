@@ -1,7 +1,8 @@
 import pika
 import pickle, logging
 from threading import Lock
-from log import logger
+from log import create_logger
+logger = create_logger(__name__)
 
 from .validate import validate_key, validate_value
 

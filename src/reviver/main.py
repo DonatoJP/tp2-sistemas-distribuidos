@@ -11,8 +11,8 @@ state = State()
 
 # format = "%(asctime)s: %(message)s"
 # reduce log level
-logging.getLogger("pika").setLevel(logging.WARNING)
-logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+# logging.getLogger("pika").setLevel(logging.WARNING)
+# logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 
 def main():
