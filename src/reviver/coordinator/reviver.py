@@ -24,16 +24,11 @@ class Reviver(Thread):
         self.state = state
         self.bully = bully
 
-    def thread_function(name):
-        logger.info("Thread %s: starting", name)
-        time.sleep(2)
-        logger.info("Thread %s: finishing", name)
-
     def check_key_value(self, key, value, now):
         diff = (now - value).total_seconds()
-        logger.info("Key %s, Diff %s", key, diff)
+        logger.debug("Key %s, Diff %s", key, diff)
         if diff > CHECK_TIME_DIFF:
-            logger.info("Client %s Down, restarting!", key)
+            logger.warning("Client %s Down, restarting!", key)
             try:
                 c = self.client.containers.get(key)
                 c.restart()
@@ -42,10 +37,10 @@ class Reviver(Thread):
                 return {"key": key, "status": STATUS_INVALID_KEY}
 
     def check_state(self):
-        logger.info("Checking Leadership...")
+        logger.debug("Checking Leadership...")
 
         if self.bully.get_is_leader():
-            logger.info("Is Leader!")
+            logger.debug("Is Leader!")
             now = datetime.now()
 
             hosts_to_revive = self.state.get_a("coordinator")
@@ -69,7 +64,7 @@ class Reviver(Thread):
                 if r is not None and r["status"] == STATUS_RESTART
             ]
         else:
-            logger.info("Not Leader, skipping!")
+            logger.debug("Not Leader, skipping!")
 
     def run(self):
 

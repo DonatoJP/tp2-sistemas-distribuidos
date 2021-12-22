@@ -20,6 +20,8 @@ class VaultClient:
 
         res = self.channel.queue_declare("")
         self.res_queue_name = res.method.queue
+        logger.info("Vault Client Init")
+
 
     def get(self, key):
         with self.rabbit_lock:
@@ -50,7 +52,11 @@ class VaultClient:
 
             value = pickle.dumps(value).hex()
             message = f"POST {key}={value}"
+            logger.info("Publishing POST message")
+
             self.channel.basic_publish("", self.input_queue_name, message)
+
+            logger.info("Sent POST KEY Message len %s", len(message))
 
     def post_key(self, key1: str, key2: str, value):
         with self.rabbit_lock:
@@ -59,7 +65,12 @@ class VaultClient:
 
             value = pickle.dumps(value).hex()
             message = f"POST_KEY {key1}={key2}={value}"
+
+            logger.info("Publishing POST KEY message")
+
             self.channel.basic_publish("", self.input_queue_name, message)
+            
+            logger.info("Sent POST KEY Message len %s", len(message))
 
     def get_key(self, key1: str, key2: str):
         with self.rabbit_lock:

@@ -241,7 +241,7 @@ class Vault:
 
             return None
 
-        logger.warning(f"Trying responses!")
+        logger.debug(f"Trying responses!")
         # logger.debug(f"Handlers {logger.handlers}")
         try:
             logger.handlers[0].flush()
