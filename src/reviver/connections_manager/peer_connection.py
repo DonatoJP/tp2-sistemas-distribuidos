@@ -98,20 +98,24 @@ class PeerConnection:
         return self.peer_conn is not None and self.peer_conn.fileno() != -1
 
     def send_message(self, msg: str):
+        logging.info("Starting send message")
+
         if self.peer_conn is None:
             raise Exception("No hay socket")
 
         msg_bytes = bytes(msg, 'utf-8')
         msg_len = len(msg_bytes)
         to_send = msg_len.to_bytes(4, byteorder='big') + msg_bytes
+        logging.info("Sending to all! len %s", msg_len)
+        logging.info("Sending send.. %s, %s", len(to_send), to_send)
 
         try:
             self.peer_conn.sendall(to_send)
-        except BrokenPipeError:
-            logging.warning("BROKEN PIPE")
+        # except BrokenPipeError:
+            # logging.warning("BROKEN PIPE")
         except Exception as e:
-            logging.warning(e)
             logging.warning("UNKOWN ERROR IN SEND ALL")
+            logging.warning(f"{e}")
 
     def clear_responses(self):
         logging.info("CLEARING RESPONSES")
