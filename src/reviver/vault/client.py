@@ -28,14 +28,14 @@ class VaultClient:
             validate_key(key)
 
             message = f"GET {self.res_queue_name} {key}"
-            logger.info("Publishing GET message")
+            logger.debug("Publishing GET message")
             self.channel.basic_publish("", self.input_queue_name, message)
 
-            logger.info("Waiting on consume message")
+            logger.debug("Waiting on consume message")
             method_frame, properties, body = next(self.channel.consume(
                 self.res_queue_name, auto_ack=True))
 
-            logger.info("Got Message len %s", len(body))
+            logger.debug("Got Message len %s", len(body))
             ret = ""
             if len(body) == 0:
                 return ret
@@ -52,11 +52,11 @@ class VaultClient:
 
             value = pickle.dumps(value).hex()
             message = f"POST {key}={value}"
-            logger.info("Publishing POST message")
+            logger.debug("Publishing POST message")
 
             self.channel.basic_publish("", self.input_queue_name, message)
 
-            logger.info("Sent POST KEY Message len %s", len(message))
+            logger.debug("Sent POST KEY Message len %s", len(message))
 
     def post_key(self, key1: str, key2: str, value):
         with self.rabbit_lock:
@@ -66,11 +66,11 @@ class VaultClient:
             value = pickle.dumps(value).hex()
             message = f"POST_KEY {key1}={key2}={value}"
 
-            logger.info("Publishing POST KEY message")
+            logger.debug("Publishing POST KEY message")
 
             self.channel.basic_publish("", self.input_queue_name, message)
             
-            logger.info("Sent POST KEY Message len %s", len(message))
+            logger.debug("Sent POST KEY Message len %s", len(message))
 
     def get_key(self, key1: str, key2: str):
         with self.rabbit_lock:
