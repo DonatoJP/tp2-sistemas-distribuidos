@@ -1,5 +1,5 @@
 import logging
-from math import ceil
+from math import floor
 from multiprocessing.pool import ThreadPool
 from threading import Lock
 import time
@@ -27,7 +27,7 @@ class Vault:
         self.storage = Storage(storage_path, buckets_number)
         self.follower_keep_listening = True
         self.follower_lock = Lock()
-        self.cluster_quorum = ceil(len(self.cluster.connections) / 2)
+        self.cluster_quorum = floor((len(self.cluster.connections) + 1) / 2) + 1
 
     def set_leader_addr(self, leader_addr):
         with self.follower_lock:
@@ -112,6 +112,8 @@ class Vault:
         # logger.debug(f"VALIDATED KEYS: {time.time() - start}")
 
         self.cluster.clear_all_responses()
+
+        # logger.debug(f"CLEARED RESPONSES: {time.time() - start}")
 
         message = f"GET {key}"
         self.cluster.send_to_all(message)

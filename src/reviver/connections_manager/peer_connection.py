@@ -111,13 +111,15 @@ class PeerConnection:
             logging.warning("BROKEN PIPE")
 
     def clear_responses(self):
-        self.peer_conn.settimeout(10)
-        while select.select([self.peer_conn], [], [], 1.0)[0]:
+        logging.info("CLEARING RESPONSES")
+        while select.select([self.peer_conn], [], [], 0)[0]:
+            logging.info("WE HAVE SOME MESSAGES")
             res = self.peer_conn.recv(1024)
             if len(res) == 0:
+                logging.info("BUT THEY WHERE EMPTY")
                 break
 
-        self.peer_conn.settimeout(None)
+        logging.info("NO MORE MESSAGES IN SOCKET")
 
 
     def is_connected(self):
