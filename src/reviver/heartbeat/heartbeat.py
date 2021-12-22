@@ -5,26 +5,7 @@ from socket import *
 import json
 import os
 import random
-import logging
-
-# format = "%(asctime)s: %(message)s"
-# logging.basicConfig(format=, level=logging.WARNING, datefmt="%H:%M:%S")
-LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
-logging.basicConfig(level=LOGLEVEL)
-logger = logging.getLogger("Heartbeat")
-
-logger.setLevel(LOGLEVEL)
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(LOGLEVEL)
-
-# create formatter
-formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
-# add formatter to ch
-ch.setFormatter(formatter)
-# add ch to logger
-# logger.addHandler(ch)
-
+from log import logger
 
 
 HOSTNAME = os.getenv("HOSTNAME", "tp3_heartbeat")
@@ -41,22 +22,6 @@ class Heartbeat(Thread):
         self.__event = event
 
     def run(self):
-        LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
-        logging.basicConfig(level=LOGLEVEL)
-        logger = logging.getLogger("Heartbeat")
-
-        logger.setLevel(LOGLEVEL)
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(LOGLEVEL)
-
-        # create formatter
-        formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
-        # add formatter to ch
-        ch.setFormatter(formatter)
-        # add ch to logger
-        # logger.addHandler(ch)
-        
         pings = 0
         logger.info(f"Created {HOSTNAME}")
         while not self.__event.is_set():
@@ -72,7 +37,7 @@ class Heartbeat(Thread):
                 )
                 # logger.info("res %s", res)
                 pings += 1
-                # logger.info("PINGS COUNT %s", pings)
+                logger.info("PINGS COUNT %s", pings)
                 time.sleep(HEARTBEAT_TIME)
             except Exception:
                 logger.debug(f"Coordinator <{idx}> unrechable, next random?")

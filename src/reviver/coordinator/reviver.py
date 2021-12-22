@@ -6,6 +6,7 @@ from threading import Thread, Timer
 import time
 
 from bully import BullyManager
+from log import logger
 
 from .state import State
 
@@ -14,8 +15,6 @@ CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
 
-# logging.basicConfig(level=logging.WARNING, datefmt="%H:%M:%S")
-logger = logging.getLogger("Reviver")
 
 class Reviver(Thread):
     def __init__(self, state: State, bully: BullyManager):

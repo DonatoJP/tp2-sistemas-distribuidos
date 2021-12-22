@@ -16,7 +16,7 @@ class Saver(AbstractOperator):
 
     def save_state(self, data: dict, workload_id):
         result = {}
-        result[self.column] = data[self.column]
+        result[self.column] = data
         self.vault.post(f"{self.key}-{workload_id}", result[self.column])
         return result
 

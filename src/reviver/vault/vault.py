@@ -17,8 +17,8 @@ from .validate import validate_key, validate_value
 # sh = logging.StreamHandler()
 # sh.setFormatter(formatter)
 # logger.addHandler(sh)
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+from log import logger
+
 class Vault:
     """Distributed, replicated, highly available kay-value store"""
 

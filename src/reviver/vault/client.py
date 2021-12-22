@@ -1,10 +1,10 @@
 import pika
 import pickle, logging
 from threading import Lock
+from log import logger
 
 from .validate import validate_key, validate_value
 
-logger = logging.getLogger("VaultClient")
 class VaultClient:
     def __init__(self, rabbit_addr, input_queue_name):
         self.rabbit_lock = Lock()

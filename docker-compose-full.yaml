@@ -30,7 +30,7 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   drop-input-column-questions-1:
     image: building-block:basic
     volumes:
@@ -50,7 +50,6 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-
 
   # ============================== Ejercicio 1 ========================
   ej1-filter-1:
@@ -110,7 +109,7 @@ services:
       - OPERATOR_MODULE=holders.avg_holder
       - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
       - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output","consumer_tag":"ej1-avg-holder-1"}
-      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output"}
       - CENTINELS_TO_RECEIVE=1
       - CENTINELS_TO_SEND=1
     depends_on:
@@ -118,7 +117,6 @@ services:
     command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-
 
   # ========================== Ejercicio 2 ==========================
   ej2-user-avg-questions-1:
@@ -200,7 +198,7 @@ services:
     command: [ "basic_holder.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-questions-filter-1:
     image: building-block:basic
     volumes:
@@ -220,7 +218,7 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-answers-filter-1:
     image: building-block:basic
     volumes:
@@ -240,7 +238,7 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-user-intersector-1:
     image: building-block:basic
     volumes:
@@ -260,7 +258,7 @@ services:
     command: [ "basic_operator.py" ]
     networks:
       - tp2-network
-  
+
   ej2-top-n-users:
     image: building-block:basic
     volumes:
@@ -322,7 +320,7 @@ services:
     networks:
       - tp2-network
 
-  result-saver:
+  result-saver1:
     # container_name: ej1-avg-holder-1
     image: building-block:basic
     volumes:
@@ -330,11 +328,11 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_NAME=result-saver
+      - NODE_NAME=result-saver1
       - BLOCK_ID=1
       - OPERATOR_MODULE=operators.saver
       - OPERATOR_PARAMS={"column":"Result", "key_save_name":"Ej1-result"}
-      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"final-output"}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output"}
       - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output-end"}
       - CENTINELS_TO_RECEIVE=1
       - CENTINELS_TO_SEND=0
@@ -344,10 +342,53 @@ services:
     networks:
       - tp2-network
 
+  result-saver2:
+    # container_name: ej1-avg-holder-1
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=result-saver2
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=operators.saver
+      - OPERATOR_PARAMS={"column":"Result", "key_save_name":"Ej2-result"}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-final-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output-end"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
+
+  result-saver3:
+    # container_name: ej1-avg-holder-1
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=result-saver3
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=operators.saver
+      - OPERATOR_PARAMS={"column":"Result", "key_save_name":"Ej3-result"}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej3-final-output"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output-end"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
   vault1:
     container_name: vault1
-    build: 
+    build:
       context: .
       dockerfile: ./src/reviver/Dockerfile
     env_file:
@@ -357,13 +398,20 @@ services:
     volumes:
       - ./src/reviver:/app
       - ./storage/vault1:/storage
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main-vault.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "rabbitmq-tp2:5672",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
     networks:
       - tp2-network
 
   vault2:
     container_name: vault2
-    build: 
+    build:
       context: .
       dockerfile: ./src/reviver/Dockerfile
     env_file:
@@ -373,13 +421,20 @@ services:
     volumes:
       - ./src/reviver:/app
       - ./storage/vault2:/storage
-    entrypoint: [ "./wait-for", "vault1:9001", "--", "python", "main-vault.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "vault1:9001",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
     networks:
       - tp2-network
 
   vault3:
     container_name: vault3
-    build: 
+    build:
       context: .
       dockerfile: ./src/reviver/Dockerfile
     env_file:
@@ -389,12 +444,19 @@ services:
     volumes:
       - ./src/reviver:/app
       - ./storage/vault3:/storage
-    entrypoint: [ "./wait-for", "vault2:9001", "--", "python", "main-vault.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "vault2:9001",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
     networks:
       - tp2-network
 
   vault-playground:
-    build: 
+    build:
       context: .
       dockerfile: ./src/reviver/Dockerfile
     env_file:
@@ -407,7 +469,7 @@ services:
 
   reviver1:
     container_name: reviver1
-    build: 
+    build:
       context: .
       dockerfile: ./src/reviver/Dockerfile
     env_file:
@@ -418,7 +480,14 @@ services:
       &appvolumes
       - ./src/reviver:/app
       - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: [ "./wait-for", "rabbitmq-tp2:5672", "--", "python", "main.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "rabbitmq-tp2:5672",
+        "--",
+        "python",
+        "main.py"
+      ]
     networks:
       - tp2-network
 
@@ -430,7 +499,14 @@ services:
     environment:
       - NODE_ID=2
     volumes: *appvolumes
-    entrypoint: [ "./wait-for", "reviver1:9000", "--", "python", "main.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "reviver1:9000",
+        "--",
+        "python",
+        "main.py"
+      ]
     networks:
       - tp2-network
 
@@ -442,10 +518,16 @@ services:
     environment:
       - NODE_ID=3
     volumes: *appvolumes
-    entrypoint: [ "./wait-for", "reviver2:9000", "--", "python", "main.py" ]
+    entrypoint:
+      [
+        "./wait-for",
+        "reviver2:9000",
+        "--",
+        "python",
+        "main.py"
+      ]
     networks:
       - tp2-network
-
   # app4:
   #   # container_name: app4
   #   build: 

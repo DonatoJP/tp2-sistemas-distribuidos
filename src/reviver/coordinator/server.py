@@ -5,7 +5,7 @@ from datetime import datetime
 from threading import Thread
 from coordinator.state import State
 
-logger = logging.getLogger("Server")
+from log import logger
 
 class UdpServer(Thread):
     def __init__(self, state: State):

@@ -12,9 +12,8 @@ from heartbeat import Heartbeat
 
 from .server import RabbitMessageProcessor, RabbitConsumerServer
 from .vault import Vault
-
-logger = logging.getLogger("VaultMessageProcessor")
-logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.DEBUG, datefmt="%H:%M:%S")
+import logging
+from log import logger
 
 
 class VaultMessageProcessor(RabbitMessageProcessor):
@@ -23,6 +22,7 @@ class VaultMessageProcessor(RabbitMessageProcessor):
         self.retry_wait = retry_wait
 
     def process(self, message):
+
         op, params = message.split(" ", 1)
 
         if op == "GET":
@@ -123,6 +123,7 @@ def follower_start(vault: Vault, leader_addr):
 
 
 def main():
+    logging.getLogger("pika").setLevel(logging.WARNING)
 
     node_id = os.environ['NODE_ID']
     logger.info(f'Starting node {node_id}')
@@ -212,7 +213,7 @@ def main():
     exited = False
     while not exited:
         leader_elected_cv.acquire()
-        leader_elected_cv.wait_for(lambda: leader_elected[0])
+        # leader_elected_cv.wait_for(lambda: leader_elected[0])
         leader_elected[0] = False
         leader_elected_cv.release()
 

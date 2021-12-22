@@ -3,14 +3,7 @@ import logging
 import signal
 
 import pika
-
-
-logger = logging.getLogger("Vault Leader Server")
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
-sh = logging.StreamHandler()
-sh.setFormatter(formatter)
-# logger.addHandler(sh)
+from log import logger
 
 class RabbitMessageProcessor:
     def process(self, message):

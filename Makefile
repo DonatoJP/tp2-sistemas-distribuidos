@@ -154,3 +154,11 @@ rs:
 	mkdir storage 
 	./dcp up -d
 .PHONY: rs
+
+rsf:
+	./dcfull down
+	sleep 3
+	sudo rm -rf storage
+	mkdir storage 
+	./dcfull up -d
+.PHONY: rsf
