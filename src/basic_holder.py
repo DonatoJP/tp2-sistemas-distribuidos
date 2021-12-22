@@ -53,7 +53,7 @@ def main():
             if centinels_manager.is_centinel(task):
                 centinels_manager.count_centinel(task)
                 if centinels_manager.are_all_received(task):
-                    result = holder_to_use.end()
+                    result = holder_to_use.end(task.workload_id)
                     for returnable in result:
                         new_task = Task(task.workload_id, returnable[0])
                         queue_producer.send(new_task.serialize(), returnable[1])

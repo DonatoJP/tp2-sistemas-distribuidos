@@ -20,7 +20,7 @@ services:
       - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-answers
       - CENTINELS_TO_SEND=1
-      - WORKLOAD_ID=1
+      - WORKLOAD_ID=2
     volumes:
       - "./data:/app/data"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
@@ -36,7 +36,7 @@ services:
       - CHUNK_SIZE=2000
       - OUTPUT_QUEUE_NAME=input-questions
       - CENTINELS_TO_SEND=1
-      - WORKLOAD_ID=1
+      - WORKLOAD_ID=2
     volumes:
       - "./data:/app/data"
     command: ["./wait-for", "rabbitmq-tp2:5672", "--", "python", "input_node.py"]
