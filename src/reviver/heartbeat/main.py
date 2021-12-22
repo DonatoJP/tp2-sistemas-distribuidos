@@ -6,7 +6,7 @@ from heartbeat import Heartbeat
 
 if __name__ == "__main__":
     # format = "%(asctime)s: %(message)s"
-    # logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+    # logging.basicConfig(format=format, level=logging.WARNING, datefmt="%H:%M:%S")
 
     logging.info("Main    : before creating thread")
     heartbeat = Heartbeat()
