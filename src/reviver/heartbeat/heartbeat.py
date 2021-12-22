@@ -38,7 +38,7 @@ class Heartbeat(Thread):
                 )
                 # logger.info("res %s", res)
                 pings += 1
-                logger.info("PINGS COUNT %s", pings)
+                logger.debug("PINGS COUNT %s", pings)
                 time.sleep(HEARTBEAT_TIME)
             except Exception:
                 logger.debug(f"Coordinator <{idx}> unrechable, next random?")

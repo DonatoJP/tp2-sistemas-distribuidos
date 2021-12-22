@@ -236,16 +236,17 @@ class Vault:
                 try:
                     return self.cluster.recv_from(peer_addr)
                 except RecvTimeout:
-                    logger.warning(f"Recv Timeout!")
+                    pass
+                    # logger.warning(f"Recv Timeout!")
 
             return None
 
-        logger.warning(f"Recv Timeout!")
-        logger.debug(f"Handlers {logger.handlers}")
+        logger.warning(f"Trying responses!")
+        # logger.debug(f"Handlers {logger.handlers}")
         try:
             logger.handlers[0].flush()
         except Exception as e:
             logger.warning(f"Cant log handler")
-        return [recv(address) for address in self.cluster.addresses]
+        # return [recv(address) for address in self.cluster.addresses]
 
-        # return self.pool.map(recv, self.cluster.addresses)
+        return self.pool.map(recv, self.cluster.addresses)
