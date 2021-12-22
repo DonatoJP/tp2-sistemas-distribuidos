@@ -108,12 +108,11 @@ class PeerConnection:
         try:
             self.peer_conn.sendall(to_send)
         except BrokenPipeError:
-            logging.info("BROKEN PIPE")
-            pass
+            logging.warning("BROKEN PIPE")
 
     def clear_responses(self):
-        self.peer_conn.settimeout(0)
-        while select.select([self.peer_conn], [], [], 0)[0]:
+        self.peer_conn.settimeout(10)
+        while select.select([self.peer_conn], [], [], 1.0)[0]:
             res = self.peer_conn.recv(1024)
             if len(res) == 0:
                 break

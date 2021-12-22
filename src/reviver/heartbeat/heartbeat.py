@@ -8,7 +8,7 @@ import random
 import logging
 
 # format = "%(asctime)s: %(message)s"
-# logging.basicConfig(format=, level=logging.INFO, datefmt="%H:%M:%S")
+# logging.basicConfig(format=, level=logging.WARNING, datefmt="%H:%M:%S")
 LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 logging.basicConfig(level=LOGLEVEL)
 logger = logging.getLogger("Heartbeat")

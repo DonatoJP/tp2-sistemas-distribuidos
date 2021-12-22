@@ -102,7 +102,7 @@ class ConnectionsManager:
             try:
                 peer.send_message(message)
             except BrokenPipeError:
-                pass
+                logging.warning("Broken Pipe!! %s", peer.node_id)
 
     def recv_from(self, peer_addr) -> str:
         peer = self._find_peer(peer_addr)

@@ -14,7 +14,7 @@ CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
 
-# logging.basicConfig(level=logging.INFO, datefmt="%H:%M:%S")
+# logging.basicConfig(level=logging.WARNING, datefmt="%H:%M:%S")
 logger = logging.getLogger("Reviver")
 
 class Reviver(Thread):
@@ -56,7 +56,7 @@ class Reviver(Thread):
                 for key, value in hosts_to_revive.items()
                 if value != ""
             ]
-            # logging.debug("RES: %s", res)
+            # logging.WARNING("RES: %s", res)
             [
                 self.state.remove_k("coordinator", r["key"])
                 for r in res
