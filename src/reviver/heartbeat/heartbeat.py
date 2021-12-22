@@ -23,7 +23,7 @@ formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s"
 # add formatter to ch
 ch.setFormatter(formatter)
 # add ch to logger
-logger.addHandler(ch)
+# logger.addHandler(ch)
 
 
 
@@ -55,7 +55,7 @@ class Heartbeat(Thread):
         # add formatter to ch
         ch.setFormatter(formatter)
         # add ch to logger
-        logger.addHandler(ch)
+        # logger.addHandler(ch)
         
         pings = 0
         logger.info(f"Created {HOSTNAME}")

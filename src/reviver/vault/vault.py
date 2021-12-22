@@ -11,17 +11,20 @@ from .storage import Storage
 from .validate import validate_key, validate_value
 
 
-logger = logging.getLogger("Vault")
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
-sh = logging.StreamHandler()
-sh.setFormatter(formatter)
-logger.addHandler(sh)
+# logger = logging.getLogger("Vault")
+# logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
+# sh = logging.StreamHandler()
+# sh.setFormatter(formatter)
+# logger.addHandler(sh)
+logger = logging.getLogger()
 
 class Vault:
     """Distributed, replicated, highly available kay-value store"""
 
-    def __init__(self, cluster: ConnectionsManager, storage_path="/storage", buckets_number=20):
+    def __init__(
+        self, cluster: ConnectionsManager, storage_path="/storage", buckets_number=20
+    ):
         self.cluster = cluster
         self.pool = ThreadPool(len(cluster.connections))
         self.storage = Storage(storage_path, buckets_number)
@@ -109,42 +112,45 @@ class Vault:
         key = key.strip()
         validate_key(key)
 
-        # logger.debug(f"VALIDATED KEYS: {time.time() - start}")
+        logger.debug(f"VALIDATED KEYS: {time.time() - start}")
 
         self.cluster.clear_all_responses()
+
+        logger.debug(f"SENT CLEAR RESPONSES: {time.time() - start}")
 
         message = f"GET {key}"
         self.cluster.send_to_all(message)
 
-        # logger.debug(f"SENT GET TO FOLLOWERS: {time.time() - start}")
+        logger.debug(f"SENT GET TO FOLLOWERS: {time.time() - start}")
 
         responses = self._get_responses()
 
-        # logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+        logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
 
         responses.append(self._follower_get(key))
 
-        # logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
+        logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
 
         if len(responses) < self.cluster_quorum:
             return True, None
 
         def parse_respone(res):
             try:
-                version, value = res.split(':', 1)
+                version, value = res.split(":", 1)
             except ValueError:
                 return 0, None
 
             return int(version), value
 
-        parsed_responses = map(parse_respone, filter(
-            lambda res: res is not None, responses))
+        parsed_responses = map(
+            parse_respone, filter(lambda res: res is not None, responses)
+        )
         most_recent_value = max(parsed_responses, key=lambda res: res[0])
 
         if most_recent_value[0] == 0:
             return False, None
 
-        # logger.debug(f"PROCESS RESPONSES: {time.time() - start}")
+        logger.debug(f"PROCESS RESPONSES: {time.time() - start}")
 
         return False, most_recent_value[1]
 
@@ -157,17 +163,28 @@ class Vault:
 
         returns True if client must retry
         """
+        start = time.time()
+
         key = key.strip()
         validate_key(key)
         validate_value(key)
+        logger.debug(f"VALIDATED KEYS: {time.time() - start}")
 
         logger.debug("Getting versions")
 
         self.cluster.clear_all_responses()
 
+        logger.debug(f"SENT CLEAR RESPONSES: {time.time() - start}")
+
         message = f"VERSION {key}"
         self.cluster.send_to_all(message)
+
+        logger.debug(f"SENT POST TO FOLLOWERS: {time.time() - start}")
+
         responses = self._get_responses()
+
+        logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+
         responses.append(self._follower_version(key))
 
         if len(responses) < self.cluster_quorum:
@@ -181,17 +198,28 @@ class Vault:
             except ValueError:
                 return 0
 
-        parsed_responses = map(parse_response, filter(
-            lambda res: res is not None, responses))
+        parsed_responses = map(
+            parse_response, filter(lambda res: res is not None, responses)
+        )
         next_version = max(parsed_responses) + 1
 
         logger.debug(f"Next version: {next_version}")
         logger.debug(f"Executing posts")
 
         message = f"POST {next_version}:{key}={value}"
-        self.cluster.send_to_all(message)
+        logger.debug(f"Parsing next version {message}")
+        try:
+            self.cluster.send_to_all(message)
+        except Exception as e:
+            logger.warning(f"Cant send to all {e}")
+        logger.debug(f"Sent!!: {time.time() - start}")
+        # time.sleep(0.5)
+
         # Que get responses no espere a todos. Que pueda salir una vez que ya tiene quorum
         responses = self._get_responses()
+
+        logger.debug(f"GOT RESPONSES FROM POST: {time.time() - start}")
+
         responses.append(self._follower_post(next_version, key, value))
 
         logger.debug(f"Got responses: {responses}")
@@ -199,13 +227,21 @@ class Vault:
         return responses.count("ACK") < self.cluster_quorum
 
     def _get_responses(self):
-        def recv (peer_addr):
+        def recv(peer_addr):
             for i in range(5):
                 try:
                     return self.cluster.recv_from(peer_addr)
                 except RecvTimeout:
-                    pass
+                    logger.warning(f"Recv Timeout!")
 
             return None
 
-        return self.pool.map(recv, self.cluster.addresses)
+        logger.warning(f"Recv Timeout!")
+        logger.debug(f"Handlers {logger.handlers}")
+        try:
+            logger.handlers[0].flush()
+        except Exception as e:
+            logger.warning(f"Cant log handler")
+        return [recv(address) for address in self.cluster.addresses]
+
+        # return self.pool.map(recv, self.cluster.addresses)

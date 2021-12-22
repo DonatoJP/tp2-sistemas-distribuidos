@@ -4,7 +4,7 @@ from threading import Thread, Condition, Lock
 from .peer_connection import PeerConnection
 from typing import Optional
 
-
+logger = logging.getLogger("ConnectionsManager")
 class ConnectionsManager:
     def __init__(self, node_id: str, self_port_n: str, connections_to_create: list, timeout=None):
         self.connections: list[PeerConnection] = []
@@ -98,11 +98,14 @@ class ConnectionsManager:
         peer.send_message(message)
 
     def send_to_all(self, message):
+        logger.debug(f"Checking connections ...")
+        logger.debug(f"Checking connections {self.connections}")
         for peer in self.connections:
+            logger.debug(f"sending to  {peer.node_id}")
             try:
                 peer.send_message(message)
-            except BrokenPipeError:
-                logging.warning("Broken Pipe!! %s", peer.node_id)
+            except Exception as e:
+                logging.warning("Broken Pipe!!  %s %s", peer.node_id, e)
 
     def recv_from(self, peer_addr) -> str:
         peer = self._find_peer(peer_addr)

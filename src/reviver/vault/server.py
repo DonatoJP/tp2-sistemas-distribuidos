@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("[%(asctime)s]-%(levelname)s-%(name)s-%(message)s")
 sh = logging.StreamHandler()
 sh.setFormatter(formatter)
-logger.addHandler(sh)
+# logger.addHandler(sh)
 
 class RabbitMessageProcessor:
     def process(self, message):
