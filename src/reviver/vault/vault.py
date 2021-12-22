@@ -96,6 +96,9 @@ class Vault:
     def _follower_version(self, key):
         return str(self.storage.version(key))
 
+    def _responses_have_quorum(self, responses):
+        return len(list(filter(lambda res: res is not None, responses))) < self.cluster_quorum
+
     def leader_get(self, key: str, last_responses=False) -> tuple:
         """
         gets from vault a value searching by the key
@@ -128,7 +131,7 @@ class Vault:
 
         # logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
 
-        if len(responses) < self.cluster_quorum:
+        if self._responses_have_quorum(responses):
             return True, None
 
         def parse_respone(res):
@@ -172,7 +175,7 @@ class Vault:
         responses = self._get_responses()
         responses.append(self._follower_version(key))
 
-        if len(responses) < self.cluster_quorum:
+        if self._responses_have_quorum(responses):
             return True
 
         # print(f"Got responses: {responses}")
@@ -198,7 +201,7 @@ class Vault:
 
         logger.debug(f"Got responses: {responses}")
 
-        return responses.count("ACK") < self.cluster_quorum
+        return self._responses_have_quorum(responses)
 
     def _get_responses(self):
         def recv (peer_addr):

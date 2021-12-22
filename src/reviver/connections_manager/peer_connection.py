@@ -109,6 +109,9 @@ class PeerConnection:
             self.peer_conn.sendall(to_send)
         except BrokenPipeError:
             logging.warning("BROKEN PIPE")
+        except Exception as e:
+            logging.warning(e)
+            logging.warning("UNKOWN ERROR IN SEND ALL")
 
     def clear_responses(self):
         logging.info("CLEARING RESPONSES")
