@@ -109,15 +109,20 @@ class PeerConnection:
             self.peer_conn.sendall(to_send)
         except BrokenPipeError:
             logging.warning("BROKEN PIPE")
+        except Exception as e:
+            logging.warning(e)
+            logging.warning("UNKOWN ERROR IN SEND ALL")
 
     def clear_responses(self):
-        # self.peer_conn.settimeout(0)
+        logging.info("CLEARING RESPONSES")
         while select.select([self.peer_conn], [], [], 0)[0]:
+            logging.info("WE HAVE SOME MESSAGES")
             res = self.peer_conn.recv(1024)
             if len(res) == 0:
+                logging.info("BUT THEY WHERE EMPTY")
                 break
 
-        # self.peer_conn.settimeout(None)
+        logging.info("NO MORE MESSAGES IN SOCKET")
 
 
     def is_connected(self):
