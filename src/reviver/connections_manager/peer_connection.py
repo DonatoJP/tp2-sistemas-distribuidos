@@ -105,13 +105,16 @@ class PeerConnection:
         msg_len = len(msg_bytes)
         to_send = msg_len.to_bytes(4, byteorder='big') + msg_bytes
 
-        try:
-            self.peer_conn.sendall(to_send)
-        except BrokenPipeError:
-            logging.warning("BROKEN PIPE")
-        except Exception as e:
-            logging.warning(e)
-            logging.warning("UNKOWN ERROR IN SEND ALL")
+        if select.select([], [self.peer_conn], [], 0)[1]:
+            try:
+                self.peer_conn.sendall(to_send)
+            except BrokenPipeError:
+                logging.warning("BROKEN PIPE")
+            except Exception as e:
+                logging.warning(e)
+                logging.warning("UNKOWN ERROR IN SEND ALL")
+        else:
+            logging.warning("Could not write to socket")
 
     def clear_responses(self):
         logging.info("CLEARING RESPONSES")
