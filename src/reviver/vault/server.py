@@ -12,10 +12,16 @@ class RabbitMessageProcessor:
 
     def __call__(self, ch, method, properties, body):
         message = body.decode()
+        start = time.time()
+        op, params = message.split(" ", 1)
         queue, result = self.process(message)
+        logger.info(f"PROCESSED MESSAGE:  with op {op} len {len(message)} :: {time.time() - start}")
+
         if result is not None and queue is not None:
             ch.basic_publish(
                 exchange='', routing_key=queue, body=result.encode())
+            logger.info(f"PROCESSED MESSAGE: PUBLISH MESSAGE with op {op} result {len(result)} :: {time.time() - start}")
+
 
         ch.basic_ack(method.delivery_tag)
 
@@ -32,7 +38,7 @@ class RabbitConsumerServer:
         self.channel = self.connection.channel()
 
         self.channel.queue_declare(queue=self.input_queue_name)
-
+        self.channel.basic_qos(prefetch_count=30)
         logger.info(self.input_queue_name)
 
         self.channel.basic_consume(queue=self.input_queue_name,

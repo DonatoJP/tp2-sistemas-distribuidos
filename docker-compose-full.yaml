@@ -455,6 +455,75 @@ services:
     networks:
       - tp2-network
 
+  hvault1:
+    container_name: hvault1
+    build:
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
+    env_file:
+      - ./src/reviver/vault/.henv
+    environment:
+      - NODE_ID=1
+    volumes:
+      - ./src/reviver:/app
+      - ./storage/hvault1:/storage
+    entrypoint:
+      [
+        "./wait-for",
+        "rabbitmq-tp2:5672",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
+    networks:
+      - tp2-network
+
+  hvault2:
+    container_name: hvault2
+    build:
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
+    env_file:
+      - ./src/reviver/vault/.henv
+    environment:
+      - NODE_ID=2
+    volumes:
+      - ./src/reviver:/app
+      - ./storage/hvault2:/storage
+    entrypoint:
+      [
+        "./wait-for",
+        "hvault1:9001",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
+    networks:
+      - tp2-network
+
+  hvault3:
+    container_name: hvault3
+    build:
+      context: .
+      dockerfile: ./src/reviver/Dockerfile
+    env_file:
+      - ./src/reviver/vault/.henv
+    environment:
+      - NODE_ID=3
+    volumes:
+      - ./src/reviver:/app
+      - ./storage/hvault3:/storage
+    entrypoint:
+      [
+        "./wait-for",
+        "hvault2:9001",
+        "--",
+        "python",
+        "main-vault.py"
+      ]
+    networks:
+      - tp2-network   
+
   vault-playground:
     build:
       context: .

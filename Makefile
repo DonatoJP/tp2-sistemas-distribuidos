@@ -175,6 +175,14 @@ diego86:
 	docker kill vault3 reviver3 tp2-middleware_ej2-top-n-users_1 tp2-middleware_ej1-filter-1_1 tp2-middleware_ej3-group-by-holder-1_1
 .PHONY: diego82
 
+diego90:
+	docker kill vault3 vault2
+.PHONY: diego82
+
 logsej2:
 	./dcfull logs -f --tail=2000 ej2-user-avg-questions-1 ej2-general-avg-answers ej2-user-avg-answers-1 ej2-general-avg-questions ej2-user-answers-filter-1 ej2-user-questions-filter-1 ej2-top-n-users ej2-user-intersector-1 result-saver2
 .PHONY: logsej2
+
+logsMSG:
+	./dcfull logs -f --tail=2000 vault3 hvault3 | grep "PROCESSED MESS"
+.PHONY: logsMSG
