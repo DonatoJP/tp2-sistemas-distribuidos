@@ -137,22 +137,19 @@ class PeerConnection:
 
     def _recv(self, to_receive: int) -> bytes:
         result = b''
-        received = b''
         aux = b''
         bytes_read = 0
         while True:
             ready = select.select([self.peer_conn], [], [], self.timeout)
             if ready[0]:
-                aux += self.peer_conn.recv(to_receive - bytes_read)
+                aux = self.peer_conn.recv(to_receive - bytes_read)
                 if not aux:
                     self.is_up_cv.acquire()
                     self.is_up = False
                     self.is_up_cv.release()
                     raise ConnectionClosed()
-                received += aux
-                aux = b''
-                bytes_read += len(received)
-                result += received
+                bytes_read += len(aux)
+                result += aux
                 if bytes_read >= to_receive:
                     break
             else:
