@@ -85,7 +85,7 @@ class Bully:
                 self.is_in_election_cv.release()
                 self.is_leader_cv.release()
 
-                logger.info(f"Sending PING to {self.leader_addr}")
+                logger.debug(f"Sending PING to {self.leader_addr}")
 
                 self.conn_manager.send_to(self.leader_addr, 'PING')
                 self.leader_addr_cv.release()
@@ -288,7 +288,7 @@ class Bully:
         """
 
         self.conn_manager.send_to(peer_addr, 'ECHO_PING')
-        logger.info(f"Sent ECHO_PING to {peer_addr}")
+        logger.debug(f"Sent ECHO_PING to {peer_addr}")
 
     def _start_receiving_from_peer(self, peer_addr):
         logger.info(f'Starting to receive from {peer_addr}')
@@ -313,10 +313,10 @@ class Bully:
             elif msg == 'LEADER':
                 self._process_leader_message(peer_addr)
             elif msg == 'PING':
-                logger.info(f"Received PING from {peer_addr}")
+                logger.debug(f"Received PING from {peer_addr}")
                 self._echo_ping(peer_addr)
             elif msg == 'ECHO_PING':
-                logger.info(f"Received ECHO PING from {peer_addr}")
+                logger.debug(f"Received ECHO PING from {peer_addr}")
                 self.notify_set_received_ping_echo(True)
             elif msg == 'READY':
                 logger.info(f"Got READY message from {peer_addr}")

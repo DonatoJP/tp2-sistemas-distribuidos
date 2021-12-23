@@ -100,7 +100,7 @@ class Vault:
     def _follower_version(self, key):
         return str(self.storage.version(key))
 
-    def _responses_have_quorum(self, responses):
+    def _responses_dont_have_quorum(self, responses):
         return len(list(filter(lambda res: res is not None, responses))) < self.cluster_quorum
 
     def leader_get(self, key: str, last_responses=False) -> tuple:
@@ -135,7 +135,7 @@ class Vault:
 
         logger.debug(f"GOT OWN RESPONSE: {time.time() - start}")
 
-        if self._responses_have_quorum(responses):
+        if self._responses_dont_have_quorum(responses):
             return True, None
 
         def parse_respone(res):
@@ -187,11 +187,13 @@ class Vault:
 
         responses = self._get_responses()
 
-        logger.debug(f"GOT RESPONSES FROM FOLLOWERS: {time.time() - start}")
+        logger.debug(f"GOT RESPONSES {responses} FROM FOLLOWERS:  {time.time() - start}")
 
         responses.append(self._follower_version(key))
 
-        if self._responses_have_quorum(responses):
+        if self._responses_dont_have_quorum(responses):
+            logger.debug(f"Hasn't quorum!:  {time.time() - start}")
+
             return True
 
         # print(f"Got responses: {responses}")
@@ -222,13 +224,13 @@ class Vault:
         # Que get responses no espere a todos. Que pueda salir una vez que ya tiene quorum
         responses = self._get_responses()
 
-        logger.debug(f"GOT RESPONSES FROM POST: {time.time() - start}")
+        logger.debug(f"GOT RESPONSES 2 {responses} FROM POST: {time.time() - start}")
 
         responses.append(self._follower_post(next_version, key, value))
 
         logger.debug(f"Got FINAL responses: {responses} :: {time.time() - start}")
 
-        return self._responses_have_quorum(responses)
+        return self._responses_dont_have_quorum(responses)
 
     def _get_responses(self):
         def recv(peer_addr):

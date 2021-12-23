@@ -114,7 +114,7 @@ class PeerConnection:
         logger.debug("Sending to all! len %s", msg_len)
         logging.debug("Sending send.. %s, %s", len(to_send), to_send)
 
-        if select.select([], [self.peer_conn], [], 0)[1]:
+        if select.select([], [self.peer_conn], [], 0.1)[1]:
             try:
                 self.peer_conn.sendall(to_send)
             except Exception as e:

@@ -93,7 +93,10 @@ class VaultClient:
 
         res = dict()
 
-        for key, value in user_dict.items():
-            res[key] = pickle.loads(bytes.fromhex(value))
+        try: 
+            for key, value in user_dict.items():
+                res[key] = pickle.loads(bytes.fromhex(value))
+        except AttributeError as e:
+            return res
 
         return res

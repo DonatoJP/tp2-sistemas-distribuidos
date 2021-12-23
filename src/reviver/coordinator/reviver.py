@@ -15,6 +15,7 @@ STATE_CHECK_TIME = 5
 CHECK_TIME_DIFF = 15
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
+STATUS_OK = "OK"
 
 
 class Reviver(Thread):
@@ -35,6 +36,9 @@ class Reviver(Thread):
                 return {"key": key, "status": STATUS_RESTART}
             except Exception:
                 return {"key": key, "status": STATUS_INVALID_KEY}
+        else: 
+            return {"key": key, "status": STATUS_OK}
+
 
     def check_state(self):
         logger.debug("Checking Leadership...")
@@ -52,6 +56,13 @@ class Reviver(Thread):
                 if value != ""
             ]
             # logging.WARNING("RES: %s", res)
+            res_ok = [
+                r['key']
+                for r in res
+                if r is not None and r["status"] == STATUS_OK
+            ]
+            logging.info("%s OK of %s", len(res_ok), len(res))
+
             [
                 self.state.remove_k("coordinator", r["key"])
                 for r in res

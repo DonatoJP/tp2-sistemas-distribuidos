@@ -17,7 +17,7 @@ class TopNUsersHolder(AbstractHolder):
     def __init__(self, top_n, by_workload = {}, **kwargs) -> None:
         self.by_workload = by_workload
         self.top_n = top_n
-        super().__init__(perform_affinity=False, **kwargs)
+        super().__init__(**kwargs)
     
     def exec_operation(self, data, workload_id) -> list:
         if workload_id not in self.by_workload:
