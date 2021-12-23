@@ -14,7 +14,7 @@ class Storage:
         return f"{version}:{key}={value}\n"
 
     def deserialize(self, line):
-        match = re.match(r"^(?P<version>\d+):(?P<key>.+)=(?P<value>.+)$", line)
+        match = re.match(r"^(?P<version>\d+):(?P<key>[^=]+)=(?P<value>.+)$", line)
         if match is not None:
             return (int(match['version']), match['key'], match['value'])
 
