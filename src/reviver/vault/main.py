@@ -136,7 +136,7 @@ def main():
     vault_peers = [addr for addr in os.environ['VAULT_PEERS_INFO'].split(
         ',') if not addr.startswith(f"{node_id}-")]
     vault_port = os.environ['VAULT_LISTEN_PORT']
-    vault_timeout = int(os.environ['VAULT_TIMEOUT'])
+    vault_timeout = float(os.environ['VAULT_TIMEOUT'])
     vault_cm = ConnectionsManager(
         node_id, vault_port, vault_peers, vault_timeout)
 

@@ -207,11 +207,11 @@ class Vault:
         )
         next_version = max(parsed_responses) + 1
 
-        logger.debug(f"Next version: {next_version}")
+        logger.debug(f"Next version: {next_version} :: {time.time() - start}")
         logger.debug(f"Executing posts")
 
         message = f"POST {next_version}:{key}={value}"
-        logger.debug(f"Parsing next version {message}")
+        # logger.debug(f"Parsing next version {message}")
         try:
             self.cluster.send_to_all(message)
         except Exception as e:
@@ -226,18 +226,22 @@ class Vault:
 
         responses.append(self._follower_post(next_version, key, value))
 
-        logger.debug(f"Got responses: {responses}")
+        logger.debug(f"Got FINAL responses: {responses} :: {time.time() - start}")
 
         return self._responses_have_quorum(responses)
 
     def _get_responses(self):
         def recv(peer_addr):
+            start = time.time()
             for i in range(5):
                 try:
-                    return self.cluster.recv_from(peer_addr)
+                    to_ret = self.cluster.recv_from(peer_addr)
+                    logger.debug(f'This iteration {i} did NOT fail {time.time() - start}')
+                    return to_ret
                 except RecvTimeout:
-                    pass
-                    # logger.warning(f"Recv Timeout!")
+                    logger.warning(f"Recv Timeout!")
+                
+                logger.debug(f'PEER_ADDRES {peer_addr} ITERATION {i} SINCE START: {time.time() - start}')
 
             return None
 
