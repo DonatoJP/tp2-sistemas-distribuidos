@@ -7,10 +7,12 @@ from utils import parse_parameters, ParseParametersError, exit
 from reviver.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
 from reviver.state_saver import StateSaver
+from reviver.log import create_logger
 
 
 # logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
-logger = logging.getLogger("Basic Operator")
+# logger = logging.getLogger("Basic Operator")
+logger = create_logger('basic-holder')
 
 def main():
     try:
@@ -86,7 +88,7 @@ def main():
     try:
         queue_consumer.start_consuming()
     except Exception as e:
-        logger.warning("Recieved Excetion %s", e)
+        logger.exception(e)
         exit_ev.set()
         exit([queue_consumer, queue_producer], 0)
 
