@@ -3,6 +3,13 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from ..operator import AbstractOperator
 
 class SentimentAnalysisOperator(AbstractOperator):
+
+    name = 'sentiment-analysis-operator'
+
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls()
+
     def __init__(self, column, **kwargs) -> None:
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.column = column
@@ -24,4 +31,15 @@ class SentimentAnalysisOperator(AbstractOperator):
 
         res = [ operation(x) for x in data ]
         return self._group_by_ak(res)
+    
+    @classmethod
+    def should_save_state(cls):
+        return False
+    
+    @classmethod
+    def should_track_duplicates(cls):
+        return False
+
+    def export_state(self):
+        return None
     

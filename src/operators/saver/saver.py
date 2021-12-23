@@ -6,6 +6,12 @@ import os
 from reviver.vault.client import VaultClient
 
 class Saver(AbstractOperator):
+    name = 'saver-operator'
+
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls()
+
     def __init__(self, column, key_save_name, **kwargs) -> None:
         self.column = column
         self.key = key_save_name
@@ -24,3 +30,14 @@ class Saver(AbstractOperator):
         io_string = StringIO(data)
         result = map(lambda line: self.save_state(json.loads(line), workload_id), io_string)
         return list(map(lambda x: (json.dumps(x), self.get_affinity(x)), result))
+    
+    @classmethod
+    def should_save_state(cls):
+        return False
+    
+    @classmethod
+    def should_track_duplicates(cls):
+        return False
+
+    def export_state(self):
+        return None

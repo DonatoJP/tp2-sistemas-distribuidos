@@ -5,6 +5,12 @@ from ..column_drop.column_drop import DropColumnOperator
 from  reviver.workload import Task
 
 class ColumnDropTopicOperator(AbstractOperator):
+    name = 'column-drop-topic-operator'
+
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls()
+
     def __init__(self, params_by_topic, perform_affinity, max_affinity) -> None:
         self.params_by_topic: dict = params_by_topic
         self.perform_affinity = perform_affinity
@@ -41,3 +47,14 @@ class ColumnDropTopicOperator(AbstractOperator):
         io_string = StringIO(data)
         result = map(lambda line: self._build_output_by_topic(json.loads(line)), io_string)
         return self._group_chunks_by_rk(result)
+    
+    @classmethod
+    def should_save_state(cls):
+        return False
+    
+    @classmethod
+    def should_track_duplicates(cls):
+        return False
+    
+    def export_state(self):
+        return None

@@ -5,6 +5,12 @@ from io import StringIO
 from functools import reduce
 
 class FilterOperator(AbstractOperator):
+    name = 'filter-operator'
+
+    @classmethod
+    def from_state(cls, state: dict):
+        return cls()
+
     def __init__(self, column, keep_columns=[], to_compare=10, op='<', **kwargs) -> None:
         self.ops = {">": operator.gt, "<": operator.lt, ">=": operator.ge, "<=": operator.le}
         self.op = self.ops[op]
@@ -42,6 +48,17 @@ class FilterOperator(AbstractOperator):
         no_nones = list( filter(None, res_aff_tuples) )
 
         return self._group_by_ak(no_nones)
+    
+    @classmethod
+    def should_save_state(cls):
+        return False
+    
+    @classmethod
+    def should_track_duplicates(cls):
+        return False
+
+    def export_state(self):
+        return None
 
 
 

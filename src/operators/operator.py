@@ -3,6 +3,18 @@ from  reviver.workload import Task
 from functools import reduce
 
 class AbstractOperator:
+    name = 'AbstractOperator'
+
+    def export_state(self):
+        ret = {}
+        ret["perform_affinity"] = self.perform_affinity
+        ret["affinity_key"] = self.affinity_key
+        ret["affinity_divider"] = self.affinity_divider
+        return ret
+
+    def __str__(self) -> str:
+        return f'{self.name} {self.export_state()}'
+
     def __init__(self, perform_affinity=False, affinity_key='', affinity_divider=1) -> None:
         self.perform_affinity = perform_affinity
         self.affinity_key = affinity_key
