@@ -52,232 +52,232 @@ services:
       - tp2-network
 
   # ============================== Ejercicio 1 ========================
-  # ej1-filter-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej1-filter-1
-  #     - BLOCK_ID=1
-  #     - OPERATOR_MODULE=operators.filter
-  #     - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
-  #       "perform_affinity":false}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.0","consumer_tag":"ej1-filter-1","queue_name":"ej1-filter-input-1"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_operator.py" ]
-  #   networks:
-  #     - tp2-network
+  ej1-filter-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej1-filter-1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=operators.filter
+      - OPERATOR_PARAMS={"keep_columns":["Body"],"column":"Score","to_compare":10,"op":">",
+        "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej1.0","consumer_tag":"ej1-filter-1","queue_name":"ej1-filter-input-1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
-  # ej1-sentiment-analyser-1:
-  #   image: building-block:full
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej1-sentiment-analyser-1
-  #     - PYTHONUNBUFFERED=1
-  #     - BLOCK_ID=1
-  #     - OPERATOR_MODULE=operators.sentiment_analysis
-  #     - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output","consumer_tag":"ej1-sentiment-analyser-1"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_operator.py" ]
-  #   networks:
-  #     - tp2-network
+  ej1-sentiment-analyser-1:
+    image: building-block:full
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej1-sentiment-analyser-1
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=operators.sentiment_analysis
+      - OPERATOR_PARAMS={"column":"Body", "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-filter-output","consumer_tag":"ej1-sentiment-analyser-1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
-  # ej1-avg-holder-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej1-avg-holder-1
-  #     - PYTHONUNBUFFERED=1
-  #     - BLOCK_ID=1
-  #     - OPERATOR_MODULE=holders.avg_holder
-  #     - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output","consumer_tag":"ej1-avg-holder-1"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej1-avg-holder-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej1-avg-holder-1
+      - PYTHONUNBUFFERED=1
+      - BLOCK_ID=1
+      - OPERATOR_MODULE=holders.avg_holder
+      - OPERATOR_PARAMS={"column":"result", "perform_affinity":false}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-sa-output","consumer_tag":"ej1-avg-holder-1"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej1-final-output"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
   # ========================== Ejercicio 2 ==========================
-  # ej2-user-avg-questions-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-user-avg-questions-1
-  #     - OPERATOR_MODULE=holders.user_avg_holder
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.0","queue_name":"ej2-user-avg-questions-1-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-user-avg-questions-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-user-avg-questions-1
+      - OPERATOR_MODULE=holders.user_avg_holder
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.0","queue_name":"ej2-user-avg-questions-1-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-general-avg-questions:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-general-avg-questions
-  #     - OPERATOR_MODULE=holders.general_avg
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.*","queue_name":"ej2-general-avg-questions-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-general-avg-questions:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-general-avg-questions
+      - OPERATOR_MODULE=holders.general_avg
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"question.ej2.*","queue_name":"ej2-general-avg-questions-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-user-avg-answers-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-user-avg-answers-1
-  #     - OPERATOR_MODULE=holders.user_avg_holder
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.0","queue_name":"ej2-user-avg-answers-1-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-user-avg-answers-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-user-avg-answers-1
+      - OPERATOR_MODULE=holders.user_avg_holder
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.0","queue_name":"ej2-user-avg-answers-1-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-general-avg-answers:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-general-avg-answers
-  #     - OPERATOR_MODULE=holders.general_avg
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.*","queue_name":"ej2-general-avg-answers-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-general-avg-answers:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-general-avg-answers
+      - OPERATOR_MODULE=holders.general_avg
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"topic","exchange_name":"qa-source","routing_key":"answer.ej2.*","queue_name":"ej2-general-avg-answers-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-user-questions-filter-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-user-questions-filter-1
-  #     - OPERATOR_MODULE=operators.user_avg_filter
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions","routing_key":"0","queue_name":"ej2-user-questions-filter-1-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters"}
-  #     - CENTINELS_TO_RECEIVE=2
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_operator.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-user-questions-filter-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-user-questions-filter-1
+      - OPERATOR_MODULE=operators.user_avg_filter
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-questions","routing_key":"0","queue_name":"ej2-user-questions-filter-1-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-user-answers-filter-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-user-answers-filter-1
-  #     - OPERATOR_MODULE=operators.user_avg_filter
-  #     - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers","routing_key":"0","queue_name":"ej2-user-answers-filter-1-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters"}
-  #     - CENTINELS_TO_RECEIVE=2
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_operator.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-user-answers-filter-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-user-answers-filter-1
+      - OPERATOR_MODULE=operators.user_avg_filter
+      - OPERATOR_PARAMS={"perform_affinity":true,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-input-filter-answers","routing_key":"0","queue_name":"ej2-user-answers-filter-1-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-user-intersector-1:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-user-intersector-1
-  #     - OPERATOR_MODULE=operators.intersector
-  #     - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters","routing_key":"0","queue_name":"ej2-user-intersector-1-input"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
-  #     - CENTINELS_TO_RECEIVE=2
-  #     - CENTINELS_TO_SEND=1
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_operator.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-user-intersector-1:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-user-intersector-1
+      - OPERATOR_MODULE=operators.intersector
+      - OPERATOR_PARAMS={"perform_affinity":false,"affinity_key":"OwnerUserId","affinity_divider":1}
+      - INPUT_QUEUE_PARAMS={"pattern":"direct","exchange_name":"ej2-output-user-filters","routing_key":"0","queue_name":"ej2-user-intersector-1-input"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
+      - CENTINELS_TO_RECEIVE=2
+      - CENTINELS_TO_SEND=1
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_operator.py" ]
+    networks:
+      - tp2-network
 
-  # ej2-top-n-users:
-  #   image: building-block:basic
-  #   volumes:
-  #     - ./src:/reviver
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_NAME=ej2-top-n-users
-  #     - OPERATOR_MODULE=holders.top_n_users_holder
-  #     - OPERATOR_PARAMS={"top_n":10}
-  #     - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
-  #     - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-final-output"}
-  #     - CENTINELS_TO_RECEIVE=1
-  #     - CENTINELS_TO_SEND=0
-  #   depends_on:
-  #     - "rabbitmq-tp2"
-  #   command: [ "basic_holder.py" ]
-  #   networks:
-  #     - tp2-network
+  ej2-top-n-users:
+    image: building-block:basic
+    volumes:
+      - ./src:/reviver
+    env_file:
+      - .env
+    environment:
+      - NODE_NAME=ej2-top-n-users
+      - OPERATOR_MODULE=holders.top_n_users_holder
+      - OPERATOR_PARAMS={"top_n":10}
+      - INPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-output-intersectors"}
+      - OUTPUT_QUEUE_PARAMS={"pattern":"work_queue","queue_name":"ej2-final-output"}
+      - CENTINELS_TO_RECEIVE=1
+      - CENTINELS_TO_SEND=0
+    depends_on:
+      - "rabbitmq-tp2"
+    command: [ "basic_holder.py" ]
+    networks:
+      - tp2-network
 
   # ======================== Ejercicio 3 ============================
   ej3-joiner-1:

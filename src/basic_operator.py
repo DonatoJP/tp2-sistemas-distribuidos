@@ -59,6 +59,10 @@ def main():
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
 
+        if duplicates_manager and duplicates_manager.is_duplicate(task):
+            ch.basic_ack(method.delivery_tag)
+            return
+        
         if centinels_manager.is_centinel(task):
             logger.debug("Received Centinel")
             centinels_manager.count_centinel(task)
@@ -68,7 +72,6 @@ def main():
                     centinels_manager.build_centinel(task),
                     operator_to_use.get_all_routing_keys()
                 )
-
         else:
             returnables = operator_to_use.exec_operation(task.data, task.workload_id)
             for returnable in returnables:
@@ -76,6 +79,9 @@ def main():
                 # returnable = (task_data, routing_key)
                 new_task = Task(task.workload_id, returnable[0], task_id=task.task_id)
                 queue_producer.send(new_task.serialize(), returnable[1])
+        
+        if duplicates_manager:
+            duplicates_manager.register_task(task)
         
         # TODO: Integrar con vault
         if ImportedOperator.should_save_state():
@@ -102,6 +108,7 @@ def main():
     try:
         queue_consumer.start_consuming()
     except Exception as e:
+        logger.exception(e)
         logger.warning("Recieved Excetion %s", e)
         event.set()
         exit([queue_consumer, queue_producer], 0)
