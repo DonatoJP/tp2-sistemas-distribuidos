@@ -8,10 +8,6 @@ from reviver.workload import Task, DuplicatesManager
 from reviver.heartbeat.heartbeat import Heartbeat
 from reviver.state_saver import StateSaver
 from reviver.log import create_logger
-
-
-# logging.basicConfig(format="[%(asctime)s]-%(levelname)s-%(name)s-%(message)s", level=logging.INFO, datefmt="%H:%M:%S")
-# logger = logging.getLogger("Basic Operator")
 logger = create_logger('basic-holder')
 
 def main():
@@ -51,6 +47,8 @@ def main():
     def callback_consuming_queue(ch, method, properties, body):
         task = Task.deserialize(body)
 
+        logger.debug(f"Consuming {task.task_id} for workload {task.workload_id}")
+
         if not duplicates_manager.is_duplicate(task):
             if centinels_manager.is_centinel(task):
                 centinels_manager.count_centinel(task)
@@ -69,10 +67,10 @@ def main():
             
             duplicates_manager.register_task(task)
 
-            # TODO: Integrar Vault para guardar estado
             state_saver.save_state(node_name, [duplicates_manager, centinels_manager, holder_to_use])
 
         ch.basic_ack(method.delivery_tag)
+        logger.debug(f"Task Basic ACK {task.task_id} for workload {task.workload_id}")
 
     params["input_queue_params"]["callback"] = callback_consuming_queue
     queue_consumer.init_queue_pattern(**params["input_queue_params"])

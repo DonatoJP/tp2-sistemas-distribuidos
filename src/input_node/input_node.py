@@ -12,7 +12,7 @@ def main():
     queue_name = os.environ["OUTPUT_QUEUE_NAME"]
 
     credentials = pika.PlainCredentials('guest', 'guest')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials, heartbeat=600000))
     channel = connection.channel()
     channel.queue_declare(queue=queue_name, arguments={"x-max-priority": 2})
 

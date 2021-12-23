@@ -33,5 +33,8 @@ class TopNUsersHolder(AbstractHolder):
         return self.by_workload[workload_id]['users_scores']
 
     def end(self, workload_id):
-        result = {"Result": self._make_top_n(workload_id) }
+        if workload_id not in self.by_workload:
+            result = {"Result": []}
+        else:
+            result = {"Result": self._make_top_n(workload_id) }
         return [ ( json.dumps(result), self.get_affinity(result) ) ]

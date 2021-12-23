@@ -1,5 +1,6 @@
 import docker
 import time
+import os
 from datetime import datetime
 import logging
 from threading import Thread, Timer
@@ -11,8 +12,8 @@ logger = create_logger(__name__)
 
 from .state import State
 
-STATE_CHECK_TIME = 5
-CHECK_TIME_DIFF = 15
+STATE_CHECK_TIME = int(os.getenv("STATE_CHECK_TIME", 7))
+CHECK_TIME_DIFF = int(os.getenv("CHECK_TIME_DIFF", 16))
 STATUS_RESTART = "restart"
 STATUS_INVALID_KEY = "invalid_key"
 STATUS_OK = "OK"

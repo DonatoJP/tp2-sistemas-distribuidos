@@ -1,6 +1,8 @@
 from . import Task
 from typing import Dict
 from reviver.state_saver import Storable
+from reviver.log import create_logger
+logger = create_logger('basic-holder')
 
 class DuplicatesManager(Storable):
     name = "duplicates_manager"
@@ -17,13 +19,15 @@ class DuplicatesManager(Storable):
             self.by_workload[task.workload_id] = []
 
         self.by_workload[task.workload_id].append(task.task_id)
+        logger.debug(f"Registered task {task.task_id} for workload {task.workload_id}")
+
 
     def is_duplicate(self, task: Task):
         if task.workload_id not in self.by_workload.keys():
             return False
         
         if task.task_id in self.by_workload[task.workload_id]:
-            print('Found Duplicate!')
+            logger.debug(f"Found Duplicate task {task.task_id} for workload {task.workload_id} of tasks {len(self.by_workload[task.workload_id])}")
 
         return task.task_id in self.by_workload[task.workload_id]
 
