@@ -77,6 +77,9 @@ class PeerConnection:
         except ConnectionRefusedError as e:
             logger.info(
                 f'[Main Thread] Could not connect to {peer_host}. It is not yet active...')
+        except Exception as e:
+            logger.warning(
+                f'Exception connecting to {peer_host}')
 
     def recv_message(self):
 
@@ -87,10 +90,10 @@ class PeerConnection:
             # Receive Final Message
             msg = self._recv(int.from_bytes(msg_len, byteorder='big'))
         except ConnectionClosed as e:
-            logger.info("CONNECTION CLOSED")
+            logger.debug("CONNECTION CLOSED")
             return None
         except ConnectionResetError:
-            logger.info("CONNECTION RESET")
+            logger.debug("CONNECTION RESET")
             return None
 
 
@@ -126,7 +129,7 @@ class PeerConnection:
             logger.debug("WE HAVE SOME MESSAGES")
             res = self.peer_conn.recv(1024)
             if len(res) == 0:
-                logger.info("BUT THEY WHERE EMPTY")
+                logger.debug("BUT THEY WHERE EMPTY")
                 break
 
         logger.debug("NO MORE MESSAGES IN SOCKET")
